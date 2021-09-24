@@ -130,3 +130,4 @@ dmypy.json
 
 # Custom files for dev
 discord_client_token
+discord_application_id
