@@ -1,0 +1,98 @@
+docker-compose \
+                -f docker-compose.yaml \
+                build
+Step 1/8 : FROM python:3
+ ---> 2a93c239d591
+Step 2/8 : WORKDIR /usr/src/app
+ ---> Using cache
+ ---> 409399418487
+Step 3/8 : RUN apt update
+ ---> Using cache
+ ---> 0407beadd59a
+Step 4/8 : RUN apt install -y vim
+ ---> Using cache
+ ---> b0bfff9a511f
+Step 5/8 : COPY requirements.txt ./
+ ---> Using cache
+ ---> 4a1ff0f77c80
+Step 6/8 : RUN python -m pip install --upgrade pip
+ ---> Using cache
+ ---> 779bd7acabda
+Step 7/8 : RUN pip install --no-cache-dir pytest pytest-cov flake8
+ ---> Using cache
+ ---> 26375faa86e9
+Step 8/8 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Using cache
+ ---> d7a5653b41c3
+
+Successfully built d7a5653b41c3
+Successfully tagged simple-discord_simple-discord:latest
+Step 1/8 : FROM python:3
+ ---> 2a93c239d591
+Step 2/8 : WORKDIR /usr/src/app
+ ---> Using cache
+ ---> 409399418487
+Step 3/8 : RUN apt update
+ ---> Using cache
+ ---> 0407beadd59a
+Step 4/8 : RUN apt install -y vim
+ ---> Using cache
+ ---> b0bfff9a511f
+Step 5/8 : COPY requirements.txt ./
+ ---> Using cache
+ ---> 4a1ff0f77c80
+Step 6/8 : RUN python -m pip install --upgrade pip
+ ---> Using cache
+ ---> 779bd7acabda
+Step 7/8 : RUN pip install --no-cache-dir pytest pytest-cov flake8
+ ---> Using cache
+ ---> 26375faa86e9
+Step 8/8 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Using cache
+ ---> d7a5653b41c3
+
+Successfully built d7a5653b41c3
+Successfully tagged simple-discord_simple-discord-tests:latest
+docker-compose \
+                -f  docker-compose.yaml \
+                run --rm simple-discord
+2021-09-24 16:19:47,811 - /usr/src/app/demo/run_bot.py:16 - INFO - Test
+2021-09-24 16:19:47,812 - ./src/simple_discord/client/discord_client.py:85 - INFO - Starting...
+2021-09-24 16:19:47,812 - ./src/simple_discord/client/discord_client.py:86 - INFO - Application ID: 889065662641737791
+^CTraceback (most recent call last):
+  File "/usr/src/app/demo/run_bot.py", line 41, in <module>
+    client.run()
+  File "./src/simple_discord/client/discord_client.py", line 87, in run
+    asyncio.run(self._run())
+  File "/usr/local/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/local/lib/python3.9/asyncio/base_events.py", line 629, in run_until_complete
+    self.run_forever()
+  File "/usr/local/lib/python3.9/asyncio/base_events.py", line 596, in run_forever
+    self._run_once()
+  File "/usr/local/lib/python3.9/asyncio/base_events.py", line 1890, in _run_once
+    handle._run()
+  File "/usr/local/lib/python3.9/asyncio/events.py", line 80, in _run
+    self._context.run(self._callback, *self._args)
+  File "./src/simple_discord/client/discord_client.py", line 92, in _run
+    await self._connect()
+  File "./src/simple_discord/client/discord_client.py", line 118, in _connect
+    gateway_uri = (await API.get_gateway_bot(self.token))['url']
+  File "./src/simple_discord/client/api/api_v9.py", line 33, in get_gateway_bot
+    async with httpx.AsyncClient() as client:
+  File "/usr/local/lib/python3.9/site-packages/httpx/_client.py", line 1364, in __init__
+    self._transport = self._init_transport(
+  File "/usr/local/lib/python3.9/site-packages/httpx/_client.py", line 1412, in _init_transport
+    return AsyncHTTPTransport(
+  File "/usr/local/lib/python3.9/site-packages/httpx/_transports/default.py", line 225, in __init__
+    ssl_context = create_ssl_context(verify=verify, cert=cert, trust_env=trust_env)
+  File "/usr/local/lib/python3.9/site-packages/httpx/_config.py", line 50, in create_ssl_context
+    return SSLConfig(
+  File "/usr/local/lib/python3.9/site-packages/httpx/_config.py", line 74, in __init__
+    self.ssl_context = self.load_ssl_context()
+  File "/usr/local/lib/python3.9/site-packages/httpx/_config.py", line 86, in load_ssl_context
+    return self.load_ssl_context_verify()
+  File "/usr/local/lib/python3.9/site-packages/httpx/_config.py", line 143, in load_ssl_context_verify
+    context.load_verify_locations(cafile=str(ca_bundle_path))
+KeyboardInterrupt
+
