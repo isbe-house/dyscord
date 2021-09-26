@@ -132,3 +132,5 @@ dmypy.json
 discord_client_token
 discord_application_id
 discord_client_secret
+.local
+.jupyter

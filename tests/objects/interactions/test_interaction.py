@@ -1,13 +1,13 @@
 
 import orjson as json
 
-from src.simple_discord.objects.interactions import CommandStructure, CommandOptions, CommandOptionChoiceStructure, CommandInteractionDataOptionStructure
+from src.simple_discord.objects.interactions import Command, CommandOptions, CommandOptionChoiceStructure, CommandInteractionDataOptionStructure
 from src.simple_discord.objects import Snowflake
 
 
 def test_ACS():
 
-    x = CommandStructure()
+    x = Command()
 
     input_dict = {
         'id': '12345',
@@ -23,7 +23,7 @@ def test_ACS():
     x.from_dict(json.loads(json.dumps(input_dict)))
 
     assert x.id == Snowflake(input_dict['id'])
-    assert x.type == CommandStructure.COMMAND_TYPE(input_dict['type'])
+    assert x.type == Command.COMMAND_TYPE(input_dict['type'])
     assert x.application_id == Snowflake(input_dict['application_id'])
     assert x.guild_id == Snowflake(input_dict['guild_id'])
     assert x.name == input_dict['name']
@@ -73,8 +73,8 @@ def test_build_command():
     o.name = 'Test Int'
     o.description = 'Just an int'
 
-    x = CommandStructure()
-    x.type = CommandStructure.COMMAND_TYPE.USER
+    x = Command()
+    x.type = Command.COMMAND_TYPE.USER
     x.name = 'TEST'
     x.description = 'This is a test command.'
     x.options = list()
@@ -86,11 +86,11 @@ def test_build_command():
 
 
 def test_generation():
-    new_cmd = CommandStructure()
+    new_cmd = Command()
     new_cmd.generate(
         name='test_command',
         description='This is a test of the command structure.',
-        type=CommandStructure.COMMAND_TYPE.CHAT_INPUT,
+        type=Command.COMMAND_TYPE.CHAT_INPUT,
     )
     new_cmd.to_dict()
     new_cmd.validate()
