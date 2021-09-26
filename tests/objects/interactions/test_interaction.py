@@ -84,12 +84,15 @@ def test_build_command():
     assert not hasattr(x, 'application_id')
     assert 'id' not in data
 
+
 def test_generation():
     new_cmd = CommandStructure()
     new_cmd.generate(
-        name='Test Command',
+        name='test_command',
         description='This is a test of the command structure.',
+        type=CommandStructure.COMMAND_TYPE.CHAT_INPUT,
     )
     new_cmd.to_dict()
+    new_cmd.validate()
 
     assert not hasattr(new_cmd, 'id')
