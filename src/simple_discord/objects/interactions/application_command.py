@@ -2,6 +2,8 @@ import copy
 import enum
 import re
 from typing import Optional, Union, List
+import builtins
+
 
 from ..base_object import BaseDiscordObject
 from .. import snowflake
@@ -65,8 +67,6 @@ class CommandStructure(BaseDiscordObject):
                          required: bool = True,
                          choices: Optional[List['CommandOptionChoiceStructure']] = None,
                          ) -> 'CommandOptions':
-        if not hasattr(self, 'options') or self.options == None:
-            self.options = list()
         new_option = CommandOptions()
         new_option.type = type
         new_option.name = name
@@ -74,6 +74,10 @@ class CommandStructure(BaseDiscordObject):
         new_option.required = required
         if choices is not None:
             new_option.choices = copy.deepcopy(choices)
+
+        if not hasattr(self, 'options') or self.options is None:
+            self.options = list()
+        assert builtins.type(self.options) is list
         self.options.append(new_option)
 
         return new_option
@@ -140,7 +144,7 @@ class CommandStructure(BaseDiscordObject):
             raise ValueError(f'Name of \'{self.name}\' does not match \'{regex}\'.')
 
         if self.name != self.name.lower():
-            raise ValueError(f'Command name must use lower case version of all characters.')
+            raise ValueError('Command name must use lower case version of all characters.')
 
         if self.type in [self.COMMAND_TYPE.USER, self.COMMAND_TYPE.MESSAGE]:
             if len(self.description):
@@ -149,9 +153,9 @@ class CommandStructure(BaseDiscordObject):
             if not len(self.description):
                 raise ValueError(f'Descriptions are mandatory {self.type.name} commands.')
 
-        if type(self.options) is list:
+        if hasattr(self, 'options') and type(self.options) is list:
             if len(self.options) and self.type in [self.COMMAND_TYPE.USER, self.COMMAND_TYPE.MESSAGE]:
-                raise ValueError(f'Context menu commands cannot have options.')
+                raise ValueError('Context menu commands cannot have options.')
 
             for option in self.options:
                 option.validate()
@@ -241,7 +245,7 @@ class CommandOptions(BaseDiscordObject):
             raise ValueError(f'Name of \'{self.name}\' does not match \'{regex}\'.')
 
         if self.name != self.name.lower():
-            raise ValueError(f'Command name must use lower case version of all characters.')
+            raise ValueError('Command name must use lower case version of all characters.')
 
         if hasattr(self, 'choices') and self.choices is not None:
             for choice in self.choices:

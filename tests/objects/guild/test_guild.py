@@ -14,7 +14,6 @@ def test_simple_guild():
 
     assert type(y) is Guild
 
-
     # Neither of these has an ID yet, they should be equal
     # TODO: Determine if this is something we wish to keep.
     # assert y == x

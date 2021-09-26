@@ -1,5 +1,6 @@
 from . import snowflake
 
+
 class BaseDiscordObject:
 
     def __init__(self):

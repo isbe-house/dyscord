@@ -491,7 +491,7 @@ class DiscordClient:
             description='This is a more complex test.',
             type=new_command.COMMAND_TYPE.CHAT_INPUT,
         )
-        option1 = new_command.add_option_typed(
+        new_command.add_option_typed(
             type=objects.interactions.CommandOptions.COMMAND_OPTION.BOOLEAN,
             name='hit_them',
             description='Age of the target',
