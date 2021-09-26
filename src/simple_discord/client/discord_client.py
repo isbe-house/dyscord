@@ -19,6 +19,7 @@ class DiscordClient:
     _log = utilities.Log()
 
     def __init__(self, token: str, application_id: Optional[str] = None):
+        # Discord attributes
         self.token = token
         self.application_id = application_id
         self.intent = 0
@@ -27,6 +28,7 @@ class DiscordClient:
         self.cache = utilities.Cache()
         self.me: objects.User
 
+        # Private attributes
         self._heartbeat_task = None
         self._last_heartbeat_ack = None
         self._listener_task = None
@@ -469,7 +471,7 @@ class DiscordClient:
         self._log.info('Get global commands')
         commands = await API.get_global_application_commands()
         for command in commands:
-            command = objects.interactions.CommandStructure().from_dict(command)
+            command = objects.interactions.Command().from_dict(command)
             pprint(commands)
             assert command.id is not None
             await API.delete_global_application_command(command.id)
@@ -479,13 +481,13 @@ class DiscordClient:
             pprint(guild)
             commands = await API.get_guild_application_commands(guild.id)
             for command in commands:
-                command = objects.interactions.CommandStructure().from_dict(command)
+                command = objects.interactions.Command().from_dict(command)
                 pprint(command)
                 assert command.id is not None
                 await API.delete_guild_application_command(guild.id, command.id)
 
     async def _register_commands(self):
-        new_command = objects.interactions.CommandStructure()
+        new_command = objects.interactions.Command()
         new_command.generate(
             name='test2',
             description='This is a more complex test.',

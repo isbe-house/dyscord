@@ -1,7 +1,7 @@
-from .application_command import CommandStructure, CommandOptions, CommandOptionChoiceStructure, CommandInteractionDataOptionStructure
+from .application_command import Command, CommandOptions, CommandOptionChoiceStructure, CommandInteractionDataOptionStructure
 
 __all__ = [
-    'CommandStructure',
+    'Command',
     'CommandOptions',
     'CommandOptionChoiceStructure',
     'CommandInteractionDataOptionStructure',

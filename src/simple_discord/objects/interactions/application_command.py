@@ -16,7 +16,7 @@ class Interactions:
         pass
 
 
-class CommandStructure(BaseDiscordObject):
+class Command(BaseDiscordObject):
 
     class COMMAND_TYPE(enum.IntEnum):
         CHAT_INPUT = 1  # Slash commands; a text-based command that shows up when a user types /
@@ -25,7 +25,7 @@ class CommandStructure(BaseDiscordObject):
 
     def __init__(self):
         self.id: Optional[snowflake.Snowflake]              # unique id of the command  all
-        self.type: Optional[CommandStructure.COMMAND_TYPE]  # one of application command type  the type of command, defaults 1 if not set  all
+        self.type: Optional[Command.COMMAND_TYPE]  # one of application command type  the type of command, defaults 1 if not set  all
         self.application_id: Optional[snowflake.Snowflake]  # unique id of the parent application  all
         self.guild_id: Optional[snowflake.Snowflake]        # guild id of the command, if not global  all
         self.name: str                                      # 1-32 character name  all
@@ -37,7 +37,7 @@ class CommandStructure(BaseDiscordObject):
     def generate(self,
                  name: str,
                  description: str,
-                 type: 'CommandStructure.COMMAND_TYPE',
+                 type: 'Command.COMMAND_TYPE',
                  options: Optional[List['CommandOptions']] = None,
                  default_permission: bool = True,
                  ):
@@ -92,7 +92,7 @@ class CommandStructure(BaseDiscordObject):
     async def register_globally(self, guild: objects.guild.Guild):
         pass
 
-    def from_dict(self, data: dict) -> 'CommandStructure':
+    def from_dict(self, data: dict) -> 'Command':
         if 'id' in data:
             self.id = snowflake.Snowflake(data['id'])
         if 'type' in data:
