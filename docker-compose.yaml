@@ -1,0 +1,38 @@
+version: '3.4'
+
+secrets:
+    discord_client_token:
+        file: ./discord_client_token
+    discord_application_id:
+        file: ./discord_application_id
+    discord_client_secret:
+        file: ./discord_client_secret
+
+services:
+    simple-discord:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: PROD
+        restart: "unless-stopped"
+        container_name: "SimpleDiscord"
+        volumes:
+            - ./src/:/usr/src/app/src
+            - ./demo/:/usr/src/app/demo
+        command: python -u demo/run_bot.py
+        user: $uid:$gid
+        secrets:
+            - discord_client_token
+            - discord_application_id
+            - discord_client_secret
+
+    simple-discord-tests:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: TEST
+        restart: "no"
+        container_name: "TESTSimpleDiscord"
+        volumes:
+            - ./:/usr/src/app/
+        user: $uid:$gid

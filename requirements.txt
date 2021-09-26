@@ -1,0 +1,6 @@
+emoji
+types-emoji
+requests
+websockets
+httpx
+orjson
