@@ -41,6 +41,13 @@ debug: ## Start interactive python shell to debug with
 # 	docker-compose \
 #                 -f docker-compose.yaml \
 #                 run --rm debian /bin/bash
+jupyter: ## Start a jupyter environment for debugging and such
+	docker-compose \
+                -f tools/jupyter/docker-compose.yaml \
+                build
+	docker-compose \
+                -f  tools/jupyter/docker-compose.yaml \
+                run --rm simple-discord-jupyter
 
 test: ## Run all tests
 	make build

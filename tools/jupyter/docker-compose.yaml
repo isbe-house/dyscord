@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+    simple-discord-jupyter:
+        build:
+          context: ../../
+          dockerfile: tools/jupyter/Dockerfile
+          network: host
+        ports:
+          - 8888:8888
+        volumes:
+          - ../../:/home/jovyan/
+        command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password='' --ip 192.168.1.4"
+        network_mode: host
