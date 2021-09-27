@@ -72,6 +72,16 @@ class User(BaseDiscordObject):
     def mention_nickname(self):
         return f'<@!{self.id}>'
 
+    def ingest_raw_dict(self, data: dict) -> 'User':
+        '''
+        Ingest and cache a given object for future use.
+        '''
+        self.from_dict(data)
+
+        # TODO: Cache users as well.
+
+        return self
+
     def from_dict(self, data: dict) -> 'User':
         # Required fields
         self.id = snowflake.Snowflake(data['id'])
