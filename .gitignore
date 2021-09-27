@@ -134,3 +134,4 @@ discord_application_id
 discord_client_secret
 .local
 .jupyter
+.ipynb_checkpoints
