@@ -13,6 +13,14 @@ from .gateway_intents import Intents
 from .. import utilities
 from .. import objects
 
+from .events import on_channel_create, on_channel_delete, on_channel_pins_update, on_channel_update, on_guild_ban_add, on_guild_ban_remove, on_guild_create,\
+    on_guild_delete, on_guild_emojis_update, on_guild_integrations_update, on_guild_member_add, on_guild_member_remove, on_guild_member_update,\
+    on_guild_role_create, on_guild_role_delete, on_guild_role_update, on_guild_stickers_update, on_guild_update, on_integration_create, on_integration_delete,\
+    on_integration_update, on_invite_create, on_invite_delete, on_message_create, on_message_delete, on_message_delete_bulk, on_message_reaction_add,\
+    on_message_reaction_remove, on_message_reaction_remove_all, on_message_reaction_remove_emoji, on_message_update, on_presence_update, on_ready,\
+    on_stage_instance_create, on_stage_instance_delete, on_stage_instance_update, on_thread_create, on_thread_delete, on_thread_list_sync,\
+    on_thread_member_update, on_thread_members_update, on_thread_update, on_typing_start, on_voice_state_update, on_webhooks_update, on_interaction_create
+
 
 class DiscordClient:
 
@@ -344,6 +352,7 @@ class DiscordClient:
             # pprint(data)
             obj = objects.Message()
             obj.ingest_raw_dict(data['d'])
+            await self.on_message_create(obj, data['d'])
 
             # TODO: Remove this after we finish debugging interactions
             await self._debug_parse_message(obj)
@@ -502,3 +511,51 @@ class DiscordClient:
         data = new_command.to_dict()
 
         await API.create_global_application_command(data)
+
+    # Register all out events
+    on_channel_create = on_channel_create
+    on_channel_delete = on_channel_delete
+    on_channel_pins_update = on_channel_pins_update
+    on_channel_update = on_channel_update
+    on_guild_ban_add = on_guild_ban_add
+    on_guild_ban_remove = on_guild_ban_remove
+    on_guild_create = on_guild_create
+    on_guild_delete = on_guild_delete
+    on_guild_emojis_update = on_guild_emojis_update
+    on_guild_integrations_update = on_guild_integrations_update
+    on_guild_member_add = on_guild_member_add
+    on_guild_member_remove = on_guild_member_remove
+    on_guild_member_update = on_guild_member_update
+    on_guild_role_create = on_guild_role_create
+    on_guild_role_delete = on_guild_role_delete
+    on_guild_role_update = on_guild_role_update
+    on_guild_stickers_update = on_guild_stickers_update
+    on_guild_update = on_guild_update
+    on_integration_create = on_integration_create
+    on_integration_delete = on_integration_delete
+    on_integration_update = on_integration_update
+    on_invite_create = on_invite_create
+    on_invite_delete = on_invite_delete
+    on_message_create = on_message_create
+    on_message_delete = on_message_delete
+    on_message_delete_bulk = on_message_delete_bulk
+    on_message_reaction_add = on_message_reaction_add
+    on_message_reaction_remove = on_message_reaction_remove
+    on_message_reaction_remove_all = on_message_reaction_remove_all
+    on_message_reaction_remove_emoji = on_message_reaction_remove_emoji
+    on_message_update = on_message_update
+    on_presence_update = on_presence_update
+    on_ready = on_ready
+    on_stage_instance_create = on_stage_instance_create
+    on_stage_instance_delete = on_stage_instance_delete
+    on_stage_instance_update = on_stage_instance_update
+    on_thread_create = on_thread_create
+    on_thread_delete = on_thread_delete
+    on_thread_list_sync = on_thread_list_sync
+    on_thread_member_update = on_thread_member_update
+    on_thread_members_update = on_thread_members_update
+    on_thread_update = on_thread_update
+    on_typing_start = on_typing_start
+    on_voice_state_update = on_voice_state_update
+    on_webhooks_update = on_webhooks_update
+    on_interaction_create = on_interaction_create
