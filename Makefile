@@ -1,7 +1,6 @@
 
-export uid=$(id -u)
-export gid=$(id -g)
-
+export UID=$(shell id -u)
+export GID=$(shell id -g)
 
 # up: ## Start all containers
 # 	docker-compose \
@@ -29,8 +28,9 @@ down: ## Stop all containers
 #                 -f  docker-compose.yaml \
 #                 logs --follow --tail=20
 
-# clean: ## Delete volumes
-# 	docker system prune -f
+clean: ## Delete volumes
+	docker system prune -f
+	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage
 
 debug: ## Start interactive python shell to debug with
 	docker-compose \
@@ -62,7 +62,7 @@ test: ## Run all tests
                 mypy src/simple_discord
 	docker-compose \
                 -f  docker-compose.yaml \
-                run simple-discord-tests \
+                run --rm simple-discord-tests \
                 flake8
 
 

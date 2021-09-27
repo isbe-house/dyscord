@@ -20,7 +20,7 @@ services:
             - ./src/:/usr/src/app/src
             - ./demo/:/usr/src/app/demo
         command: python -u demo/run_bot.py
-        user: $uid:$gid
+        user: "${UID}:${GID}"
         secrets:
             - discord_client_token
             - discord_application_id
@@ -35,4 +35,4 @@ services:
         container_name: "TESTSimpleDiscord"
         volumes:
             - ./:/usr/src/app/
-        user: $uid:$gid
+        user: "${UID}:${GID}"
