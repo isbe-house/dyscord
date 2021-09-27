@@ -2,6 +2,7 @@
 import orjson as json
 
 from src.simple_discord.objects.interactions import Command, CommandOptions, CommandOptionChoiceStructure, CommandInteractionDataOptionStructure
+from src.simple_discord.objects.interactions import COMMAND_TYPE, COMMAND_OPTION
 from src.simple_discord.objects import Snowflake
 
 
@@ -23,7 +24,7 @@ def test_ACS():
     x.from_dict(json.loads(json.dumps(input_dict)))
 
     assert x.id == Snowflake(input_dict['id'])
-    assert x.type == Command.COMMAND_TYPE(input_dict['type'])
+    assert x.type == COMMAND_TYPE(input_dict['type'])
     assert x.application_id == Snowflake(input_dict['application_id'])
     assert x.guild_id == Snowflake(input_dict['guild_id'])
     assert x.name == input_dict['name']
@@ -69,12 +70,12 @@ def test_ACIDOS():
 def test_build_command():
     # Create options
     o = CommandOptions()
-    o.type = CommandOptions.COMMAND_OPTION.INTEGER
+    o.type = COMMAND_OPTION.INTEGER
     o.name = 'Test Int'
     o.description = 'Just an int'
 
     x = Command()
-    x.type = Command.COMMAND_TYPE.USER
+    x.type = COMMAND_TYPE.USER
     x.name = 'TEST'
     x.description = 'This is a test command.'
     x.options = list()
@@ -90,7 +91,7 @@ def test_generation():
     new_cmd.generate(
         name='test_command',
         description='This is a test of the command structure.',
-        type=Command.COMMAND_TYPE.CHAT_INPUT,
+        type=COMMAND_TYPE.CHAT_INPUT,
     )
     new_cmd.to_dict()
     new_cmd.validate()

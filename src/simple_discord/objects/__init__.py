@@ -21,5 +21,5 @@ __all__ = [
     'Permissions',
     'Snowflake',
     'User',
-    'interactions'
+    'interactions',
 ]

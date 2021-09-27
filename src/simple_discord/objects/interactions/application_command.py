@@ -1,5 +1,4 @@
 import copy
-import enum
 import re
 from typing import Optional, Union, List
 import builtins
@@ -8,6 +7,7 @@ import builtins
 from ..base_object import BaseDiscordObject
 from .. import snowflake
 from ... import objects
+from . import enumerations
 
 
 class Interactions:
@@ -18,14 +18,11 @@ class Interactions:
 
 class Command(BaseDiscordObject):
 
-    class COMMAND_TYPE(enum.IntEnum):
-        CHAT_INPUT = 1  # Slash commands; a text-based command that shows up when a user types /
-        USER = 2  # A UI-based command that shows up when you right click or tap on a user
-        MESSAGE = 3  # A UI-based command that shows up when you right click or tap on a message
+    COMMAND_TYPE = enumerations.COMMAND_TYPE
 
     def __init__(self):
         self.id: Optional[snowflake.Snowflake]              # unique id of the command  all
-        self.type: Optional[Command.COMMAND_TYPE]  # one of application command type  the type of command, defaults 1 if not set  all
+        self.type: Optional[enumerations.COMMAND_TYPE]  # one of application command type  the type of command, defaults 1 if not set  all
         self.application_id: Optional[snowflake.Snowflake]  # unique id of the parent application  all
         self.guild_id: Optional[snowflake.Snowflake]        # guild id of the command, if not global  all
         self.name: str                                      # 1-32 character name  all
@@ -37,7 +34,7 @@ class Command(BaseDiscordObject):
     def generate(self,
                  name: str,
                  description: str,
-                 type: 'Command.COMMAND_TYPE',
+                 type: 'enumerations.COMMAND_TYPE',
                  options: Optional[List['CommandOptions']] = None,
                  default_permission: bool = True,
                  ):
@@ -61,7 +58,7 @@ class Command(BaseDiscordObject):
         raise NotImplementedError
 
     def add_option_typed(self,
-                         type: 'CommandOptions.COMMAND_OPTION',
+                         type: 'enumerations.COMMAND_OPTION',
                          name: str,
                          description: str,
                          required: bool = True,
@@ -96,7 +93,7 @@ class Command(BaseDiscordObject):
         if 'id' in data:
             self.id = snowflake.Snowflake(data['id'])
         if 'type' in data:
-            self.type = self.COMMAND_TYPE(data['type'])
+            self.type = enumerations.COMMAND_TYPE(data['type'])
         if 'application_id' in data:
             self.application_id = data['application_id']
         if 'guild_id' in data:
@@ -119,7 +116,10 @@ class Command(BaseDiscordObject):
         if hasattr(self, 'id'):
             ret_dict['id'] = str(self.id)
         if hasattr(self, 'type') and self.type is not None:
-            ret_dict['type'] = self.type.value
+            if type(self.type) is int:
+                ret_dict['type'] = self.type
+            else:
+                ret_dict['type'] = self.type.value
         if hasattr(self, 'application_id'):
             ret_dict['application_id'] = str(self.application_id)
         if hasattr(self, 'guild_id'):
@@ -138,7 +138,7 @@ class Command(BaseDiscordObject):
 
         return ret_dict
 
-    def validate(self):
+    def validate(self):  # noqa: C901
         regex = r'^[\w-]{1,32}$'
         if not re.match(regex, self.name):
             raise ValueError(f'Name of \'{self.name}\' does not match \'{regex}\'.')
@@ -146,37 +146,43 @@ class Command(BaseDiscordObject):
         if self.name != self.name.lower():
             raise ValueError('Command name must use lower case version of all characters.')
 
-        if self.type in [self.COMMAND_TYPE.USER, self.COMMAND_TYPE.MESSAGE]:
+        if len(self.description) > 100:
+            raise ValueError('Description cannot exceed 100 characters.')
+
+        if self.type in [enumerations.COMMAND_TYPE.USER, enumerations.COMMAND_TYPE.MESSAGE]:
             if len(self.description):
                 raise ValueError(f'Descriptions are not allowed for type {self.type.name} commands.')
-        elif self.type == self.COMMAND_TYPE.CHAT_INPUT:
+        elif self.type == enumerations.COMMAND_TYPE.CHAT_INPUT:
             if not len(self.description):
                 raise ValueError(f'Descriptions are mandatory {self.type.name} commands.')
 
+        if type(self.type) is not enumerations.COMMAND_TYPE:
+            raise TypeError(f'Type is of incorrect type {type(self.type)}, should be {enumerations.COMMAND_TYPE}.')
+
         if hasattr(self, 'options') and type(self.options) is list:
-            if len(self.options) and self.type in [self.COMMAND_TYPE.USER, self.COMMAND_TYPE.MESSAGE]:
+
+            if len(self.options) and self.type in [enumerations.COMMAND_TYPE.USER, enumerations.COMMAND_TYPE.MESSAGE]:
                 raise ValueError('Context menu commands cannot have options.')
 
+            if len(self.options) > 25:
+                raise OverflowError(f'You cannot have {len(self.options)} options, limited to max of 25.')
+
             for option in self.options:
+                if type(option) is not CommandOptions:
+                    raise TypeError(f'Found option of type {type(option)}, must be {CommandOptions}')
                 option.validate()
+
+        if type(self.default_permission) is not bool:
+            raise TypeError(f'Default Permission is of incorrect type {type(self.default_permission)}, should be {type(True)}.')
 
 
 class CommandOptions(BaseDiscordObject):
 
-    class COMMAND_OPTION(enum.IntEnum):
-        SUB_COMMAND = 1
-        SUB_COMMAND_GROUP = 2
-        STRING = 3
-        INTEGER = 4  # Any integer between -2^53 and 2^53
-        BOOLEAN = 5
-        USER = 6
-        CHANNEL = 7  # Includes all channel types + categories
-        ROLE = 8
-        MENTIONABLE = 9  # Includes users and roles
-        NUMBER = 10  # Any double between -2^53 and 2^53
+    # Handy shortcut
+    COMMAND_OPTION = enumerations.COMMAND_OPTION
 
     def __init__(self):
-        self.type: CommandOptions.COMMAND_OPTION                      # one of application command option type the type of option
+        self.type: enumerations.COMMAND_OPTION                      # one of application command option type the type of option
         self.name: str                                                          # string 1-32 character name
         self.description: str                                                   # string 1-100 character description
         self.required: bool                                                     # boolean if the parameter is required or optional--default false
@@ -200,7 +206,7 @@ class CommandOptions(BaseDiscordObject):
 
     def from_dict(self, data: dict) -> 'CommandOptions':
         if 'type' in data:
-            self.type = self.COMMAND_OPTION(data['type'])
+            self.type = enumerations.COMMAND_OPTION(data['type'])
         self.name = data['name']
         self.description = data['description']
         if 'required' in data:
@@ -286,15 +292,15 @@ class CommandInteractionDataOptionStructure(BaseDiscordObject):
 
     def __init__(self):
         self.name: str                                                          # string the name of the parameter
-        self.type: CommandOptions.COMMAND_OPTION                      # integer value of application command option type
-        self.value: CommandOptions.COMMAND_OPTION                     # application command option type the value of the pair
+        self.type: enumerations.COMMAND_OPTION                      # integer value of application command option type
+        self.value: enumerations.COMMAND_OPTION                     # application command option type the value of the pair
         self.options: list[CommandInteractionDataOptionStructure]    # ? array of application command interaction data option present if this option is a group or subcommand
 
     def from_dict(self, data: dict) -> 'CommandInteractionDataOptionStructure':
         self.name = data['name']
-        self.type = CommandOptions.COMMAND_OPTION(data['type'])
+        self.type = enumerations.COMMAND_OPTION(data['type'])
         if 'value' in data:
-            self.value = CommandOptions.COMMAND_OPTION[data['value']]
+            self.value = enumerations.COMMAND_OPTION[data['value']]
         if 'options' in data:
             self.options = list()
             for option in data['options']:
