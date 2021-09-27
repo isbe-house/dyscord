@@ -1,6 +1,7 @@
 
 export UID=$(shell id -u)
 export GID=$(shell id -g)
+export HOST_ADDRESS=$(shell hostname -f)
 
 # up: ## Start all containers
 # 	docker-compose \
