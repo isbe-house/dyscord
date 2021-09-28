@@ -12,3 +12,5 @@ services:
           - ../../:/home/jovyan/
         command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password='' --ip=${HOST_ADDRESS}"
         network_mode: host
+        environment:
+          - JUPYTER_ENABLE_LAB=yes

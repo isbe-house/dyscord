@@ -1,9 +1,10 @@
 import datetime
 import enum
-from typing import Union, Optional
+from typing import Union, Optional, List, Dict
 
 from .base_object import BaseDiscordObject
 from . import user, channel, snowflake
+from .interactions import components
 
 
 class Message(BaseDiscordObject):
@@ -62,7 +63,7 @@ class Message(BaseDiscordObject):
         self.referenced_message: Message
         # self.interaction = None  # Interactions TBD
         self.thread: channel.Channel
-        # self.components = None  # Message components TBD
+        self.components: List[components.Component]  # Message components TBD
         # self.sticker_items: List[Sticker] = []  # Stickers TBD
 
     def ingest_raw_dict(self, data) -> 'Message':
@@ -107,3 +108,74 @@ class Message(BaseDiscordObject):
         Sav object to the cache for faster recall in the future.
         '''
         raise NotImplementedError(f'{__class__.__name__} does not yet implement this function.')
+
+    def to_sendable_dict(self) -> dict:
+        '''
+        Sending a message only allows a subset of attributes. Ignore anything else about this message when producing that dict.
+        '''
+        new_dict: Dict[str, object] = dict()
+        new_dict['content'] = self.content if hasattr(self, 'content') else None
+        # new_dict['tts'] = self.tts if hasattr(self, 'tts') else False
+        # new_dict['file'] = None  # TODO: Handle a file upload.
+        # new_dict['embeds'] = None  # TODO: Handle embeds.
+        # new_dict['allowed_mentions'] = True  # BUG: This isn't a bool, its an `AllowedMentionsObject`, which we don't support yet.
+        # new_dict['message_reference'] = None
+        # new_dict['sticker_ids'] = None
+
+        if hasattr(self, 'components') and type(self.components) is list and len(self.components):
+            new_dict['components'] = list()
+            assert type(new_dict['components']) is list
+            for component in self.components:
+                new_dict['components'].append(component.to_dict())
+
+        return new_dict
+
+    def add_components(self) -> 'components.ActionRow':
+        '''
+        Start adding components by starting an ACTION_ROW.
+        '''
+        if not hasattr(self, 'components'):
+            self.components = list()
+        new_action_row = components.ActionRow()
+        self.components.append(new_action_row)
+
+        return new_action_row
+
+    def validate(self):
+        '''
+        Validate a message for sending to discord.
+        '''
+        assert hasattr(self, 'content') or hasattr(self, 'embeds') or hasattr(self, 'file'),\
+            'Message must have a content, embeds, or file to be valid for sending.'
+
+        if hasattr(self, 'content'):
+            assert type(self.content) is str,\
+                f'Got invalid type {type(self.content)} in Message.content, must be str.'
+
+            assert len(self.content) <= 2000,\
+                f'Invalid length of {len(self.content):,} in Message.content, must be <= 2000 characters.'
+
+        if hasattr(self, 'components'):
+            assert type(self.components) is list,\
+                f'Got invalid type {type(self.components)} in Message.components, must be list.'
+
+            assert len(self.components) <= 5,\
+                f'Invalid length of {len(self.components):,} in Message.components, must be <= 5 elements.'
+
+            custom_ids = list()
+            for component in self.components:
+                assert type(component) is components.ActionRow,\
+                    f'Got invalid type {type(component)} in Message.components, must be ActionRow.'
+                component.validate()
+
+                if type(component) is components.ActionRow:
+                    for sub_component in component.components:
+                        if hasattr(sub_component, 'custom_id'):
+                            assert sub_component.custom_id not in custom_ids,\
+                                f'Found duplicate custom_id [{sub_component.custom_id}]'
+                            custom_ids.append(sub_component.custom_id)
+                else:
+                    if hasattr(component, 'custom_id'):
+                        assert component.custom_id not in custom_ids,\
+                            f'Found duplicate custom_id [{component.custom_id}]'
+                        custom_ids.append(component.custom_id)

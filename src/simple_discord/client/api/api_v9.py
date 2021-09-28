@@ -16,7 +16,7 @@ class API_V9:
 
     @classmethod
     def auth_header(cls):
-        return {'Authorization': f'Bot {cls.TOKEN}'}
+        return {'Authorization': f'Bot {cls.TOKEN}', 'Content-Type': 'application/json'}
 
     # GATEWAY ENDPOINTS
     @classmethod
@@ -238,5 +238,21 @@ class API_V9:
             )
             r.raise_for_status()
 
-        data = json.loads(r.content)
-        return data
+        return r.json()
+
+    @classmethod
+    async def create_message(cls, channel_id: snowflake.Snowflake, message_payload: dict):
+        url = f'{cls.BASE_URL}/channels/{channel_id}/messages'
+
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                url,
+                headers=cls.auth_header(),
+                json=message_payload,
+            )
+            try:
+                r.raise_for_status()
+            except:
+                cls._log.exception(r.content)
+
+        return r.json()

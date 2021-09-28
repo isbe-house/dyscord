@@ -33,3 +33,17 @@ class COMMAND_OPTION(enum.IntEnum):
     ROLE = 8
     MENTIONABLE = 9  # Includes users and roles
     NUMBER = 10  # Any double between -2^53 and 2^53
+
+
+class COMPONENT_TYPES(enum.IntEnum):
+    ACTION_ROW = 1
+    BUTTON = 2
+    SELECT_MENU = 3
+
+
+class BUTTON_STYLES(enum.IntEnum):
+    PRIMARY = 1
+    SECONDARY = 2
+    SUCCESS = 3
+    DANGER = 4
+    LINK = 5

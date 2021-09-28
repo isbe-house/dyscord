@@ -25,6 +25,8 @@ services:
             - discord_client_token
             - discord_application_id
             - discord_client_secret
+        environment:
+            - PYTHONDONTWRITEBYTECODE=1
 
     simple-discord-tests:
         build:
@@ -36,3 +38,5 @@ services:
         volumes:
             - ./:/usr/src/app/
         user: "${UID}:${GID}"
+        environment:
+            - PYTHONDONTWRITEBYTECODE=1

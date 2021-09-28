@@ -22,7 +22,7 @@ class Command(BaseDiscordObject):
 
     def __init__(self):
         self.id: Optional[snowflake.Snowflake]              # unique id of the command  all
-        self.type: Optional[enumerations.COMMAND_TYPE]  # one of application command type  the type of command, defaults 1 if not set  all
+        self.type: Optional[enumerations.COMMAND_TYPE]      # one of application command type  the type of command, defaults 1 if not set  all
         self.application_id: Optional[snowflake.Snowflake]  # unique id of the parent application  all
         self.guild_id: Optional[snowflake.Snowflake]        # guild id of the command, if not global  all
         self.name: str                                      # 1-32 character name  all
@@ -83,10 +83,10 @@ class Command(BaseDiscordObject):
         if hasattr(self, 'options'):
             del self.options
 
-    async def register_to_guild(self, guild: objects.guild.Guild):
+    async def register_to_guild(self, guild: 'objects.guild.Guild'):
         pass
 
-    async def register_globally(self, guild: objects.guild.Guild):
+    async def register_globally(self, guild: 'objects.guild.Guild'):
         pass
 
     def from_dict(self, data: dict) -> 'Command':

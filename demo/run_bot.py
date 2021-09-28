@@ -6,6 +6,7 @@ sys.path.insert(0, '.')
 
 # Do normal imports and run!
 import logging
+import uuid
 
 from src.simple_discord.utilities import Log
 from src.simple_discord.client import DiscordClient, API
@@ -43,9 +44,9 @@ client.configure_intents(
 @client.register_handler('READY')
 async def on_ready(client, ready, raw_ready):
     log.critical('IT WORKS!')
-    print(client)
-    print(ready)
-    print(raw_ready)
+    # print(client)
+    # print(ready)
+    # print(raw_ready)
 
 async def purge_commands(client):
     from pprint import pprint
@@ -85,6 +86,51 @@ async def register_commands(client):
     await API.create_global_application_command(data)
 
 
+async def send_buttons(client, chan_id):
+    msg = objects.Message()
+    channel = objects.TextChannel()
+    channel.id = chan_id
+
+    msg.content = 'Hello World!'
+
+    row = msg.add_components()
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.PRIMARY, label=' ', custom_id = str(uuid.uuid4()), disabled=True)
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.PRIMARY, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.PRIMARY, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.PRIMARY, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.PRIMARY, label='TEST', custom_id = str(uuid.uuid4()))
+
+    row = msg.add_components()
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SECONDARY, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SECONDARY, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SECONDARY, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SECONDARY, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SECONDARY, label='TEST', custom_id = str(uuid.uuid4()))
+
+    row = msg.add_components()
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SUCCESS, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SUCCESS, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SUCCESS, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SUCCESS, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.SUCCESS, label='TEST', custom_id = str(uuid.uuid4()))
+
+    row = msg.add_components()
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.DANGER, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.DANGER, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.DANGER, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.DANGER, label='TEST', custom_id = str(uuid.uuid4()))
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.DANGER, label='TEST', custom_id = str(uuid.uuid4()))
+
+    row = msg.add_components()
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.LINK, label='TEST', url='https://google.com')
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.LINK, label='TEST', url='https://google.com')
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.LINK, label='TEST', url='https://google.com')
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.LINK, label='TEST', url='https://google.com')
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.LINK, label='TEST', url='https://google.com')
+
+    await channel.send_message(msg)
+
+
 @client.register_handler('MESSAGE_CREATE')
 async def parse_message(client, message, raw_message):
     if client.me in message.mentions:
@@ -95,5 +141,9 @@ async def parse_message(client, message, raw_message):
         elif 'REGISTER' in message.content:
             log.critical('Registering test commands.')
             await register_commands(client)
+        elif 'BUTTON' in message.content:
+            log.critical('Create and send some components.')
+            await send_buttons(client, message.channel_id)
+
 
 client.run()

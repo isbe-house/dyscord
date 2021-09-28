@@ -357,9 +357,6 @@ class DiscordClient:
             obj.ingest_raw_dict(data['d'])
             await self.on_message_create(obj, data['d'])
 
-            # TODO: Remove this after we finish debugging interactions
-            await self._debug_parse_message(obj)
-
         elif event_type == 'MESSAGE_DELETE':
             pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')

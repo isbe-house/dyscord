@@ -2,7 +2,7 @@ import enum
 
 from .. import utilities
 from ..client import api
-from . import snowflake
+from . import snowflake, message
 
 
 class Channel:
@@ -63,6 +63,12 @@ class TextChannel(Channel):
 
     def from_dict(self, data, parent_guild=None):
         return self
+
+    async def send_message(self, message: message.Message):
+
+        message.validate()
+
+        await api.API.create_message(self.id, message.to_sendable_dict())
 
 
 class NewsChannel(Channel):
