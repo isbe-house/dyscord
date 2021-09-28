@@ -6,6 +6,7 @@ from .permissions import Permissions
 from .ready import Ready
 from .snowflake import Snowflake
 from .user import User
+from .enumerations import DISCORD_EVENTS
 
 from . import interactions
 
@@ -13,6 +14,7 @@ __all__ = [
     'CategoryChannel',
     'Channel',
     'ChannelImporter',
+    'DISCORD_EVENTS',
     'Emoji',
     'Guild',
     'interactions',

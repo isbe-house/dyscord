@@ -9,7 +9,7 @@ class Channel:
 
     _log = utilities.Log()
 
-    class ChannelTypes(enum.IntEnum):
+    class CHANNEL_TYPES(enum.IntEnum):
         GUILD_TEXT = 0  # a text channel within a server
         DM = 1  # a direct message between users
         GUILD_VOICE = 2  # a voice channel within a server
@@ -26,7 +26,7 @@ class Channel:
         self.id: snowflake.Snowflake
         self.name: str
         self.position: int
-        self.type: Channel.ChannelTypes
+        self.type: Channel.CHANNEL_TYPES
 
     def __str__(self):
         return f'{self.__class__.__name__}(name=\'{self.name}\', type={self.type.name})'
@@ -44,7 +44,7 @@ class Channel:
 
     def from_dict(self, data, parent_guild=None):
         self.id = snowflake.Snowflake(data['id'])
-        self.type = self.ChannelTypes(data['type'])
+        self.type = self.CHANNEL_TYPES(data['type'])
         return self
 
     def get_channel(self, channel_id: snowflake.Snowflake):
@@ -150,35 +150,35 @@ class ChannelImporter:
     def ingest_raw_dict(cls, data, parent_guild=None) -> "Channel":
         new_channel: Channel
 
-        if data["type"] == Channel.ChannelTypes.GUILD_TEXT:
+        if data["type"] == Channel.CHANNEL_TYPES.GUILD_TEXT:
             new_channel = TextChannel()
 
-        elif data["type"] == Channel.ChannelTypes.DM:
+        elif data["type"] == Channel.CHANNEL_TYPES.DM:
             new_channel = DMChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_VOICE:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_VOICE:
             new_channel = VoiceChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GROUP_DM:
+        elif data["type"] == Channel.CHANNEL_TYPES.GROUP_DM:
             new_channel = GroupDMChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_PUBLIC_THREAD:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_PUBLIC_THREAD:
             new_channel = GuildPublicThread()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_PRIVATE_THREAD:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_PRIVATE_THREAD:
             new_channel = GuildPrivateThread()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_CATEGORY:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_CATEGORY:
             new_channel = CategoryChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_NEWS:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_NEWS:
             new_channel = NewsChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_STORE:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_STORE:
             new_channel = StoreChannel()
 
         else:
-            raise ValueError(f'Dict contained unknown channel type. {data["type"]}, {Channel.ChannelTypes(data["type"]).name}')
+            raise ValueError(f'Dict contained unknown channel type. {data["type"]}, {Channel.CHANNEL_TYPES(data["type"]).name}')
 
         new_channel.ingest_raw_dict(data, parent_guild)
 

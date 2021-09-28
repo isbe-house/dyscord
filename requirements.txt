@@ -1,5 +1,7 @@
+colour
 emoji
 types-emoji
+
 requests
 websockets
 httpx

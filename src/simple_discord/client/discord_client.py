@@ -1,5 +1,8 @@
 import asyncio
 import time
+
+from collections import defaultdict
+from functools import wraps
 from pprint import pprint
 from typing import Optional
 
@@ -8,7 +11,6 @@ import orjson as json
 
 from .api import API
 from .gateway_intents import Intents
-
 
 from .. import utilities
 from .. import objects
@@ -41,6 +43,7 @@ class DiscordClient:
         self._last_heartbeat_ack = None
         self._listener_task = None
         self._sequence_number = None
+        self._wrapper_registrations: dict = defaultdict(lambda: list())
 
     def configure_intents(self,  # noqa: C901
                           guilds: bool = False,
@@ -391,11 +394,15 @@ class DiscordClient:
 
         elif event_type == 'READY':
             pprint(data)
-            self.session_id = data['d']['session_id']
+
+            obj = objects.Ready().from_dict(data['d'])
+            self.session_id = obj.session_id
             self.ready = True
-            self.me = objects.User().from_dict(data['d']['user'])
+            self.me = obj.user
             self._log.info('Discord connection complete, we are ready!')
             self._log.info(f'We are now {self.me}')
+
+            await self.on_ready(obj, data['d'])
 
         elif event_type == 'STAGE_INSTANCE_CREATE':
             pprint(data)
@@ -465,52 +472,9 @@ class DiscordClient:
             self._log.critical(f'Encountered unknown event \'{data["t"]}\'!!!')
             pprint(data)
 
-    async def _debug_parse_message(self, message):
-        if self.me in message.mentions:
-            self._log.info(f'Saw message: {message.content}')
-            if 'PURGE' in message.content:
-                self._log.critical('Purging all commands.')
-                await self._purge_commands()
-            elif 'REGISTER' in message.content:
-                self._log.critical('Registering test commands.')
-                await self._register_commands()
-
-    async def _purge_commands(self):
-        from pprint import pprint
-        self._log.info('Get global commands')
-        commands = await API.get_global_application_commands()
-        for command in commands:
-            command = objects.interactions.Command().from_dict(command)
-            pprint(commands)
-            assert command.id is not None
-            await API.delete_global_application_command(command.id)
-
-        self._log.info('Get guild commands')
-        for guild in utilities.Cache().guilds:
-            pprint(guild)
-            commands = await API.get_guild_application_commands(guild.id)
-            for command in commands:
-                command = objects.interactions.Command().from_dict(command)
-                pprint(command)
-                assert command.id is not None
-                await API.delete_guild_application_command(guild.id, command.id)
-
-    async def _register_commands(self):
-        new_command = objects.interactions.Command()
-        new_command.generate(
-            name='test2',
-            description='This is a more complex test.',
-            type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
-        )
-        new_command.add_option_typed(
-            type=objects.interactions.enumerations.COMMAND_OPTION.BOOLEAN,
-            name='hit_them',
-            description='Age of the target',
-        )
-        new_command.validate()
-        data = new_command.to_dict()
-
-        await API.create_global_application_command(data)
+        # Call user wrapped cotoutines
+        for user_coroutine in self._wrapper_registrations[event_type]:
+            await user_coroutine(obj, data['d'])
 
     # Register all out events
     on_channel_create = on_channel_create
@@ -559,3 +523,19 @@ class DiscordClient:
     on_voice_state_update = on_voice_state_update
     on_webhooks_update = on_webhooks_update
     on_interaction_create = on_interaction_create
+
+    def register_handler(self, event: str):
+        '''
+        Register a given function to a given event string.
+        '''
+        if not hasattr(objects.DISCORD_EVENTS, event):
+            raise ValueError(f'Attempted to bind to unknown event \'{event}\', must be exact match for existing {objects.DISCORD_EVENTS} entry.')
+
+        def coroutine_wrapper(coroutine):
+            @wraps(coroutine)
+            async def wrapped_coroutine(*args, **kwargs):
+                await coroutine(self, *args, **kwargs)
+            self._wrapper_registrations[event].append(wrapped_coroutine)
+            return wrapped_coroutine
+
+        return coroutine_wrapper
