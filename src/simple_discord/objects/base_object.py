@@ -1,7 +1,11 @@
 from . import snowflake
 
+from ..utilities import log
+
 
 class BaseDiscordObject:
+
+    _log = log.Log()
 
     def __init__(self):
         self.id: snowflake.Snowflake

@@ -3,36 +3,46 @@ import pytest
 from src.simple_discord.objects.interactions import Command, COMMAND_TYPE, COMMAND_OPTION
 
 
-def test_bad_validations():
+def test_bad_validations_bad_name():
     new_cmd = Command()
     new_cmd.generate(name='Fail', description='Not valid', type=COMMAND_TYPE.CHAT_INPUT)
     with pytest.raises(ValueError):
         new_cmd.validate()
 
+
+def test_bad_validations_long_name():
+    new_cmd = Command()
     new_cmd.generate(name='123123123412312312341231231234123', description='Not valid', type=COMMAND_TYPE.CHAT_INPUT)
     with pytest.raises(ValueError):
         new_cmd.validate()
 
+
+def test_bad_validations_long_description():
+    new_cmd = Command()
     new_cmd.generate(name='good_name', description='x' * 101, type=COMMAND_TYPE.CHAT_INPUT)
     with pytest.raises(ValueError):
         new_cmd.validate()
 
+
+def test_bad_validations_type():
+    new_cmd = Command()
     new_cmd.generate(name='good_name', description='Good description', type=1.0)  # type: ignore
     with pytest.raises(TypeError):
         new_cmd.validate()
 
+    new_cmd = Command()
     new_cmd.generate(name='good_name', description='Good description', type=1)  # type: ignore
     with pytest.raises(TypeError):
         new_cmd.validate()
 
-    new_cmd.generate(name='good_name', description='Good description', type=1)  # type: ignore
-    with pytest.raises(TypeError):
-        new_cmd.validate()
 
+def test_bad_validations_permissions():
+    new_cmd = Command()
     new_cmd.generate(name='good_name', description='Good description', type=COMMAND_TYPE.CHAT_INPUT, default_permission='Frog')  # type: ignore
     with pytest.raises(TypeError):
         new_cmd.validate()
 
+    new_cmd = Command()
     new_cmd.generate(name='good_name', description='Good description', type=COMMAND_TYPE.CHAT_INPUT, default_permission=1)  # type: ignore
     with pytest.raises(TypeError):
         new_cmd.validate()

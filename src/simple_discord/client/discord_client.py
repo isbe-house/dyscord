@@ -1,4 +1,5 @@
 import asyncio
+import nest_asyncio  # type: ignore
 import time
 
 from collections import defaultdict
@@ -27,23 +28,28 @@ from .events import on_channel_create, on_channel_delete, on_channel_pins_update
 class DiscordClient:
 
     _log = utilities.Log()
+    _wrapper_registrations: dict = defaultdict(lambda: list())
+    me: objects.User
+    session_id: str
+    token: str
+    application_id: Optional[str]
+    intent: int
+    ready: bool
+    cache: 'utilities.Cache'
 
     def __init__(self, token: str, application_id: Optional[str] = None):
         # Discord attributes
-        self.token = token
-        self.application_id = application_id
-        self.intent = 0
-        self.ready = False
-        self.session_id: str
-        self.cache = utilities.Cache()
-        self.me: objects.User
+        DiscordClient.token = token
+        DiscordClient.application_id = application_id
+        DiscordClient.intent = 0
+        DiscordClient.ready = False
+        DiscordClient.cache = utilities.Cache()
 
         # Private attributes
         self._heartbeat_task = None
         self._last_heartbeat_ack = None
         self._listener_task = None
         self._sequence_number = None
-        self._wrapper_registrations: dict = defaultdict(lambda: list())
 
     def configure_intents(self,  # noqa: C901
                           guilds: bool = False,
@@ -100,6 +106,7 @@ class DiscordClient:
         '''
         self._log.info('Starting...')
         self._log.info(f'Application ID: {self.application_id}')
+        nest_asyncio.apply()
         asyncio.run(self._run())
 
     async def _run(self):
@@ -256,6 +263,7 @@ class DiscordClient:
 
         event_type = data['t']
         self._log.info(f'Got a {event_type}')
+        obj = None
 
         if event_type == 'CHANNEL_CREATE':
             pprint(data)
@@ -390,12 +398,10 @@ class DiscordClient:
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'READY':
-            pprint(data)
-
             obj = objects.Ready().from_dict(data['d'])
-            self.session_id = obj.session_id
-            self.ready = True
-            self.me = obj.user
+            DiscordClient.session_id = obj.session_id
+            DiscordClient.ready = True
+            DiscordClient.me = obj.user
             self._log.info('Discord connection complete, we are ready!')
             self._log.info(f'We are now {self.me}')
 
@@ -450,19 +456,8 @@ class DiscordClient:
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTERACTION_CREATE':
-            pprint(data)
-            self._log.warning(f'Encountered unhandled event {event_type}')
-            interaction_id = objects.snowflake.Snowflake(data['d']['id'])
-            await API.interaction_respond(
-                interaction_id,
-                data['d']['token'],
-                {
-                    'type': 4,
-                    'data': {
-                        'content': 'SLAP A BITCH!'
-                    }
-                }
-            )
+            obj = objects.interactions.InteractionStructure().from_dict(data['d'])
+            self._log.info('Saw INTERACTION_CREATE event.')
 
         else:
             # We have an unknown event on our hands, PANIC!!!
@@ -470,8 +465,9 @@ class DiscordClient:
             pprint(data)
 
         # Call user wrapped cotoutines
-        for user_coroutine in self._wrapper_registrations[event_type]:
-            await user_coroutine(obj, data['d'])
+        if obj is not None:
+            for user_coroutine in DiscordClient._wrapper_registrations[event_type]:
+                await user_coroutine(obj, data['d'])
 
     # Register all out events
     on_channel_create = on_channel_create
@@ -521,7 +517,8 @@ class DiscordClient:
     on_webhooks_update = on_webhooks_update
     on_interaction_create = on_interaction_create
 
-    def register_handler(self, event: str):
+    @classmethod
+    def register_handler(cls, event: str):
         '''
         Register a given function to a given event string.
         '''
@@ -531,8 +528,9 @@ class DiscordClient:
         def coroutine_wrapper(coroutine):
             @wraps(coroutine)
             async def wrapped_coroutine(*args, **kwargs):
-                await coroutine(self, *args, **kwargs)
-            self._wrapper_registrations[event].append(wrapped_coroutine)
+                await coroutine(cls, *args, **kwargs)
+
+            cls._wrapper_registrations[event].append(wrapped_coroutine)
             return wrapped_coroutine
 
         return coroutine_wrapper

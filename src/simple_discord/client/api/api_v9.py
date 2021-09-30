@@ -3,7 +3,7 @@ import orjson as json
 
 from ...utilities import Log
 
-from ...objects import snowflake
+from ... import objects
 
 
 class API_V9:
@@ -58,9 +58,6 @@ class API_V9:
     async def create_global_application_command(cls, command_structure: dict):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands'
 
-        from pprint import pprint
-        pprint(command_structure)
-
         # if 'description' in command_structure and command_structure['type'] is not 1:
         #     cls._log.warning('The API sucks, and only tells you later that description fields are not allowed for type 2 and 3.')
         #     cls._log.warning('In an effort to make this easier, we just purge this here.')
@@ -72,12 +69,11 @@ class API_V9:
                 headers=cls.auth_header(),
                 json=command_structure,
             )
-            pprint(r.json())
             r.raise_for_status()
         return r.json()
 
     @classmethod
-    async def get_global_application_command(cls, command_id: snowflake.Snowflake):
+    async def get_global_application_command(cls, command_id: 'objects.Snowflake'):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
 
         async with httpx.AsyncClient() as client:
@@ -90,7 +86,7 @@ class API_V9:
 
     @classmethod
     async def edit_global_application_command(cls,
-                                              command_id: snowflake.Snowflake,
+                                              command_id: 'objects.Snowflake',
                                               command_structure: dict
                                               ):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
@@ -105,7 +101,7 @@ class API_V9:
         return r.json()
 
     @classmethod
-    async def delete_global_application_command(cls, command_id: snowflake.Snowflake):
+    async def delete_global_application_command(cls, command_id: 'objects.Snowflake'):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
 
         async with httpx.AsyncClient() as client:
@@ -116,12 +112,12 @@ class API_V9:
             r.raise_for_status()
 
     @classmethod
-    async def bulk_overwrite_global_application_commands(cls, command_id: snowflake.Snowflake):
+    async def bulk_overwrite_global_application_commands(cls, command_id: 'objects.Snowflake'):
         # PUT/applications/{application.id}/commands
         raise NotImplementedError('TBD')
 
     @classmethod
-    async def get_guild_application_commands(cls, guild_id: snowflake.Snowflake):
+    async def get_guild_application_commands(cls, guild_id: 'objects.Snowflake'):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands'
 
         async with httpx.AsyncClient() as client:
@@ -134,7 +130,7 @@ class API_V9:
 
     @classmethod
     async def create_guild_application_command(cls,
-                                               guild_id: snowflake.Snowflake,
+                                               guild_id: 'objects.Snowflake',
                                                command_structure: dict
                                                ):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands'
@@ -150,8 +146,8 @@ class API_V9:
 
     @classmethod
     async def get_guild_application_command(cls,
-                                            guild_id: snowflake.Snowflake,
-                                            command_id: snowflake.Snowflake,
+                                            guild_id: 'objects.Snowflake',
+                                            command_id: 'objects.Snowflake',
                                             ):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands/{command_id}'
 
@@ -165,8 +161,8 @@ class API_V9:
 
     @classmethod
     async def edit_guild_application_command(cls,
-                                             guild_id: snowflake.Snowflake,
-                                             command_id: snowflake.Snowflake,
+                                             guild_id: 'objects.Snowflake',
+                                             command_id: 'objects.Snowflake',
                                              command_structure: dict,
                                              ):
         # PATCH /applications/{application.id}/guilds/{guild.id}/commands/{command.id}
@@ -174,8 +170,8 @@ class API_V9:
 
     @classmethod
     async def delete_guild_application_command(cls,
-                                               guild_id: snowflake.Snowflake,
-                                               command_id: snowflake.Snowflake,
+                                               guild_id: 'objects.Snowflake',
+                                               command_id: 'objects.Snowflake',
                                                ):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands/{command_id}'
 
@@ -188,8 +184,8 @@ class API_V9:
 
     @classmethod
     async def bulk_overwrite_guild_application_command(cls,
-                                                       guild_id: snowflake.Snowflake,
-                                                       command_id: snowflake.Snowflake,
+                                                       guild_id: 'objects.Snowflake',
+                                                       command_id: 'objects.Snowflake',
                                                        command_structure: dict,
                                                        ):
         # PUT /applications/{application.id}/guilds/{guild.id}/commands/{command.id}
@@ -197,7 +193,7 @@ class API_V9:
 
     @classmethod
     async def interaction_respond(cls,
-                                  interaction_id: snowflake.Snowflake,
+                                  interaction_id: 'objects.Snowflake',
                                   interaction_token: str,
                                   data_structure: dict,
                                   ):
@@ -228,7 +224,7 @@ class API_V9:
     '''
 
     @classmethod
-    async def get_channel(cls, channel_id: snowflake.Snowflake):
+    async def get_channel(cls, channel_id: 'objects.Snowflake'):
         url = f'{cls.BASE_URL}/channels/{channel_id}'
 
         async with httpx.AsyncClient() as client:
@@ -241,7 +237,7 @@ class API_V9:
         return r.json()
 
     @classmethod
-    async def create_message(cls, channel_id: snowflake.Snowflake, message_payload: dict):
+    async def create_message(cls, channel_id: 'objects.Snowflake', message_payload: dict):
         url = f'{cls.BASE_URL}/channels/{channel_id}/messages'
 
         async with httpx.AsyncClient() as client:
@@ -252,7 +248,7 @@ class API_V9:
             )
             try:
                 r.raise_for_status()
-            except:
+            except Exception:
                 cls._log.exception(r.content)
 
         return r.json()

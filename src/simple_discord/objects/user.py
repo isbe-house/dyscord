@@ -1,7 +1,10 @@
 import enum
+import datetime
+from typing import List
 
-from . import snowflake
+from . import snowflake, role
 from .base_object import BaseDiscordObject
+from .. import utilities
 
 
 class User(BaseDiscordObject):
@@ -29,22 +32,21 @@ class User(BaseDiscordObject):
         NITRO_CLASSIC = 1 << 0
         NITRO = 1 << 1
 
-    def __init__(self):
-        self.id: snowflake.Snowflake
-        self.username: str
-        self.discriminator: str
-        self.avatar: str
-        self.bot: bool
-        self.system: bool
-        self.mfa_enabled: bool
-        self.banner: str
-        self.accent_color: int  # TODO: This is actually a color object!
-        self.locale: str
-        self.verified: bool
-        self.email: str
-        self.flags: int
-        self.premium_type: int
-        self.public_flags: int
+    id: snowflake.Snowflake
+    username: str
+    discriminator: str
+    avatar: str
+    bot: bool
+    system: bool
+    mfa_enabled: bool
+    banner: str
+    accent_color: int  # TODO: This is actually a color object!
+    locale: str
+    verified: bool
+    email: str
+    flags: int
+    premium_type: int
+    public_flags: int
 
     def __str__(self):
         fields = []
@@ -53,9 +55,9 @@ class User(BaseDiscordObject):
             fields.append(f'id={self.id}')
 
         if ('username' in self.__dict__) and ('discriminator' in self.__dict__):
-            fields.append(f'username={self.username}#{self.discriminator}')
+            fields.append(f'username=\'{self.username}#{self.discriminator}\'')
 
-        return f'User({",".join(fields)})'
+        return f'User({", ".join(fields)})'
 
     def __eq__(self, other):
         if not isinstance(other, User):
@@ -78,7 +80,7 @@ class User(BaseDiscordObject):
         '''
         self.from_dict(data)
 
-        # TODO: Cache users as well.
+        self.cache()
 
         return self
 
@@ -96,3 +98,97 @@ class User(BaseDiscordObject):
             self.system = data['system']
 
         return self
+
+    def cache(self):
+        utilities.Cache().add(self)
+
+
+class Member(User):
+    nick: str
+    avatar: str
+    roles: List[role.Role]
+    joined_at: datetime.datetime
+    premium_since: datetime.datetime
+    deaf: bool
+    mute: bool
+    pending: bool
+    permissions: str
+
+    def __str__(self):
+        fields = []
+
+        if hasattr(self, 'id'):
+            fields.append(f'id={self.id}')
+
+        if hasattr(self, 'username') and hasattr(self, 'discriminator'):
+            fields.append(f'username=\'{self.username}#{self.discriminator}\'')
+
+        if hasattr(self, 'nick'):
+            fields.append(f'nick=\'{self.nick}\'')
+
+        return f'Member({", ".join(fields)})'
+
+    def from_dict(self, data: dict) -> 'Member':
+        if 'nick' in data:
+            self.nick = data['nick']
+        if 'avatar' in data:
+            self.avatar = data['avatar']
+        if 'joined_at' in data:
+            self.joined_at = datetime.datetime.fromisoformat(data['joined_at'])
+        if 'premium_since' in data and data['premium_since'] is not None:
+            self.premium_since = datetime.datetime.fromisoformat(data['premium_since'])
+        if 'deaf' in data:
+            self.deaf = data['deaf']
+        if 'mute' in data:
+            self.mute = data['mute']
+        if 'pending' in data:
+            self.pending = data['pending']
+        if 'permissions' in data:
+            self.permissions = data['permissions']
+        return self
+
+    def update_from_user(self, user: User) -> 'Member':  # noqa: C901
+        if hasattr(user, 'id'):
+            self.id = user.id
+        if hasattr(user, 'username'):
+            self.username = user.username
+        if hasattr(user, 'discriminator'):
+            self.discriminator = user.discriminator
+        if hasattr(user, 'avatar'):
+            self.avatar = user.avatar
+        if hasattr(user, 'bot'):
+            self.bot = user.bot
+        if hasattr(user, 'system'):
+            self.system = user.system
+        if hasattr(user, 'mfa_enabled'):
+            self.mfa_enabled = user.mfa_enabled
+        if hasattr(user, 'banner'):
+            self.banner = user.banner
+        if hasattr(user, 'accent_color'):
+            self.accent_color = user.accent_color
+        if hasattr(user, 'locale'):
+            self.locale = user.locale
+        if hasattr(user, 'verified'):
+            self.verified = user.verified
+        if hasattr(user, 'email'):
+            self.email = user.email
+        if hasattr(user, 'flags'):
+            self.flags = user.flags
+        if hasattr(user, 'premium_type'):
+            self.premium_type = user.premium_type
+        if hasattr(user, 'public_flags'):
+            self.public_flags = user.public_flags
+        return self
+
+    def ingest_raw_dict(self, data: dict) -> 'User':
+        '''
+        Ingest and cache a given object for future use.
+        '''
+        self.from_dict(data)
+
+        self.cache()
+
+        return self
+
+    def cache(self):
+        utilities.Cache().add(self)

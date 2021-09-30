@@ -18,21 +18,33 @@ class Cache(Borg):
             self.users = set()
             self.first = False
 
-    def get(self, identifier):
+    def get(self, identifier: 'objects.Snowflake'):
         '''
         Return a given object with an given identifier if we know about it.
         '''
         for x in self.guilds:
             if identifier == x.id:
                 return x
+        for x in self.channels:
+            if identifier == x.id:
+                return x
+        for x in self.users:
+            if identifier == x.id:
+                return x
+        raise LookupError(f'Identifier {identifier} not in cache.')
 
     def add(self, object):
         '''
         Given some generic object, insert it into the cache.
         '''
 
-        if type(object) is objects.Guild:
-            self.guilds.add(object)
+        # Convert to dict
+        # if type(object) is objects.Guild:
+        #     self.guilds.add(object)
+        # elif isinstance(object, objects.Channel):
+        #     self.channels.add(object)
+        # elif type(object) is objects.User:
+        #     self.users.add(object)
 
     def clear(self):
 

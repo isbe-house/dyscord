@@ -29,7 +29,7 @@ def test_simple_sample():
 
     assert obj.edited_timestamp is None
 
-    assert obj.type == Message.MessageType.DEFAULT
+    assert obj.type == Message.MESSAGE_TYPE.DEFAULT
 
 
 def test_complex_samples():

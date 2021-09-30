@@ -1,70 +1,72 @@
 import datetime
-import enum
+import asyncio
 from typing import Union, Optional, List, Dict
 
 from .base_object import BaseDiscordObject
-from . import user, channel, snowflake
-from .interactions import components
+from . import user, channel as ext_channel, snowflake, enumerations
+from ..utilities import cache, log
+from .interactions import components as ext_components
+
+from ..client import api
 
 
 class Message(BaseDiscordObject):
 
-    class MessageType(enum.IntEnum):
-        DEFAULT = 0
-        RECIPIENT_ADD = 1
-        RECIPIENT_REMOVE = 2
-        CALL = 3
-        CHANNEL_NAME_CHANGE = 4
-        CHANNEL_ICON_CHANGE = 5
-        CHANNEL_PINNED_MESSAGE = 6
-        GUILD_MEMBER_JOIN = 7
-        USER_PREMIUM_GUILD_SUBSCRIPTION = 8
-        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1 = 9
-        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2 = 10
-        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3 = 11
-        CHANNEL_FOLLOW_ADD = 12
-        GUILD_DISCOVERY_DISQUALIFIED = 14
-        GUILD_DISCOVERY_REQUALIFIED = 15
-        GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING = 16
-        GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING = 17
-        THREAD_CREATED = 18
-        REPLY = 19
-        CHAT_INPUT_COMMAND = 20
-        THREAD_STARTER_MESSAGE = 21
-        GUILD_INVITE_REMINDER = 22
-        CONTEXT_MENU_COMMAND = 23
+    _log = log.Log()
 
-    def __init__(self):
-        self.id: snowflake.Snowflake
-        self.channel_id: snowflake.Snowflake
-        self.guild_id: Optional[snowflake.Snowflake]
-        self.author: user.User
-        self.member: Optional[user.User]
-        self.content: str
-        self.timestamp: datetime.datetime
-        self.edited_timestamp: Optional[datetime.datetime]
-        self.tts: bool
-        self.mention_everyone: bool
-        self.mentions: list[user.User]
-        # self.mention_roles: list[role.Role] = []  # Roles are TBD
-        self.mention_channels: list[channel.Channel]
-        # self.attachments: list[attachment.Attachment] = []  # Attachments are TBD
-        # self.embeds: list[embed.Embed] = []  # Embeds are TBD
-        # self.reactions: list[reaction.Reaction] = []  # Reactions are TBD
-        self.nonce: Optional[Union[int, str]]
-        self.pinned: bool
-        self.webhook_id: Optional[snowflake.Snowflake]
-        self.type: Message.MessageType
-        # self.activity = None  # Activity TBD
-        # self.application: application.Application = None  # Application TBD
-        self.application_id: snowflake.Snowflake
-        # self.message_reference: = None  # Message Reference TBD
-        # self.flags = None  # Message Flags TBD
-        self.referenced_message: Message
-        # self.interaction = None  # Interactions TBD
-        self.thread: channel.Channel
-        self.components: List[components.Component]  # Message components TBD
-        # self.sticker_items: List[Sticker] = []  # Stickers TBD
+    MESSAGE_TYPE = enumerations.MESSAGE_TYPE
+
+    id: 'snowflake.Snowflake'
+    channel_id: 'snowflake.Snowflake'
+    guild_id: Optional['snowflake.Snowflake']
+    author: 'user.User'
+    member: Optional['user.Member']
+    content: str
+    timestamp: datetime.datetime
+    edited_timestamp: Optional[datetime.datetime]
+    tts: bool
+    mention_everyone: bool
+    mentions: List['user.User']
+    # mention_roles: list[role.Role] = []  # Roles are TBD
+    mention_channels: List['ext_channel.Channel']
+    # attachments: list[attachment.Attachment] = []  # Attachments are TBD
+    # embeds: list[embed.Embed] = []  # Embeds are TBD
+    # reactions: list[reaction.Reaction] = []  # Reactions are TBD
+    nonce: Optional[Union[int, str]]
+    pinned: bool
+    webhook_id: Optional['snowflake.Snowflake']
+    type: 'enumerations.MESSAGE_TYPE'
+    # activity = None  # Activity TBD
+    # application: application.Application = None  # Application TBD
+    application_id: 'snowflake.Snowflake'
+    # message_reference: = None  # Message Reference TBD
+    # flags = None  # Message Flags TBD
+    referenced_message: 'Message'
+    # interaction = None  # Interactions TBD
+    thread: 'ext_channel.Channel'
+    components: List['ext_components.Component']  # Message components TBD
+    # sticker_items: List[Sticker] = []  # Stickers TBD
+
+    def __init__(self,
+                 content: str = None
+                 ):
+        if content is not None:
+            self.content = content
+
+    def __getattr__(self, name):
+
+        if name == 'channel' and 'channel_id' in self.__dict__:
+            try:
+                channel = cache.Cache().get(self.channel_id)
+                self._log.info('Got channel from the cache.')
+            except LookupError:
+                loop = asyncio.get_event_loop()
+                channel_dict = loop.run_until_complete(api.API.get_channel(self.channel_id))
+                channel = ext_channel.ChannelImporter().ingest_raw_dict(channel_dict)
+                self._log.info('Got channel from the API.')
+            self.channel = channel
+            return channel
+        raise AttributeError(f'Failed to find \'{name}\'')
 
     def ingest_raw_dict(self, data) -> 'Message':
         '''
@@ -85,7 +87,9 @@ class Message(BaseDiscordObject):
         self.channel_id = snowflake.Snowflake(data['channel_id'])
         self.guild_id = snowflake.Snowflake(data['guild_id']) if (data.get('guild_id', None) is not None) else None
         self.author = user.User().from_dict(data['author'])  # TODO: Update after we can parse in users.
-        self.member = user.User()  # TODO: Update after we can parse in users.
+        if 'member' in data:
+            self.member = user.Member().from_dict(data['member'])  # TODO: Update after we can parse in users.
+            self.member.update_from_user(self.author)
         self.content = data['content']
         self.timestamp = datetime.datetime.fromisoformat(data['timestamp'])
         self.edited_timestamp = datetime.datetime.fromisoformat(data['edited_timestamp']) if data['edited_timestamp'] is not None else None
@@ -99,7 +103,7 @@ class Message(BaseDiscordObject):
         self.nonce = data['nonce'] if 'nonce' in data else None
         self.pinned = data['pinned']
         self.webhook_id = snowflake.Snowflake(data['webhook_id']) if (data.get('webhook_id', None) is not None) else None
-        self.type = Message.MessageType(data['type'])
+        self.type = enumerations.MESSAGE_TYPE(data['type'])
 
         return self
 
@@ -130,13 +134,13 @@ class Message(BaseDiscordObject):
 
         return new_dict
 
-    def add_components(self) -> 'components.ActionRow':
+    def add_components(self) -> 'ext_components.ActionRow':
         '''
         Start adding components by starting an ACTION_ROW.
         '''
         if not hasattr(self, 'components'):
             self.components = list()
-        new_action_row = components.ActionRow()
+        new_action_row = ext_components.ActionRow()
         self.components.append(new_action_row)
 
         return new_action_row
@@ -164,11 +168,11 @@ class Message(BaseDiscordObject):
 
             custom_ids = list()
             for component in self.components:
-                assert type(component) is components.ActionRow,\
+                assert type(component) is ext_components.ActionRow,\
                     f'Got invalid type {type(component)} in Message.components, must be ActionRow.'
                 component.validate()
 
-                if type(component) is components.ActionRow:
+                if type(component) is ext_components.ActionRow:
                     for sub_component in component.components:
                         if hasattr(sub_component, 'custom_id'):
                             assert sub_component.custom_id not in custom_ids,\

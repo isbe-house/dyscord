@@ -151,13 +151,13 @@ class SelectMenu(Component):
     type = enumerations.COMPONENT_TYPES.SELECT_MENU
     custom_id: str
     disabled: bool
-    options: List[application_command.CommandOptions]
+    options: List['application_command.CommandOptions']
     placeholder: str
     min_values: int
     max_values: int
 
     def add_option(self):  # -> 'application_command.CommandOptions':
-        # TODO: Basiclly copy this in from our existing example.
+        # TODO: Basically copy this in from our existing example.
         pass
 
     def to_dict(self) -> dict:

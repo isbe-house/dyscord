@@ -1,7 +1,7 @@
 
 import orjson as json
 
-from src.simple_discord.objects.interactions import Command, CommandOptions, CommandOptionChoiceStructure, CommandInteractionDataOptionStructure
+from src.simple_discord.objects.interactions import Command, CommandOptions, CommandOptionChoiceStructure
 from src.simple_discord.objects.interactions import COMMAND_TYPE, COMMAND_OPTION
 from src.simple_discord.objects import Snowflake
 
@@ -52,17 +52,6 @@ def test_ACOCS():
     input_dict = {
         'name': 'Animal',
         'value': 'Frog',
-    }
-    x.from_dict(input_dict)
-
-
-def test_ACIDOS():
-
-    x = CommandInteractionDataOptionStructure()
-    input_dict = {
-        'name': 'Animal',
-        'type': 2,
-        'value': 'STRING',
     }
     x.from_dict(input_dict)
 
