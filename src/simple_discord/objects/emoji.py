@@ -1,7 +1,9 @@
 import emoji
 
+from.base_object import BaseDiscordObject
 
-class Emoji:
+
+class Emoji(BaseDiscordObject):
 
     def __init__(self, name: str = None, unicode: str = None):
         self.name = name

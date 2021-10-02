@@ -88,3 +88,12 @@ class CHANNEL_TYPES(enum.IntEnum):
     GUILD_PUBLIC_THREAD = 11  # a temporary sub-channel within a GUILD_TEXT channel
     GUILD_PRIVATE_THREAD = 12  # a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
     GUILD_STAGE_VOICE = 13  # a voice channel for hosting events with an audience
+
+
+class EMBED_TYPES(enum.Enum):
+    rich = enum.auto()      # generic embed rendered from embed attributes
+    image = enum.auto()     # image embed
+    video = enum.auto()     # video embed
+    gifv = enum.auto()      # animated gif image embed rendered as a video embed
+    article = enum.auto()   # article embed
+    link = enum.auto()      # link embed

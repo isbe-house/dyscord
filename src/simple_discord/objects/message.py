@@ -5,12 +5,12 @@ from typing import Union, Optional, List, Dict
 from .base_object import BaseDiscordObject
 from . import user, channel as ext_channel, snowflake, enumerations
 from ..utilities import cache, log
-from .interactions import components as ext_components
+from .interactions import components as ext_components, application_command
 
 from ..client import api
 
 
-class Message(BaseDiscordObject):
+class Message(BaseDiscordObject, application_command.ComponentAdder):
 
     _log = log.Log()
 
@@ -119,7 +119,7 @@ class Message(BaseDiscordObject):
         '''
         new_dict: Dict[str, object] = dict()
         new_dict['content'] = self.content if hasattr(self, 'content') else None
-        # new_dict['tts'] = self.tts if hasattr(self, 'tts') else False
+        new_dict['tts'] = self.tts if hasattr(self, 'tts') else False
         # new_dict['file'] = None  # TODO: Handle a file upload.
         # new_dict['embeds'] = None  # TODO: Handle embeds.
         # new_dict['allowed_mentions'] = True  # BUG: This isn't a bool, its an `AllowedMentionsObject`, which we don't support yet.
@@ -133,17 +133,6 @@ class Message(BaseDiscordObject):
                 new_dict['components'].append(component.to_dict())
 
         return new_dict
-
-    def add_components(self) -> 'ext_components.ActionRow':
-        '''
-        Start adding components by starting an ACTION_ROW.
-        '''
-        if not hasattr(self, 'components'):
-            self.components = list()
-        new_action_row = ext_components.ActionRow()
-        self.components.append(new_action_row)
-
-        return new_action_row
 
     def validate(self):
         '''

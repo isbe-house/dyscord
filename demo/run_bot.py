@@ -38,7 +38,7 @@ client = DiscordClient(token=token, application_id=application_id)
 client.configure_intents(
     guilds=True,
     guild_members=True,
-    guild_messages=True,
+    # guild_messages=True,
     guild_message_reactions=True,
     guild_message_typeing=True,
     direct_messages=True,

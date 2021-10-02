@@ -1,4 +1,4 @@
-from src.simple_discord.objects.base_object import BaseDiscordObject
+from ..objects.base_object import BaseDiscordObject
 from .. import objects
 
 

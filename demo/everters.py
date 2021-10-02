@@ -7,6 +7,8 @@ from src.simple_discord.objects.interactions.enumerations import BUTTON_STYLES
 async def on_interaction(client, interaction: InteractionStructure, raw_interaction):
     from pprint import pprint
     pprint(raw_interaction)
+
+    assert interaction.data is not None
     pprint(interaction.data.to_dict())
 
     response = interaction.generate_response(True)

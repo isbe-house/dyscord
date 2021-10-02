@@ -1,3 +1,4 @@
+import abc
 import copy
 import re
 from typing import Optional, Union, List, Dict
@@ -21,6 +22,26 @@ class Interactions(BaseDiscordObject):
 
     async def generate_command(self):
         pass
+
+
+class ComponentAdder(abc.ABC):
+
+    '''Allow other objects to start adding components to themselves with a common set of helper functions.
+
+    Caution: This is an abstract class, and is not intended for direct instantiation.
+    '''
+
+    def add_components(self) -> 'ext_components.ActionRow':
+        '''
+        Start adding components by starting an ACTION_ROW.
+        '''
+        if not hasattr(self, 'components'):
+            self.components: Optional[List['ext_components.Component']] = list()
+        assert type(self.components) is list
+        new_action_row = ext_components.ActionRow()
+        self.components.append(new_action_row)
+
+        return new_action_row
 
 
 class Command(BaseDiscordObject):
@@ -311,6 +332,9 @@ class CommandOptionChoiceStructure(BaseDiscordObject):
 
 
 class InteractionStructure(BaseDiscordObject):
+
+    '''Response given from the server after an user activated an interaction of some type.'''
+
     id: snowflake.Snowflake
     application_id: snowflake.Snowflake
     type: enumerations.INTERACTION_TYPES
@@ -435,7 +459,7 @@ class InteractionResponse(BaseDiscordObject):
         await api.API.interaction_respond(self.interaction_id, self.interaction_token, self.to_dict())
 
 
-class InteractionCallback(BaseDiscordObject):
+class InteractionCallback(BaseDiscordObject, ComponentAdder):
     tts: Optional[bool]
     content: Optional[str]
     # embeds: List[embeds]  # TODO: Support embeds here.
@@ -473,16 +497,3 @@ class InteractionCallback(BaseDiscordObject):
         self.flags = flags
         if hasattr(self, 'components'):
             del self.components
-
-    def add_components(self) -> 'ext_components.ActionRow':
-        '''
-        Start adding components by starting an ACTION_ROW.
-        Test.
-        '''
-        if not hasattr(self, 'components'):
-            self.components = list()
-        assert type(self.components) is list
-        new_action_row = ext_components.ActionRow()
-        self.components.append(new_action_row)
-
-        return new_action_row

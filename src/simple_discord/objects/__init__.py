@@ -8,6 +8,7 @@ from .ready import Ready
 from .snowflake import Snowflake
 from .user import User, Member
 from .role import Role
+from .embed import Embed
 
 from .channel import Channel, ChannelImporter, CategoryChannel, NewsChannel, TextChannel, StoreChannel, VoiceChannel
 
@@ -32,4 +33,5 @@ __all__ = [
     'VoiceChannel',
     'Member',
     'Role',
+    'Embed',
 ]
