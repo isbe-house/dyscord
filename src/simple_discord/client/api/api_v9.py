@@ -1,5 +1,6 @@
+import asyncio
+import datetime
 import httpx
-import orjson as json
 
 from ...utilities import Log
 
@@ -12,46 +13,70 @@ class API_V9:
     TOKEN: str  # Overridden when the API is loaded in DiscordClient._connect
     APPLICATION_ID: str
 
+    _lock = asyncio.Lock()
     _log = Log()
 
     @classmethod
     def auth_header(cls):
         return {'Authorization': f'Bot {cls.TOKEN}', 'Content-Type': 'application/json'}
 
+    @classmethod
+    async def _handle_rate_limit(cls, response):
+        headers = response.headers
+
+        if 'x-ratelimit-reset' not in headers:
+            return
+
+        reset_datetime = datetime.datetime.fromtimestamp(float(headers['x-ratelimit-reset']))
+        time_until_reset = reset_datetime - datetime.datetime.now()
+
+        if int(headers["x-ratelimit-remaining"]) == 0:
+            cls._log.warning(f'Rate limit encountered, waiting for {time_until_reset}.')
+            await asyncio.sleep(time_until_reset.total_seconds())
+
     # GATEWAY ENDPOINTS
+
     @classmethod
     async def get_gateway_bot(cls, token) -> dict:
-        async with httpx.AsyncClient() as client:
-            r = await client.get(
-                f'{cls.BASE_URL}/gateway/bot',
-                headers={'Authorization': f'Bot {token}'},
-            )
-            r.raise_for_status()
+
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    f'{cls.BASE_URL}/gateway/bot',
+                    headers={'Authorization': f'Bot {token}'},
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
 
         # Add our own settings to URI
-        data = json.loads(r.content)
+        data = r.json()
         data['url'] += '?v=9&encoding=json'
 
         return data
 
     @classmethod
     async def get_gateway(cls) -> dict:
-        async with httpx.AsyncClient() as client:
-            r = await client.get(f'{cls.BASE_URL}/gateway')
-            r.raise_for_status()
 
-        return json.loads(r.content)
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(f'{cls.BASE_URL}/gateway')
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
+
+        return r.json()
 
     @classmethod
     async def get_global_application_commands(cls):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.get(
-                url,
-                headers=cls.auth_header(),
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    url,
+                    headers=cls.auth_header(),
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
         return r.json()
 
     @classmethod
@@ -63,25 +88,29 @@ class API_V9:
         #     cls._log.warning('In an effort to make this easier, we just purge this here.')
         #     del command_structure['description']
 
-        async with httpx.AsyncClient() as client:
-            r = await client.post(
-                url,
-                headers=cls.auth_header(),
-                json=command_structure,
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.post(
+                    url,
+                    headers=cls.auth_header(),
+                    json=command_structure,
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
         return r.json()
 
     @classmethod
     async def get_global_application_command(cls, command_id: 'objects.Snowflake'):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.get(
-                url,
-                headers=cls.auth_header(),
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    url,
+                    headers=cls.auth_header(),
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
         return r.json()
 
     @classmethod
@@ -91,25 +120,29 @@ class API_V9:
                                               ):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.patch(
-                url,
-                headers=cls.auth_header(),
-                json=command_structure,
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.patch(
+                    url,
+                    headers=cls.auth_header(),
+                    json=command_structure,
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
         return r.json()
 
     @classmethod
     async def delete_global_application_command(cls, command_id: 'objects.Snowflake'):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.delete(
-                url,
-                headers=cls.auth_header(),
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.delete(
+                    url,
+                    headers=cls.auth_header(),
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
 
     @classmethod
     async def bulk_overwrite_global_application_commands(cls, command_id: 'objects.Snowflake'):
@@ -120,12 +153,14 @@ class API_V9:
     async def get_guild_application_commands(cls, guild_id: 'objects.Snowflake'):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.get(
-                url,
-                headers=cls.auth_header(),
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    url,
+                    headers=cls.auth_header(),
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
         return r.json()
 
     @classmethod
@@ -135,14 +170,15 @@ class API_V9:
                                                ):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.post(
-                url,
-                headers=cls.auth_header(),
-                json=command_structure,
-            )
-            r.raise_for_status()
-        cls._log.info(r.content)
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.post(
+                    url,
+                    headers=cls.auth_header(),
+                    json=command_structure,
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
 
     @classmethod
     async def get_guild_application_command(cls,
@@ -151,12 +187,14 @@ class API_V9:
                                             ):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands/{command_id}'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.get(
-                url,
-                headers=cls.auth_header(),
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    url,
+                    headers=cls.auth_header(),
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
         return r.json()
 
     @classmethod
@@ -175,12 +213,14 @@ class API_V9:
                                                ):
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands/{command_id}'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.delete(
-                url,
-                headers=cls.auth_header(),
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.delete(
+                    url,
+                    headers=cls.auth_header(),
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
 
     @classmethod
     async def bulk_overwrite_guild_application_command(cls,
@@ -199,12 +239,14 @@ class API_V9:
                                   ):
         url = f'{cls.BASE_URL}/interactions/{interaction_id}/{interaction_token}/callback'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.post(
-                url,
-                json=data_structure
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.post(
+                    url,
+                    json=data_structure
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
         cls._log.info(r.content)
 
     '''
@@ -227,12 +269,14 @@ class API_V9:
     async def get_channel(cls, channel_id: 'objects.Snowflake'):
         url = f'{cls.BASE_URL}/channels/{channel_id}'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.get(
-                url,
-                headers=cls.auth_header(),
-            )
-            r.raise_for_status()
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    url,
+                    headers=cls.auth_header(),
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
 
         return r.json()
 
@@ -240,15 +284,16 @@ class API_V9:
     async def create_message(cls, channel_id: 'objects.Snowflake', message_payload: dict):
         url = f'{cls.BASE_URL}/channels/{channel_id}/messages'
 
-        async with httpx.AsyncClient() as client:
-            r = await client.post(
-                url,
-                headers=cls.auth_header(),
-                json=message_payload,
-            )
-            try:
-                r.raise_for_status()
-            except Exception:
-                cls._log.exception(r.content)
-
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.post(
+                    url,
+                    headers=cls.auth_header(),
+                    json=message_payload,
+                )
+                try:
+                    r.raise_for_status()
+                except Exception:
+                    cls._log.exception(r.content)
+            await cls._handle_rate_limit(r)
         return r.json()

@@ -1,8 +1,10 @@
 # flake8: noqa
 
 # Handle the weirdness of our docker env first
+from datetime import datetime
 from pprint import pprint
 import sys
+
 sys.path.insert(0, '.')
 
 # Do normal imports and run!
@@ -38,7 +40,7 @@ client = DiscordClient(token=token, application_id=application_id)
 client.configure_intents(
     guilds=True,
     guild_members=True,
-    # guild_messages=True,
+    guild_messages=True,
     guild_message_reactions=True,
     guild_message_typeing=True,
     direct_messages=True,
@@ -134,6 +136,19 @@ async def send_buttons(client, chan_id):
     await channel.send_message(msg)
 
 
+async def test(client, channel: objects.TextChannel):
+
+    new_msg = objects.Message()
+    e1 = new_msg.add_embeds()
+    e1.generate('Test Embed', timestamp=datetime.now())
+    e1.add_field('one', 'two')
+    e1.add_field('Users', f'{6274:,}')
+    e1.add_provider('John', 'https://isbe.house')
+    e1.add_footer('Footer', icon_url='https://img.icons8.com/external-vitaliy-gorbachev-blue-vitaly-gorbachev/72/external-magic-hat-carnival-vitaliy-gorbachev-blue-vitaly-gorbachev-2.png')
+    e1.add_author('John', url='https://isbe.house')
+    response = await channel.send_message(new_msg)
+
+
 @client.register_handler('MESSAGE_CREATE')
 async def parse_message(client, message: objects.Message, raw_message):
     if client.me in message.mentions:
@@ -153,5 +168,8 @@ async def parse_message(client, message: objects.Message, raw_message):
         elif 'LIST' in message.content:
             log.critical('List components.')
             await list_commands(client)
+        elif 'TEST' in message.content:
+            log.critical('Run test command.')
+            await test(client, message.channel)
 
 client.run()

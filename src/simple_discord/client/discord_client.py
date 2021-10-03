@@ -187,7 +187,7 @@ class DiscordClient:
 
                 if opcode == 0:
                     self._log.debug('Received event, dispatch...')
-                    await self._event_dispatcher(data)
+                    asyncio.create_task(self._event_dispatcher(data))
 
                 # elif opcode == 1:
                 #     # Heartbeat

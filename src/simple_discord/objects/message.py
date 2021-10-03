@@ -3,14 +3,14 @@ import asyncio
 from typing import Union, Optional, List, Dict
 
 from .base_object import BaseDiscordObject
-from . import user, channel as ext_channel, snowflake, enumerations
+from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed
 from ..utilities import cache, log
 from .interactions import components as ext_components, application_command
 
 from ..client import api
 
 
-class Message(BaseDiscordObject, application_command.ComponentAdder):
+class Message(BaseDiscordObject, application_command.ComponentAdder, ext_embed.EmbedAdder):
 
     _log = log.Log()
 
@@ -27,11 +27,11 @@ class Message(BaseDiscordObject, application_command.ComponentAdder):
     tts: bool
     mention_everyone: bool
     mentions: List['user.User']
-    # mention_roles: list[role.Role] = []  # Roles are TBD
+    # mention_roles: list[role.Role]  # Roles are TBD
     mention_channels: List['ext_channel.Channel']
-    # attachments: list[attachment.Attachment] = []  # Attachments are TBD
-    # embeds: list[embed.Embed] = []  # Embeds are TBD
-    # reactions: list[reaction.Reaction] = []  # Reactions are TBD
+    # attachments: list[attachment.Attachment]  # Attachments are TBD
+    embeds: Optional[List[ext_embed.Embed]]
+    # reactions: list[reaction.Reaction]  # Reactions are TBD
     nonce: Optional[Union[int, str]]
     pinned: bool
     webhook_id: Optional['snowflake.Snowflake']
@@ -121,7 +121,12 @@ class Message(BaseDiscordObject, application_command.ComponentAdder):
         new_dict['content'] = self.content if hasattr(self, 'content') else None
         new_dict['tts'] = self.tts if hasattr(self, 'tts') else False
         # new_dict['file'] = None  # TODO: Handle a file upload.
-        # new_dict['embeds'] = None  # TODO: Handle embeds.
+        if hasattr(self, 'embeds'):
+            new_dict['embeds'] = list()  # TODO: Handle embeds.
+            assert type(new_dict['embeds']) is list
+            assert type(self.embeds) is list
+            for embed in self.embeds:
+                new_dict['embeds'].append(embed.to_dict())
         # new_dict['allowed_mentions'] = True  # BUG: This isn't a bool, its an `AllowedMentionsObject`, which we don't support yet.
         # new_dict['message_reference'] = None
         # new_dict['sticker_ids'] = None
@@ -172,3 +177,13 @@ class Message(BaseDiscordObject, application_command.ComponentAdder):
                         assert component.custom_id not in custom_ids,\
                             f'Found duplicate custom_id [{component.custom_id}]'
                         custom_ids.append(component.custom_id)
+
+        if hasattr(self, 'embeds'):
+            assert type(self.embeds) is list,\
+                f'Got invalid type {type(self.embeds)} in Message.embeds, must be list.'
+
+            assert len(self.embeds) <= 25,\
+                f'Invalid length of {len(self.embeds):,} in Message.embeds, must be <= 5 elements.'
+
+            for embed in self.embeds:
+                embed.validate()

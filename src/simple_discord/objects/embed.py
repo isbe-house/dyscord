@@ -1,3 +1,4 @@
+import abc
 import datetime
 from typing import Optional, List, Dict
 
@@ -137,6 +138,11 @@ class Embed(BaseDiscordObject):
                 total_length += len(field.name)
                 total_length += len(field.value)
 
+        if hasattr(self, 'author'):
+            assert type(self.author) is EmbedAuthor,\
+                f'Got invalid type {type(self.author)} for author.'
+            self.author.validate()
+
         assert total_length <= 6000,\
             f'Total characters in embed is {total_length}. Max API limit is 6000.'
 
@@ -245,17 +251,35 @@ class Embed(BaseDiscordObject):
 
 class EmbedFooter(BaseDiscordObject):
     text: str  # footer text
-    icon_url: str  # url of footer icon (only supports http(s) and attachments)
-    proxy_icon_url: str  # a proxied url of footer icon
+    icon_url: Optional[str]  # url of footer icon (only supports http(s) and attachments)
+    proxy_icon_url: Optional[str]  # a proxied url of footer icon
 
     def to_dict(self) -> 'dict':
         new_dict: Dict[str, object] = dict()
+        if hasattr(self, 'text'):
+            new_dict['text'] = self.text
+        if hasattr(self, 'icon_url'):
+            new_dict['icon_url'] = self.icon_url
+        if hasattr(self, 'proxy_icon_url'):
+            new_dict['proxy_icon_url'] = self.proxy_icon_url
         return new_dict
 
     def validate(self):
-        print(f'Text length: {len(self.text)}.')
+
         assert len(self.text) <= 2048,\
             f'Got invalid length of text, {len(self.text)} elements long. Max is 2048.'
+
+        if hasattr(self, 'icon_url'):
+            assert type(self.icon_url) is str,\
+                f'Got invalid type {type(self.icon_url)} for icon_url. Must be str.'
+            assert self.icon_url.startswith(('http://', 'https://')),\
+                f'Got invalid icon_url {self.icon_url}, must start with http:// or https://.'
+
+        if hasattr(self, 'proxy_icon_url'):
+            assert type(self.proxy_icon_url) is str,\
+                f'Got invalid type {type(self.proxy_icon_url)} for proxy_icon_url. Must be str.'
+            assert self.proxy_icon_url.startswith(('http://', 'https://')),\
+                f'Got invalid proxy_icon_url {self.proxy_icon_url}, must start with http:// or https://.'
 
 
 class EmbedImage(BaseDiscordObject):
@@ -285,10 +309,14 @@ class EmbedImage(BaseDiscordObject):
 
         assert type(self.url) is str,\
             f'Got invalid type {type(self.url)} for url. Must be str.'
+        assert self.url.startswith(('http://', 'https://')),\
+            f'Got invalid url {self.url}, must start with http:// or https://.'
 
         if hasattr(self, 'proxy_url'):
             assert type(self.proxy_url) is str,\
                 f'Got invalid type {type(self.proxy_url)} for proxy_url. Must be str.'
+            assert self.proxy.startswith(('http://', 'https://')),\
+                f'Got invalid proxy {self.proxy}, must start with http:// or https://.'
 
         if hasattr(self, 'height'):
             assert type(self.height) is int,\
@@ -326,10 +354,14 @@ class EmbedThumbnail(BaseDiscordObject):
 
         assert type(self.url) is str,\
             f'Got invalid type {type(self.url)} for url. Must be str.'
+        assert self.url.startswith(('http://', 'https://')),\
+            f'Got invalid url {self.url}, must start with http:// or https://.'
 
         if hasattr(self, 'proxy_url'):
             assert type(self.proxy_url) is str,\
                 f'Got invalid type {type(self.proxy_url)} for proxy_url. Must be str.'
+            assert self.proxy_url.startswith(('http://', 'https://')),\
+                f'Got invalid proxy_url {self.proxy_url}, must start with http:// or https://.'
 
         if hasattr(self, 'height'):
             assert type(self.height) is int,\
@@ -369,10 +401,14 @@ class EmbedVideo(BaseDiscordObject):
         if hasattr(self, 'url'):
             assert type(self.url) is str,\
                 f'Got invalid type {type(self.url)} for url. Must be str.'
+            assert self.url.startswith(('http://', 'https://')),\
+                f'Got invalid url {self.url}, must start with http:// or https://.'
 
         if hasattr(self, 'proxy_url'):
             assert type(self.proxy_url) is str,\
                 f'Got invalid type {type(self.proxy_url)} for proxy_url. Must be str.'
+            assert self.proxy_url.startswith(('http://', 'https://')),\
+                f'Got invalid proxy_url {self.proxy_url}, must start with http:// or https://.'
 
         if hasattr(self, 'height'):
             assert type(self.height) is int,\
@@ -407,6 +443,8 @@ class EmbedProvider(BaseDiscordObject):
         if hasattr(self, 'url'):
             assert type(self.url) is str,\
                 f'Got invalid type {type(self.url)} for url. Must be str.'
+            assert self.url.startswith(('http://', 'https://')),\
+                f'Got invalid url {self.url}, must start with http:// or https://.'
 
 
 class EmbedAuthor(BaseDiscordObject):
@@ -442,14 +480,20 @@ class EmbedAuthor(BaseDiscordObject):
         if hasattr(self, 'url'):
             assert type(self.url) is str,\
                 f'Got invalid type {type(self.url)} for url. Must be str.'
+            assert self.url.startswith(('http://', 'https://')),\
+                f'Got invalid url {self.url}, must start with http:// or https://.'
 
         if hasattr(self, 'icon_url'):
             assert type(self.icon_url) is str,\
                 f'Got invalid type {type(self.icon_url)} for icon_url. Must be str.'
+            assert self.icon_url.startswith(('http://', 'https://')),\
+                f'Got invalid icon_url {self.icon_url}, must start with http:// or https://.'
 
         if hasattr(self, 'proxy_icon_url'):
             assert type(self.proxy_icon_url) is str,\
                 f'Got invalid type {type(self.proxy_icon_url)} for proxy_icon_url. Must be str.'
+            assert self.proxy_icon_url.startswith(('http://', 'https://')),\
+                f'Got invalid proxy_icon_url {self.proxy_icon_url}, must start with http:// or https://.'
 
 
 class EmbedField(BaseDiscordObject):
@@ -487,3 +531,23 @@ class EmbedField(BaseDiscordObject):
         if hasattr(self, 'inline'):
             assert type(self.inline) is bool,\
                 f'Got invalid type {type(self.inline)} for inline. Must be bool.'
+
+
+class EmbedAdder(abc.ABC):
+
+    '''Allow other objects to start adding components to themselves with a common set of helper functions.
+
+    Caution: This is an abstract class, and is not intended for direct instantiation.
+    '''
+
+    def add_embeds(self) -> 'Embed':
+        '''
+        Start adding components by starting an ACTION_ROW.
+        '''
+        if not hasattr(self, 'embeds'):
+            self.embeds: Optional[List['Embed']] = list()
+        assert type(self.embeds) is list
+        new_embed = Embed()
+        self.embeds.append(new_embed)
+
+        return new_embed

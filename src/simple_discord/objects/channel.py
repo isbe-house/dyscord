@@ -83,7 +83,7 @@ class TextChannel(Channel):
         else:
             raise TypeError
 
-        await api.API.create_message(self.id, message.to_sendable_dict())
+        return await api.API.create_message(self.id, message.to_sendable_dict())
 
 
 class NewsChannel(Channel):
