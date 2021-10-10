@@ -40,3 +40,16 @@ services:
         user: "${UID}:${GID}"
         environment:
             - PYTHONDONTWRITEBYTECODE=1
+
+    documentation:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: DOCS
+        restart: "no"
+        volumes:
+            - ./:/usr/src/app/
+        user: "${UID}:${GID}"
+        ports:
+        - "8000:8000"
+        command: "mkdocs serve -a 0.0.0.0:8000"

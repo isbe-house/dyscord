@@ -14,3 +14,8 @@ FROM PROD as TEST
 COPY requirements_test.txt ./
 RUN pip install --no-cache-dir -r requirements_test.txt
 # Handle testing modules, not needed for deployment
+
+FROM TEST as DOCS
+
+RUN pip install --no-cache-dir mkdocs mkdocstrings
+ENV PYTHONPATH=src

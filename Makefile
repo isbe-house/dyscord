@@ -24,6 +24,12 @@ down: ## Stop all containers
                 -f  docker-compose.yaml \
                 down
 
+docs: build ## Stop all containers
+	docker-compose \
+        -f  docker-compose.yaml \
+        run --rm --service-ports documentation
+
+
 # logs: ## Display logs (follow)
 # 	docker-compose \
 #                 -f  docker-compose.yaml \
@@ -31,7 +37,7 @@ down: ## Stop all containers
 
 clean: ## Delete volumes
 	docker system prune -f
-	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage
+	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history
 
 debug: ## Start interactive python shell to debug with
 	docker-compose \
@@ -91,5 +97,5 @@ help:
 
 .DEFAULT_GOAL := help
 
-.PHONY: up down clean populate test build debug run
+.PHONY: up down clean populate test build debug run docs
 # .SILENT: test up down up clean
