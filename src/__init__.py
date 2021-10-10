@@ -1,1 +1,1 @@
-'''Dev directory of Simple Discord'''
+'''Dev directory of Simple Discord.'''

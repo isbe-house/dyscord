@@ -1,12 +1,32 @@
+import abc
 from typing import Dict, List, Union, Optional
 
-from . import application_command, enumerations
+from . import command, enumerations
 from ..base_object import BaseDiscordObject
 from .. import emoji
 
 
 class Component(BaseDiscordObject):
     type: enumerations.COMPONENT_TYPES
+
+
+class ComponentAdder(abc.ABC):
+    '''Allow other objects to start adding components to themselves with a common set of helper functions.
+
+    Caution: This is an abstract class, and is not intended for direct instantiation.
+    '''
+
+    def add_components(self) -> 'ActionRow':
+        '''
+        Start adding components by starting an ACTION_ROW.
+        '''
+        if not hasattr(self, 'components'):
+            self.components: Optional[List['Component']] = list()
+        assert type(self.components) is list
+        new_action_row = ActionRow()
+        self.components.append(new_action_row)
+
+        return new_action_row
 
 
 class ActionRow(Component):
@@ -151,12 +171,12 @@ class SelectMenu(Component):
     type = enumerations.COMPONENT_TYPES.SELECT_MENU
     custom_id: str
     disabled: bool
-    options: List['application_command.CommandOptions']
+    options: List['command.CommandOptions']
     placeholder: str
     min_values: int
     max_values: int
 
-    def add_option(self):  # -> 'application_command.CommandOptions':
+    def add_option(self):  # -> 'command.CommandOptions':
         # TODO: Basically copy this in from our existing example.
         pass
 

@@ -6,12 +6,12 @@ from typing import Union, Optional, List, Dict
 from .base_object import BaseDiscordObject
 from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed
 from ..utilities import cache, log
-from .interactions import components as ext_components, application_command
+from .interactions import components as ext_components
 
 from ..client import api
 
 
-class Message(BaseDiscordObject, application_command.ComponentAdder, ext_embed.EmbedAdder):
+class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder):
 
     _log = log.Log()
 
@@ -166,18 +166,11 @@ class Message(BaseDiscordObject, application_command.ComponentAdder, ext_embed.E
                 assert type(component) is ext_components.ActionRow,\
                     f'Got invalid type {type(component)} in Message.components, must be ActionRow.'
                 component.validate()
-
-                if type(component) is ext_components.ActionRow:
-                    for sub_component in component.components:
-                        if hasattr(sub_component, 'custom_id'):
-                            assert sub_component.custom_id not in custom_ids,\
-                                f'Found duplicate custom_id [{sub_component.custom_id}]'
-                            custom_ids.append(sub_component.custom_id)
-                else:
-                    if hasattr(component, 'custom_id'):
-                        assert component.custom_id not in custom_ids,\
-                            f'Found duplicate custom_id [{component.custom_id}]'
-                        custom_ids.append(component.custom_id)
+                for sub_component in component.components:
+                    if hasattr(sub_component, 'custom_id'):
+                        assert sub_component.custom_id not in custom_ids,\
+                            f'Found duplicate custom_id [{sub_component.custom_id}]'
+                        custom_ids.append(sub_component.custom_id)
 
         if hasattr(self, 'embeds'):
             assert type(self.embeds) is list,\
