@@ -135,3 +135,5 @@ discord_client_secret
 .local
 .jupyter
 .ipynb_checkpoints
+.bash_history
+.python_history

@@ -1,5 +1,6 @@
-import datetime
 import asyncio
+import datetime
+import enum
 from typing import Union, Optional, List, Dict
 
 from .base_object import BaseDiscordObject
@@ -187,3 +188,28 @@ class Message(BaseDiscordObject, application_command.ComponentAdder, ext_embed.E
 
             for embed in self.embeds:
                 embed.validate()
+
+    class formatter:
+
+        class TIMESTAMP_FLAGS(enum.Enum):
+            SHORT_TIME = 't'
+            LONG_TIME = 'T'
+            SHORT_DATE = 'd'
+            LONG_DATE = 'D'
+            DEFAULT = 'f'
+            LONG_DATE_TIME = 'F'
+            RELATIVE_TIME = 'R'
+
+        @classmethod
+        def timestamp(cls, timestamp: datetime.datetime, flag: Union[TIMESTAMP_FLAGS, str] = TIMESTAMP_FLAGS.DEFAULT) -> str:
+            if type(flag) is cls.TIMESTAMP_FLAGS:
+                flag = flag.value
+            return f'<t:{int(timestamp.timestamp())}:{flag}>'
+
+        @classmethod
+        def user(cls, user_id: snowflake.Snowflake):
+            return f'<@{user_id}>'
+
+        @classmethod
+        def user_nickname(cls, user_id: snowflake.Snowflake):
+            return f'<@!{user_id}>'

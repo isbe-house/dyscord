@@ -1,16 +1,18 @@
 import abc
+import builtins
 import copy
 import re
-from typing import Optional, Union, List, Dict
-import builtins
 from collections import defaultdict
+from typing import Optional, Union, List, Dict
 
 
 from ...client import api
 
 from ..base_object import BaseDiscordObject
+
 from .. import snowflake,\
     guild
+
 from .. import user as ext_user,\
     message as ext_message
 
@@ -47,6 +49,7 @@ class ComponentAdder(abc.ABC):
 class Command(BaseDiscordObject):
 
     COMMAND_TYPE = enumerations.COMMAND_TYPE
+    COMMAND_OPTION = enumerations.COMMAND_OPTION
 
     id: 'snowflake.Snowflake'                        # unique id of the command  all
     type: Optional['enumerations.COMMAND_TYPE']      # one of application command type  the type of command, defaults 1 if not set  all
@@ -54,7 +57,7 @@ class Command(BaseDiscordObject):
     guild_id: Optional['snowflake.Snowflake']        # guild id of the command, if not global  all
     name: str                                        # 1-32 character name  all
     description: str                                 # 1-100 character description for CHAT_INPUT commands, empty string for USER and MESSAGE commands  all
-    options: Optional[List['CommandOptions']]        # array of application command option  the parameters for the command, max 25  CHAT_INPUT
+    options: Optional[List['CommandOptionsBase']]    # array of application command option  the parameters for the command, max 25  CHAT_INPUT
     default_permission: bool                         # boolean (default true)  whether the command is enabled by default when the app is added to a guild  all
     version: Optional['snowflake.Snowflake']         # autoincrementing version identifier updated during substantial record changes  all
 
@@ -78,7 +81,7 @@ class Command(BaseDiscordObject):
                  name: str,
                  description: str,
                  type: 'enumerations.COMMAND_TYPE',
-                 options: Optional[List['CommandOptions']] = None,
+                 options: Optional[List['CommandOptionsBase']] = None,
                  default_permission: bool = True,
                  ):
         '''
@@ -89,16 +92,44 @@ class Command(BaseDiscordObject):
         self.default_permission = default_permission
         self.type = type
 
-        if options is not None:
+        if builtins.type(options) is list:
             self.options = copy.deepcopy(options)
         elif options is None and hasattr(self, 'options'):
             del self.options
 
-    def add_option_sub_command(self):
-        raise NotImplementedError
+    def add_option_sub_command(self,
+                               name: str,
+                               description: str,
+                               ) -> 'CommandOptionSubCommand':
+        new_option = CommandOptionSubCommand()
+        new_option.type = enumerations.COMMAND_OPTION.SUB_COMMAND
+        new_option.name = name
+        new_option.description = description
 
-    def add_option_sub_command_group(self):
-        raise NotImplementedError
+        if not hasattr(self, 'options'):
+            self.options = list()
+
+        assert type(self.options) is list
+        self.options.append(new_option)
+
+        return new_option
+
+    def add_option_sub_command_group(self,
+                                     name: str,
+                                     description: str,
+                                     ) -> 'CommandOptionSubCommandGroup':
+        new_option = CommandOptionSubCommandGroup()
+        new_option.type = enumerations.COMMAND_OPTION.SUB_COMMAND_GROUP
+        new_option.name = name
+        new_option.description = description
+
+        if not hasattr(self, 'options'):
+            self.options = list()
+
+        assert type(self.options) is list
+        self.options.append(new_option)
+
+        return new_option
 
     def add_option_typed(self,
                          type: 'enumerations.COMMAND_OPTION',
@@ -126,11 +157,11 @@ class Command(BaseDiscordObject):
         if hasattr(self, 'options'):
             del self.options
 
-    async def register_to_guild(self, guild: 'guild.Guild'):
-        pass
+    async def register_to_guild(self, guild: 'guild.Guild') -> dict:
+        return await api.API.create_guild_application_command(guild.id, self.to_dict())
 
-    async def register_globally(self, guild: 'guild.Guild'):
-        pass
+    async def register_globally(self) -> dict:
+        return await api.API.create_global_application_command(self.to_dict())
 
     def from_dict(self, data: dict) -> 'Command':
         if 'id' in data:
@@ -211,7 +242,7 @@ class Command(BaseDiscordObject):
                 raise OverflowError(f'You cannot have {len(self.options)} options, limited to max of 25.')
 
             for option in self.options:
-                if type(option) is not CommandOptions:
+                if not isinstance(option, CommandOptionsBase):
                     raise TypeError(f'Found option of type {type(option)}, must be {CommandOptions}')
                 option.validate()
 
@@ -219,35 +250,21 @@ class Command(BaseDiscordObject):
             raise TypeError(f'Default Permission is of incorrect type {type(self.default_permission)}, should be {type(True)}.')
 
 
-class CommandOptions(BaseDiscordObject):
+class CommandOptionsBase(abc.ABC, BaseDiscordObject):
 
     # Handy shortcut
     COMMAND_OPTION = enumerations.COMMAND_OPTION
 
-    def __init__(self):
-        self.type: enumerations.COMMAND_OPTION                      # one of application command option type the type of option
-        self.name: str                                                          # string 1-32 character name
-        self.description: str                                                   # string 1-100 character description
-        self.required: bool                                                     # boolean if the parameter is required or optional--default false
-        self.choices: Optional[list[CommandOptionChoiceStructure]]   # array of application command option choice choices for STRING, INTEGER, and
-        # NUMBER types for the user to pick from, max 25
-        self.options: Optional[list[CommandOptions]]                 # array of application command option if the option is a subcommand or subcommand group type,
-        # this nested options will be the parameters
+    type: 'enumerations.COMMAND_OPTION'                      # one of application command option type the type of option
+    name: str                                                          # string 1-32 character name
+    description: str                                                   # string 1-100 character description
+    required: bool                                                     # boolean if the parameter is required or optional--default false
+    choices: Optional[List['CommandOptionChoiceStructure']]   # array of application command option choice choices for STRING, INTEGER, and
+    # NUMBER types for the user to pick from, max 25
+    options: Optional[List['CommandOptions']]                 # array of application command option if the option is a subcommand or subcommand group type,
+    # this nested options will be the parameters
 
-    def add_choice(self,
-                   name: str,
-                   value: Union[str, int, float],
-                   ):
-        new_choice = CommandOptionChoiceStructure()
-        new_choice.name = name
-        new_choice.value = value
-        if not hasattr(self, 'choices') or self.choices is None:
-            self.choices = list()
-        self.choices.append(new_choice)
-
-        return new_choice
-
-    def from_dict(self, data: dict) -> 'CommandOptions':
+    def from_dict(self, data: dict) -> 'CommandOptionsBase':
         if 'type' in data:
             self.type = enumerations.COMMAND_OPTION(data['type'])
         self.name = data['name']
@@ -255,12 +272,12 @@ class CommandOptions(BaseDiscordObject):
         if 'required' in data:
             self.required = data['required']
         if 'choices' in data:
-            # TODO: Loop through and process the options.
+            # TODO: Loop through and process the choices.
             # self.choices
             pass
         if 'options' in data:
             # TODO: Loop through and process the options.
-            # self.options
+            # self.choices
             pass
 
         return self
@@ -301,6 +318,34 @@ class CommandOptions(BaseDiscordObject):
                 choice.validate()
 
 
+class CommandOptions(CommandOptionsBase):
+
+    def add_choice(self,
+                   name: str,
+                   value: Union[str, int, float],
+                   ):
+        new_choice = CommandOptionChoiceStructure()
+        new_choice.name = name
+        new_choice.value = value
+        if not hasattr(self, 'choices') or self.choices is None:
+            self.choices = list()
+        self.choices.append(new_choice)
+
+        return new_choice
+
+
+class CommandOptionSubCommandGroup(CommandOptionsBase):
+    # Same thing, let's just take it!
+    add_option_sub_command = Command.add_option_sub_command
+
+
+class CommandOptionSubCommand(CommandOptionsBase):
+
+    COMMAND_OPTION = enumerations.COMMAND_OPTION
+
+    add_option_typed = Command.add_option_typed
+
+
 class CommandOptionChoiceStructure(BaseDiscordObject):
 
     def __init__(self):
@@ -334,6 +379,7 @@ class CommandOptionChoiceStructure(BaseDiscordObject):
 class InteractionStructure(BaseDiscordObject):
 
     '''Response given from the server after an user activated an interaction of some type.'''
+    INTERACTION_RESPONSE_TYPES = enumerations.INTERACTION_RESPONSE_TYPES
 
     id: snowflake.Snowflake
     application_id: snowflake.Snowflake
@@ -350,6 +396,7 @@ class InteractionStructure(BaseDiscordObject):
     message: Optional['ext_message.Message']
 
     def from_dict(self, data: dict) -> 'InteractionStructure':
+        self._log.info('Parsing  a InteractionStructure dict')
         self.application_id = snowflake.Snowflake(data['application_id'])
         self.id = snowflake.Snowflake(data['id'])
         self.token = str(data['token'])
@@ -377,10 +424,14 @@ class InteractionStructure(BaseDiscordObject):
     def validate(self):
         pass
 
-    def generate_response(self, ephemeral: bool = False) -> 'InteractionResponse':
+    def generate_response(self,
+                          ephemeral: bool = False,
+                          type: enumerations.INTERACTION_RESPONSE_TYPES = enumerations.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE,
+                          ) -> 'InteractionResponse':
         new_response = InteractionResponse()
         new_response.interaction_id = self.id
         new_response.interaction_token = self.token
+        new_response.type = type
         if ephemeral:
             new_response.data.flags |= enumerations.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         return new_response
@@ -398,7 +449,7 @@ class InteractionDataStructure(BaseDiscordObject):
     target_id: Optional[snowflake.Snowflake]  # ? snowflake id the of user or message targetted by a user or message command
 
     def from_dict(self, data: dict) -> 'InteractionDataStructure':  # noqa: C901
-        self._log.info('Parse a InteractionDataStructure object.')
+        self._log.info('Parse a InteractionDataStructure dict.')
         if 'id' in data:
             self.id = snowflake.Snowflake(data['id'])
         if 'name' in data:
@@ -424,7 +475,10 @@ class InteractionDataStructure(BaseDiscordObject):
             self.custom_id = str(data['custom_id'])
         if 'target_id' in data:
             self.target_id = snowflake.Snowflake(data['target_id'])
-
+        if 'options' in data:
+            self.options = list()
+            for option_dict in data['options']:
+                self.options.append(InteractionDataOptionStructure().from_dict(option_dict))
         return self
 
     def to_dict(self) -> dict:
@@ -433,6 +487,41 @@ class InteractionDataStructure(BaseDiscordObject):
 
     def validate(self):
         pass
+
+class InteractionDataOptionStructure(BaseDiscordObject):
+
+    name: str                                                  # string the name of the invoked command Application Command
+    type: enumerations.COMMAND_OPTION                          # integer the type of the invoked command Application Command
+    value: Optional[Union[str, int, bool, 'snowflake.Snowflake', float]]               # the value of the pair
+    options: Optional[List['InteractionDataOptionStructure']]  # Present when command is a group or subcommand
+
+    def from_dict(self, data: dict) -> 'InteractionDataOptionStructure':  # noqa: C901
+        self.name = data['name']
+        self.type = enumerations.COMMAND_OPTION(data['type'])
+        if 'value' in data:
+            if self.type == enumerations.COMMAND_OPTION.SUB_COMMAND:
+                raise ValueError('Sub Commands should not have values!')
+            elif self.type == enumerations.COMMAND_OPTION.SUB_COMMAND_GROUP:
+                raise ValueError('Sub Command Groups should not have values!')
+            elif self.type in [enumerations.COMMAND_OPTION.STRING, enumerations.COMMAND_OPTION.INTEGER, enumerations.COMMAND_OPTION.BOOLEAN, enumerations.COMMAND_OPTION.NUMBER]:
+                self.value = data['value']
+            elif self.type == enumerations.COMMAND_OPTION.USER:
+                # TODO: Actually lookup the user here and replace the snowflake with a full object.
+                self.value = snowflake.Snowflake(data['value'])
+            elif self.type == enumerations.COMMAND_OPTION.CHANNEL:
+                # TODO: Actually lookup the channel here and replace the snowflake with a full object.
+                self.value = snowflake.Snowflake(data['value'])
+            elif self.type == enumerations.COMMAND_OPTION.ROLE:
+                # TODO: Actually lookup the role here and replace the snowflake with a full object.
+                self.value = snowflake.Snowflake(data['value'])
+            elif self.type == enumerations.COMMAND_OPTION.MENTIONABLE:
+                # TODO: Actually lookup the mentionable here and replace the snowflake with a full object.
+                self.value = snowflake.Snowflake(data['value'])
+        if 'options' in data:
+            self.options = list()
+            for option_dict in data['options']:
+                self.options.append(InteractionDataOptionStructure().from_dict(option_dict))
+        return self
 
 
 class InteractionResponse(BaseDiscordObject):

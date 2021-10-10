@@ -1,8 +1,6 @@
 # flake8: noqa
 
 # Handle the weirdness of our docker env first
-from datetime import datetime
-from pprint import pprint
 import sys
 
 sys.path.insert(0, '.')
@@ -10,12 +8,13 @@ sys.path.insert(0, '.')
 # Do normal imports and run!
 import logging
 import uuid
+from datetime import datetime, timedelta
 
 from src.simple_discord.utilities import Log
 from src.simple_discord.client import DiscordClient, API
 from src.simple_discord import objects, utilities
 from src.simple_discord.objects.interactions import Command
-from demo.everters import on_interaction
+from demo import everters
 
 log = Log()
 log.setLevel(logging.INFO)
@@ -49,6 +48,18 @@ client.configure_intents(
 @client.register_handler('READY')
 async def on_ready(client, ready, raw_ready):
     log.critical('IT WORKS!')
+
+@client.register_handler('READY')
+def on_ready2(client, ready, raw_ready):
+    log.critical('IT WORKS!')
+
+@client.register_class
+class Foo:
+    async def on_ready(self, client, ready, raw_ready):
+        log.critical('IT WORKS!')
+
+    async def on_message_create(self, client, message, raw_message):
+        log.info('Saw a message.')
 
 async def purge_commands(client, message):
     client._log.info('Get global commands')
@@ -106,6 +117,23 @@ async def register_commands(client):
     registration = await API.create_global_application_command(data3)
     log.info(f'Registration3: {registration}')
 
+    # Complex chat command
+
+    new_command = Command()
+    new_command.generate(
+        name='complex',
+        description='This is a more complex test.',
+        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
+    )
+    scg = new_command.add_option_sub_command_group('edit', 'edit stuff')
+    sc = scg.add_option_sub_command('user', 'Edit a user')
+    sc.add_option_typed(sc.COMMAND_OPTION.USER, name='target', description='The poor sap you are gonna hit')
+
+    new_command.validate()
+
+    registration = await new_command.register_globally()
+    log.info(f'Registration3: {registration}')
+
 
 async def list_commands(client):
     client._log.info('Get global commands')
@@ -139,14 +167,9 @@ async def send_buttons(client, chan_id):
 async def test(client, channel: objects.TextChannel):
 
     new_msg = objects.Message()
-    e1 = new_msg.add_embeds()
-    e1.generate('Test Embed', timestamp=datetime.now())
-    e1.add_field('one', 'two')
-    e1.add_field('Users', f'{6274:,}')
-    e1.add_provider('John', 'https://isbe.house')
-    e1.add_footer('Footer', icon_url='https://img.icons8.com/external-vitaliy-gorbachev-blue-vitaly-gorbachev/72/external-magic-hat-carnival-vitaliy-gorbachev-blue-vitaly-gorbachev-2.png')
-    e1.add_author('John', url='https://isbe.house')
-    response = await channel.send_message(new_msg)
+    now = datetime.now()
+    new_msg.content = f'The time is {new_msg.formatter.timestamp(now, new_msg.formatter.TIMESTAMP_FLAGS.RELATIVE_TIME)}'
+    await channel.send_message(new_msg)
 
 
 @client.register_handler('MESSAGE_CREATE')
@@ -170,6 +193,7 @@ async def parse_message(client, message: objects.Message, raw_message):
             await list_commands(client)
         elif 'TEST' in message.content:
             log.critical('Run test command.')
+            assert type(message.channel) is objects.channel.TextChannel
             await test(client, message.channel)
 
 client.run()

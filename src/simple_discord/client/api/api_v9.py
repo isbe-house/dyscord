@@ -167,7 +167,7 @@ class API_V9:
     async def create_guild_application_command(cls,
                                                guild_id: 'objects.Snowflake',
                                                command_structure: dict
-                                               ):
+                                               ) -> dict:
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands'
 
         async with cls._lock:
@@ -179,12 +179,13 @@ class API_V9:
                 )
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
+        return r.json()
 
     @classmethod
     async def get_guild_application_command(cls,
                                             guild_id: 'objects.Snowflake',
                                             command_id: 'objects.Snowflake',
-                                            ):
+                                            ) -> dict:
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands/{command_id}'
 
         async with cls._lock:

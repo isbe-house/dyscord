@@ -1,9 +1,11 @@
 import asyncio
+import inspect
 import nest_asyncio  # type: ignore
 import time
+import warnings
 
 from collections import defaultdict
-from functools import wraps
+import functools
 from pprint import pprint
 from typing import Optional
 
@@ -15,6 +17,7 @@ from .gateway_intents import Intents
 
 from .. import utilities
 from .. import objects
+from .. import helper
 
 from .events import on_channel_create, on_channel_delete, on_channel_pins_update, on_channel_update, on_guild_ban_add, on_guild_ban_remove, on_guild_create,\
     on_guild_delete, on_guild_emojis_update, on_guild_integrations_update, on_guild_member_add, on_guild_member_remove, on_guild_member_update,\
@@ -29,6 +32,7 @@ class DiscordClient:
 
     _log = utilities.Log()
     _wrapper_registrations: dict = defaultdict(lambda: list())
+    _wrapper_class_registrations: list = list()
     me: objects.User
     session_id: str
     token: str
@@ -36,6 +40,7 @@ class DiscordClient:
     intent: int
     ready: bool
     cache: 'utilities.Cache'
+    API = API
 
     def __init__(self, token: str, application_id: Optional[str] = None):
         # Discord attributes
@@ -167,6 +172,15 @@ class DiscordClient:
 
     async def _web_socket_listener(self, uri):
 
+        def _handle_completed_tasks(task: asyncio.Task):
+            exception = task.exception()
+            if exception is None:
+                return
+            try:
+                raise exception
+            except Exception:
+                self._log.exception('Exception from event dispatcher.')
+
         async with websockets.connect(uri) as websocket:
 
             self._gateway_ws = websocket
@@ -187,7 +201,8 @@ class DiscordClient:
 
                 if opcode == 0:
                     self._log.debug('Received event, dispatch...')
-                    asyncio.create_task(self._event_dispatcher(data))
+                    task = asyncio.create_task(self._event_dispatcher(data))
+                    task.add_done_callback(_handle_completed_tasks)
 
                 # elif opcode == 1:
                 #     # Heartbeat
@@ -360,7 +375,6 @@ class DiscordClient:
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_CREATE':
-            # pprint(data)
             obj = objects.Message()
             obj.ingest_raw_dict(data['d'])
             await self.on_message_create(obj, data['d'])
@@ -458,6 +472,8 @@ class DiscordClient:
         elif event_type == 'INTERACTION_CREATE':
             obj = objects.interactions.InteractionStructure().from_dict(data['d'])
             self._log.info('Saw INTERACTION_CREATE event.')
+            pprint(data['d'])
+            await helper.CommandHandler.command_handler(self, obj)
 
         else:
             # We have an unknown event on our hands, PANIC!!!
@@ -466,8 +482,23 @@ class DiscordClient:
 
         # Call user wrapped cotoutines
         if obj is not None:
-            for user_coroutine in DiscordClient._wrapper_registrations[event_type]:
-                await user_coroutine(obj, data['d'])
+            for user_function in DiscordClient._wrapper_registrations[event_type]:
+                if asyncio.iscoroutinefunction(user_function):
+                    await user_function(self, obj, data['d'])
+                else:
+                    user_function(self, obj, data['d'])
+
+            for user_class in DiscordClient._wrapper_class_registrations:
+                if hasattr(user_class, f'on_{event_type.lower()}'):
+                    user_function = getattr(user_class, f'on_{event_type.lower()}')
+
+                    if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
+                        warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
+
+                    if asyncio.iscoroutinefunction(user_function):
+                        await user_function(user_class, self, obj, data['d'])
+                    else:
+                        user_function(user_class, self, obj, data['d'])
 
     # Register all out events
     on_channel_create = on_channel_create
@@ -525,12 +556,31 @@ class DiscordClient:
         if not hasattr(objects.DISCORD_EVENTS, event):
             raise ValueError(f'Attempted to bind to unknown event \'{event}\', must be exact match for existing {objects.DISCORD_EVENTS} entry.')
 
-        def coroutine_wrapper(coroutine):
-            @wraps(coroutine)
-            async def wrapped_coroutine(*args, **kwargs):
-                await coroutine(cls, *args, **kwargs)
+        def func_wrapper(func):
+            if asyncio.iscoroutinefunction(func):
+                @functools.wraps(func)
+                async def wrapped_func(*args, **kwargs):  # type: ignore
+                    await func(*args, **kwargs)
 
-            cls._wrapper_registrations[event].append(wrapped_coroutine)
-            return wrapped_coroutine
+                cls._wrapper_registrations[event].append(wrapped_func)
+                return wrapped_func
+            else:
+                @functools.wraps(func)
+                def wrapped_func(*args, **kwargs):  # type: ignore
+                    func(*args, **kwargs)
 
-        return coroutine_wrapper
+                cls._wrapper_registrations[event].append(wrapped_func)
+                return wrapped_func
+
+        return func_wrapper
+
+    @classmethod
+    def register_class(cls, target_class):
+
+        @functools.wraps(target_class)
+        async def class_wrapper(cls, *args, **kwargs):
+            pass
+
+        cls._wrapper_class_registrations.append(class_wrapper)
+
+        return class_wrapper

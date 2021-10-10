@@ -1,19 +1,19 @@
+from typing import Optional
 from src.simple_discord.client import DiscordClient
+from src.simple_discord.objects import snowflake
 from src.simple_discord.objects.interactions import InteractionStructure
 from src.simple_discord.objects.interactions.enumerations import BUTTON_STYLES
+from src import simple_discord
 
 
-@DiscordClient.register_handler(event='INTERACTION_CREATE')
-async def on_interaction(client, interaction: InteractionStructure, raw_interaction):
-    from pprint import pprint
-    pprint(raw_interaction)
-
+async def global_complex(client, interaction: InteractionStructure):
     assert interaction.data is not None
-    pprint(interaction.data.to_dict())
-
-    response = interaction.generate_response(True)
-    response.type = response.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE
-    response.data.generate(content='This is a personal response.')
-    row = response.data.add_components()
-    row.add_button(BUTTON_STYLES.PRIMARY, '1', 'PRESS ME')
+    target_user = interaction.data.options[0].options[0].options[0].value
+    response = interaction.generate_response(True, interaction.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE)
+    user = simple_discord.objects.User()
+    user.id = target_user
+    response.data.generate(content=f'I\'m gonna slap {user.mention_nickname}!')
     await response.send()
+
+
+simple_discord.helper.CommandHandler.register_global_callback('complex', global_complex)

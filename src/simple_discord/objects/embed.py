@@ -88,7 +88,7 @@ class Embed(BaseDiscordObject):
         if color is not None:
             self.color = color
 
-    def validate(self):
+    def validate(self):  # noqa: C901
 
         total_length = 0
 
