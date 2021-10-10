@@ -43,7 +43,7 @@ build-docs: build
 
 clean: ## Delete volumes
 	docker system prune -f
-	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history
+	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site
 
 debug: ## Start interactive python shell to debug with
 	docker-compose \
@@ -94,6 +94,12 @@ test-docs:
                 run --rm simple-discord-tests \
                 pydocstyle --ignore=D300 src
 
+######################################################################################################################################################
+
+dist:
+	make build-docs
+	python3 setup.py sdist
+
 
 ######################################################################################################################################################
 
@@ -102,5 +108,5 @@ help:
 
 .DEFAULT_GOAL := help
 
-.PHONY: up down clean populate test build debug run docs build-docs
+.PHONY: up down clean populate test build debug run docs build-docs dist
 # .SILENT: test up down up clean

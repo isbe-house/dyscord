@@ -1,11 +1,17 @@
 import setuptools
+from distutils.util import convert_path
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+main_ns = {}
+ver_path = convert_path('src/simple_discord/version.py')
+with open(ver_path) as ver_file:
+    exec(ver_file.read(), main_ns)
+
 setuptools.setup(
     name="simple-discord-jmurrayufo",
-    version="0.1.0",
+    version=main_ns['__version__'],
     author="John Murray",
     author_email="jmurrayufo@gmail.com",
     description="A simple implementation of the discord API",
@@ -23,4 +29,6 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.7",
+    license='GPLv3',
+    platforms=['any'],
 )
