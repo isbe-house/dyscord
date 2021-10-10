@@ -417,13 +417,6 @@ class InteractionStructure(BaseDiscordObject):
 
         return self
 
-    def to_dict(self) -> dict:
-        ret_dict: dict = dict()
-        return ret_dict
-
-    def validate(self):
-        pass
-
     def generate_response(self,
                           ephemeral: bool = False,
                           type: enumerations.INTERACTION_RESPONSE_TYPES = enumerations.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE,
