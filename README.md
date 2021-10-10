@@ -8,3 +8,7 @@ Very much an active WIP. The API to this library is not at all locked down. User
 # Documentation
 
 We are following [Google Style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) docstring patterns.
+
+# Changelog
+
+See the [Changelog](docs/changelog.md).
