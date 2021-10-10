@@ -1,32 +1,20 @@
-import enum
+from typing import Union, Optional
 
 from .. import utilities
 from ..client import api
-from . import snowflake
+from . import snowflake, message as ext_message, enumerations
 
 
 class Channel:
 
     _log = utilities.Log()
 
-    class ChannelTypes(enum.IntEnum):
-        GUILD_TEXT = 0  # a text channel within a server
-        DM = 1  # a direct message between users
-        GUILD_VOICE = 2  # a voice channel within a server
-        GROUP_DM = 3  # a direct message between multiple users
-        GUILD_CATEGORY = 4  # an organizational category that contains up to 50 channels
-        GUILD_NEWS = 5  # a channel that users can follow and crosspost into their own server
-        GUILD_STORE = 6  # a channel in which game developers can sell their game on Discord
-        GUILD_NEWS_THREAD = 10  # a temporary sub-channel within a GUILD_NEWS channel
-        GUILD_PUBLIC_THREAD = 11  # a temporary sub-channel within a GUILD_TEXT channel
-        GUILD_PRIVATE_THREAD = 12  # a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
-        GUILD_STAGE_VOICE = 13  # a voice channel for hosting events with an audience
+    CHANNEL_TYPES = enumerations.CHANNEL_TYPES
 
-    def __init__(self):
-        self.id: snowflake.Snowflake
-        self.name: str
-        self.position: int
-        self.type: Channel.ChannelTypes
+    id: 'snowflake.Snowflake'
+    name: str
+    position: int
+    type: 'enumerations.CHANNEL_TYPES'
 
     def __str__(self):
         return f'{self.__class__.__name__}(name=\'{self.name}\', type={self.type.name})'
@@ -35,8 +23,6 @@ class Channel:
         return self.__str__()
 
     def cache(self):
-        # Preventing circular imports
-
         utilities.Cache().add(self)
 
     def ingest_raw_dict(self, data, parent_guild=None):
@@ -44,25 +30,60 @@ class Channel:
 
     def from_dict(self, data, parent_guild=None):
         self.id = snowflake.Snowflake(data['id'])
-        self.type = self.ChannelTypes(data['type'])
+        self.type = self.CHANNEL_TYPES(data['type'])
         return self
 
-    def get_channel(self, channel_id: snowflake.Snowflake):
-        return ChannelImporter().ingest_raw_dict(api.API.get_channel(channel_id))
+    @classmethod
+    async def get_channel(cls, channel_id: snowflake.Snowflake):
+        return ChannelImporter().ingest_raw_dict(await api.API.get_channel(channel_id))
 
 
 class TextChannel(Channel):
+
+    guild_id: 'snowflake.Snowflake'
+    # permission_overwrites: list
+    rate_limit_per_user: int
+    nsfw: Optional[bool]
+    topic: str
+    last_message_id: 'snowflake.Snowflake'
+    parent_id: 'snowflake.Snowflake'
+    default_auto_archive_duration: int
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "TextChannel":
         super().from_dict(data, parent_guild)
         self.from_dict(data, parent_guild=None)
 
-        self._log.debug("Ingest called.")
         self.cache()
         return self
 
     def from_dict(self, data, parent_guild=None):
+        self.id = snowflake.Snowflake(data['id'])
+        if 'guild_id' in data:
+            self.guild_id = snowflake.Snowflake(data['guild_id'])
+        self.name = data['name']
+        self.type = enumerations.CHANNEL_TYPES(data['type'])
+        self.position = data['position']
+        self.rate_limit_per_user = data['rate_limit_per_user']
+        if 'nsfw' in data:
+            self.nsfw = data['nsfw']
+        self.topic = data['topic']
+        self.last_message_id = snowflake.Snowflake(data['last_message_id'])
+        self.parent_id = snowflake.Snowflake(data['parent_id'])
+        if 'default_auto_archive_duration' in data:
+            self.default_auto_archive_duration = data['default_auto_archive_duration']
         return self
+
+    async def send_message(self, message: Union[ext_message.Message, str]):
+        if type(message) is ext_message.Message:
+            message.validate()
+        elif type(message) is str:
+            new_message = ext_message.Message()
+            new_message.content = message
+            message = new_message
+        else:
+            raise TypeError
+
+        return await api.API.create_message(self.id, message.to_sendable_dict())
 
 
 class NewsChannel(Channel):
@@ -150,35 +171,35 @@ class ChannelImporter:
     def ingest_raw_dict(cls, data, parent_guild=None) -> "Channel":
         new_channel: Channel
 
-        if data["type"] == Channel.ChannelTypes.GUILD_TEXT:
+        if data["type"] == Channel.CHANNEL_TYPES.GUILD_TEXT:
             new_channel = TextChannel()
 
-        elif data["type"] == Channel.ChannelTypes.DM:
+        elif data["type"] == Channel.CHANNEL_TYPES.DM:
             new_channel = DMChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_VOICE:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_VOICE:
             new_channel = VoiceChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GROUP_DM:
+        elif data["type"] == Channel.CHANNEL_TYPES.GROUP_DM:
             new_channel = GroupDMChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_PUBLIC_THREAD:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_PUBLIC_THREAD:
             new_channel = GuildPublicThread()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_PRIVATE_THREAD:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_PRIVATE_THREAD:
             new_channel = GuildPrivateThread()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_CATEGORY:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_CATEGORY:
             new_channel = CategoryChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_NEWS:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_NEWS:
             new_channel = NewsChannel()
 
-        elif data["type"] == Channel.ChannelTypes.GUILD_STORE:
+        elif data["type"] == Channel.CHANNEL_TYPES.GUILD_STORE:
             new_channel = StoreChannel()
 
         else:
-            raise ValueError(f'Dict contained unknown channel type. {data["type"]}, {Channel.ChannelTypes(data["type"]).name}')
+            raise ValueError(f'Dict contained unknown channel type. {data["type"]}, {Channel.CHANNEL_TYPES(data["type"]).name}')
 
         new_channel.ingest_raw_dict(data, parent_guild)
 

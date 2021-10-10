@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="simple-discord-jmurrayufo",
-    version="0.0.1",
+    version="0.1.0",
     author="John Murray",
     author_email="jmurrayufo@gmail.com",
     description="A simple implementation of the discord API",

@@ -1,5 +1,11 @@
 import asyncio
+import inspect
+import nest_asyncio  # type: ignore
 import time
+import warnings
+
+from collections import defaultdict
+import functools
 from pprint import pprint
 from typing import Optional
 
@@ -9,24 +15,40 @@ import orjson as json
 from .api import API
 from .gateway_intents import Intents
 
-
 from .. import utilities
 from .. import objects
+from .. import helper
+
+from .events import on_channel_create, on_channel_delete, on_channel_pins_update, on_channel_update, on_guild_ban_add, on_guild_ban_remove, on_guild_create,\
+    on_guild_delete, on_guild_emojis_update, on_guild_integrations_update, on_guild_member_add, on_guild_member_remove, on_guild_member_update,\
+    on_guild_role_create, on_guild_role_delete, on_guild_role_update, on_guild_stickers_update, on_guild_update, on_integration_create, on_integration_delete,\
+    on_integration_update, on_invite_create, on_invite_delete, on_message_create, on_message_delete, on_message_delete_bulk, on_message_reaction_add,\
+    on_message_reaction_remove, on_message_reaction_remove_all, on_message_reaction_remove_emoji, on_message_update, on_presence_update, on_ready,\
+    on_stage_instance_create, on_stage_instance_delete, on_stage_instance_update, on_thread_create, on_thread_delete, on_thread_list_sync,\
+    on_thread_member_update, on_thread_members_update, on_thread_update, on_typing_start, on_voice_state_update, on_webhooks_update, on_interaction_create
 
 
 class DiscordClient:
 
     _log = utilities.Log()
+    _wrapper_registrations: dict = defaultdict(lambda: list())
+    _wrapper_class_registrations: list = list()
+    me: objects.User
+    session_id: str
+    token: str
+    application_id: Optional[str]
+    intent: int
+    ready: bool
+    cache: 'utilities.Cache'
+    API = API
 
     def __init__(self, token: str, application_id: Optional[str] = None):
         # Discord attributes
-        self.token = token
-        self.application_id = application_id
-        self.intent = 0
-        self.ready = False
-        self.session_id: str
-        self.cache = utilities.Cache()
-        self.me: objects.User
+        DiscordClient.token = token
+        DiscordClient.application_id = application_id
+        DiscordClient.intent = 0
+        DiscordClient.ready = False
+        DiscordClient.cache = utilities.Cache()
 
         # Private attributes
         self._heartbeat_task = None
@@ -89,6 +111,7 @@ class DiscordClient:
         '''
         self._log.info('Starting...')
         self._log.info(f'Application ID: {self.application_id}')
+        nest_asyncio.apply()
         asyncio.run(self._run())
 
     async def _run(self):
@@ -149,6 +172,15 @@ class DiscordClient:
 
     async def _web_socket_listener(self, uri):
 
+        def _handle_completed_tasks(task: asyncio.Task):
+            exception = task.exception()
+            if exception is None:
+                return
+            try:
+                raise exception
+            except Exception:
+                self._log.exception('Exception from event dispatcher.')
+
         async with websockets.connect(uri) as websocket:
 
             self._gateway_ws = websocket
@@ -169,7 +201,8 @@ class DiscordClient:
 
                 if opcode == 0:
                     self._log.debug('Received event, dispatch...')
-                    await self._event_dispatcher(data)
+                    task = asyncio.create_task(self._event_dispatcher(data))
+                    task.add_done_callback(_handle_completed_tasks)
 
                 # elif opcode == 1:
                 #     # Heartbeat
@@ -245,6 +278,7 @@ class DiscordClient:
 
         event_type = data['t']
         self._log.info(f'Got a {event_type}')
+        obj = None
 
         if event_type == 'CHANNEL_CREATE':
             pprint(data)
@@ -341,12 +375,9 @@ class DiscordClient:
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_CREATE':
-            # pprint(data)
             obj = objects.Message()
             obj.ingest_raw_dict(data['d'])
-
-            # TODO: Remove this after we finish debugging interactions
-            await self._debug_parse_message(obj)
+            await self.on_message_create(obj, data['d'])
 
         elif event_type == 'MESSAGE_DELETE':
             pprint(data)
@@ -381,12 +412,14 @@ class DiscordClient:
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'READY':
-            pprint(data)
-            self.session_id = data['d']['session_id']
-            self.ready = True
-            self.me = objects.User().from_dict(data['d']['user'])
+            obj = objects.Ready().from_dict(data['d'])
+            DiscordClient.session_id = obj.session_id
+            DiscordClient.ready = True
+            DiscordClient.me = obj.user
             self._log.info('Discord connection complete, we are ready!')
             self._log.info(f'We are now {self.me}')
+
+            await self.on_ready(obj, data['d'])
 
         elif event_type == 'STAGE_INSTANCE_CREATE':
             pprint(data)
@@ -437,68 +470,117 @@ class DiscordClient:
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTERACTION_CREATE':
-            pprint(data)
-            self._log.warning(f'Encountered unhandled event {event_type}')
-            interaction_id = objects.snowflake.Snowflake(data['d']['id'])
-            await API.interaction_respond(
-                interaction_id,
-                data['d']['token'],
-                {
-                    'type': 4,
-                    'data': {
-                        'content': 'SLAP A BITCH!'
-                    }
-                }
-            )
+            obj = objects.interactions.InteractionStructure().from_dict(data['d'])
+            self._log.info('Saw INTERACTION_CREATE event.')
+            pprint(data['d'])
+            await helper.CommandHandler.command_handler(self, obj)
 
         else:
             # We have an unknown event on our hands, PANIC!!!
             self._log.critical(f'Encountered unknown event \'{data["t"]}\'!!!')
             pprint(data)
 
-    async def _debug_parse_message(self, message):
-        if self.me in message.mentions:
-            self._log.info(f'Saw message: {message.content}')
-            if 'PURGE' in message.content:
-                self._log.critical('Purging all commands.')
-                await self._purge_commands()
-            elif 'REGISTER' in message.content:
-                self._log.critical('Registering test commands.')
-                await self._register_commands()
+        # Call user wrapped cotoutines
+        if obj is not None:
+            for user_function in DiscordClient._wrapper_registrations[event_type]:
+                if asyncio.iscoroutinefunction(user_function):
+                    await user_function(self, obj, data['d'])
+                else:
+                    user_function(self, obj, data['d'])
 
-    async def _purge_commands(self):
-        from pprint import pprint
-        self._log.info('Get global commands')
-        commands = await API.get_global_application_commands()
-        for command in commands:
-            command = objects.interactions.Command().from_dict(command)
-            pprint(commands)
-            assert command.id is not None
-            await API.delete_global_application_command(command.id)
+            for user_class in DiscordClient._wrapper_class_registrations:
+                if hasattr(user_class, f'on_{event_type.lower()}'):
+                    user_function = getattr(user_class, f'on_{event_type.lower()}')
 
-        self._log.info('Get guild commands')
-        for guild in utilities.Cache().guilds:
-            pprint(guild)
-            commands = await API.get_guild_application_commands(guild.id)
-            for command in commands:
-                command = objects.interactions.Command().from_dict(command)
-                pprint(command)
-                assert command.id is not None
-                await API.delete_guild_application_command(guild.id, command.id)
+                    if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
+                        warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
 
-    async def _register_commands(self):
-        new_command = objects.interactions.Command()
-        new_command.generate(
-            name='test2',
-            description='This is a more complex test.',
-            type=new_command.COMMAND_TYPE.CHAT_INPUT,
-        )
-        new_command.add_option_typed(
-            type=objects.interactions.CommandOptions.COMMAND_OPTION.BOOLEAN,
-            name='hit_them',
-            description='Age of the target',
-        )
-        new_command.validate()
-        data = new_command.to_dict()
+                    if asyncio.iscoroutinefunction(user_function):
+                        await user_function(user_class, self, obj, data['d'])
+                    else:
+                        user_function(user_class, self, obj, data['d'])
 
-        await API.create_global_application_command(data)
+    # Register all out events
+    on_channel_create = on_channel_create
+    on_channel_delete = on_channel_delete
+    on_channel_pins_update = on_channel_pins_update
+    on_channel_update = on_channel_update
+    on_guild_ban_add = on_guild_ban_add
+    on_guild_ban_remove = on_guild_ban_remove
+    on_guild_create = on_guild_create
+    on_guild_delete = on_guild_delete
+    on_guild_emojis_update = on_guild_emojis_update
+    on_guild_integrations_update = on_guild_integrations_update
+    on_guild_member_add = on_guild_member_add
+    on_guild_member_remove = on_guild_member_remove
+    on_guild_member_update = on_guild_member_update
+    on_guild_role_create = on_guild_role_create
+    on_guild_role_delete = on_guild_role_delete
+    on_guild_role_update = on_guild_role_update
+    on_guild_stickers_update = on_guild_stickers_update
+    on_guild_update = on_guild_update
+    on_integration_create = on_integration_create
+    on_integration_delete = on_integration_delete
+    on_integration_update = on_integration_update
+    on_invite_create = on_invite_create
+    on_invite_delete = on_invite_delete
+    on_message_create = on_message_create
+    on_message_delete = on_message_delete
+    on_message_delete_bulk = on_message_delete_bulk
+    on_message_reaction_add = on_message_reaction_add
+    on_message_reaction_remove = on_message_reaction_remove
+    on_message_reaction_remove_all = on_message_reaction_remove_all
+    on_message_reaction_remove_emoji = on_message_reaction_remove_emoji
+    on_message_update = on_message_update
+    on_presence_update = on_presence_update
+    on_ready = on_ready
+    on_stage_instance_create = on_stage_instance_create
+    on_stage_instance_delete = on_stage_instance_delete
+    on_stage_instance_update = on_stage_instance_update
+    on_thread_create = on_thread_create
+    on_thread_delete = on_thread_delete
+    on_thread_list_sync = on_thread_list_sync
+    on_thread_member_update = on_thread_member_update
+    on_thread_members_update = on_thread_members_update
+    on_thread_update = on_thread_update
+    on_typing_start = on_typing_start
+    on_voice_state_update = on_voice_state_update
+    on_webhooks_update = on_webhooks_update
+    on_interaction_create = on_interaction_create
+
+    @classmethod
+    def register_handler(cls, event: str):
+        '''
+        Register a given function to a given event string.
+        '''
+        if not hasattr(objects.DISCORD_EVENTS, event):
+            raise ValueError(f'Attempted to bind to unknown event \'{event}\', must be exact match for existing {objects.DISCORD_EVENTS} entry.')
+
+        def func_wrapper(func):
+            if asyncio.iscoroutinefunction(func):
+                @functools.wraps(func)
+                async def wrapped_func(*args, **kwargs):  # type: ignore
+                    await func(*args, **kwargs)
+
+                cls._wrapper_registrations[event].append(wrapped_func)
+                return wrapped_func
+            else:
+                @functools.wraps(func)
+                def wrapped_func(*args, **kwargs):  # type: ignore
+                    func(*args, **kwargs)
+
+                cls._wrapper_registrations[event].append(wrapped_func)
+                return wrapped_func
+
+        return func_wrapper
+
+    @classmethod
+    def register_class(cls, target_class):
+
+        @functools.wraps(target_class)
+        async def class_wrapper(cls, *args, **kwargs):
+            pass
+
+        cls._wrapper_class_registrations.append(class_wrapper)
+
+        return class_wrapper

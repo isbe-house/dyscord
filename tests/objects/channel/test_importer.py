@@ -28,5 +28,6 @@ class TestImporter:
         channel = ChannelImporter().ingest_raw_dict(input_data)
 
         assert isinstance(channel, Channel)
-
         assert isinstance(channel, TextChannel)
+        assert channel.name == 'general'
+        assert channel.position == 6

@@ -8,7 +8,12 @@ services:
           network: host
         ports:
           - 8888:8888
+          - 8000:8000
+        user: "${UID}:${GID}"
         volumes:
-          - ../../:/home/jovyan/
-        command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password='' --ip 192.168.1.4"
+          - ./examples/:/home/jovyan/examples/
+          - ../../src/simple_discord:/opt/conda/lib/python3.9/site-packages/simple_discord:ro
+        command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password='' --ip=${HOST_ADDRESS} --ServerApp.root_dir='/home/jovyan/examples/'"
         network_mode: host
+        environment:
+          - JUPYTER_ENABLE_LAB=yes

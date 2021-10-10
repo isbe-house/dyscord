@@ -2,13 +2,19 @@
 
 # Handle the weirdness of our docker env first
 import sys
+
 sys.path.insert(0, '.')
 
 # Do normal imports and run!
 import logging
+import uuid
+from datetime import datetime, timedelta
 
 from src.simple_discord.utilities import Log
-from src.simple_discord.client import DiscordClient
+from src.simple_discord.client import DiscordClient, API
+from src.simple_discord import objects, utilities
+from src.simple_discord.objects.interactions import Command
+from demo import everters
 
 log = Log()
 log.setLevel(logging.INFO)
@@ -38,5 +44,156 @@ client.configure_intents(
     guild_message_typeing=True,
     direct_messages=True,
 )
+
+@client.register_handler('READY')
+async def on_ready(client, ready, raw_ready):
+    log.critical('IT WORKS!')
+
+@client.register_handler('READY')
+def on_ready2(client, ready, raw_ready):
+    log.critical('IT WORKS!')
+
+@client.register_class
+class Foo:
+    async def on_ready(self, client, ready, raw_ready):
+        log.critical('IT WORKS!')
+
+    async def on_message_create(self, client, message, raw_message):
+        log.info('Saw a message.')
+
+async def purge_commands(client, message):
+    client._log.info('Get global commands')
+    commands = await API.get_global_application_commands()
+    for command in commands:
+        command = Command().from_dict(command)
+        assert command.id is not None
+        await API.delete_global_application_command(command.id)
+
+    client._log.info('Get guild commands')
+    for guild in utilities.Cache().guilds:
+        commands = await API.get_guild_application_commands(guild.id)
+        for command in commands:
+            command = Command().from_dict(command)
+            assert command.id is not None
+            await API.delete_guild_application_command(guild.id, command.id)
+
+async def register_commands(client):
+    new_command = Command()
+    new_command.generate(
+        name='chat',
+        description='This is a more complex test.',
+        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
+    )
+    new_command.add_option_typed(
+        type=objects.interactions.enumerations.COMMAND_OPTION.BOOLEAN,
+        name='hit_them',
+        description='Age of the target',
+    )
+    new_command.validate()
+    data1 = new_command.to_dict()
+
+    new_command = Command()
+    new_command.generate(
+        name='user',
+        description='',
+        type=objects.interactions.enumerations.COMMAND_TYPE.USER,
+    )
+    new_command.validate()
+    data2 = new_command.to_dict()
+
+    new_command = Command()
+    new_command.generate(
+        name='message',
+        description='',
+        type=objects.interactions.enumerations.COMMAND_TYPE.MESSAGE,
+    )
+    new_command.validate()
+    data3 = new_command.to_dict()
+
+    registration = await API.create_global_application_command(data1)
+    log.info(f'Registration1: {registration}')
+    registration = await API.create_global_application_command(data2)
+    log.info(f'Registration2: {registration}')
+    registration = await API.create_global_application_command(data3)
+    log.info(f'Registration3: {registration}')
+
+    # Complex chat command
+
+    new_command = Command()
+    new_command.generate(
+        name='complex',
+        description='This is a more complex test.',
+        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
+    )
+    scg = new_command.add_option_sub_command_group('edit', 'edit stuff')
+    sc = scg.add_option_sub_command('user', 'Edit a user')
+    sc.add_option_typed(sc.COMMAND_OPTION.USER, name='target', description='The poor sap you are gonna hit')
+
+    new_command.validate()
+
+    registration = await new_command.register_globally()
+    log.info(f'Registration3: {registration}')
+
+
+async def list_commands(client):
+    client._log.info('Get global commands')
+    commands = await API.get_global_application_commands()
+    for command in commands:
+        command = Command().from_dict(command)
+        log.info(command)
+
+    client._log.info('Get guild commands')
+    for guild in utilities.Cache().guilds:
+        log.info(guild)
+        commands = await API.get_guild_application_commands(guild.id)
+        for command in commands:
+            command = Command().from_dict(command)
+            log.info(command)
+
+
+async def send_buttons(client, chan_id):
+    msg = objects.Message()
+    channel = objects.TextChannel()
+    channel.id = chan_id
+
+    msg.content = 'Hello World!'
+
+    row = msg.add_components()
+    row.add_button(objects.interactions.enumerations.BUTTON_STYLES.DANGER, label='DO NOT PRESS', custom_id = str(uuid.uuid4()))
+
+    await channel.send_message(msg)
+
+
+async def test(client, channel: objects.TextChannel):
+
+    new_msg = objects.Message()
+    now = datetime.now()
+    new_msg.content = f'The time is {new_msg.formatter.timestamp(now, new_msg.formatter.TIMESTAMP_FLAGS.RELATIVE_TIME)}'
+    await channel.send_message(new_msg)
+
+
+@client.register_handler('MESSAGE_CREATE')
+async def parse_message(client, message: objects.Message, raw_message):
+    if client.me in message.mentions:
+        log.info(f'Saw message: {message.content} from {message.author}')
+        if 'PURGE' in message.content:
+            log.critical('Purging all commands.')
+            await purge_commands(client, message)
+
+            assert type(message.channel) is objects.TextChannel
+            await message.channel.send_message('Purged commands!')
+        elif 'REGISTER' in message.content:
+            log.critical('Registering test commands.')
+            await register_commands(client)
+        elif 'BUTTON' in message.content:
+            log.critical('Create and send some components.')
+            await send_buttons(client, message.channel_id)
+        elif 'LIST' in message.content:
+            log.critical('List components.')
+            await list_commands(client)
+        elif 'TEST' in message.content:
+            log.critical('Run test command.')
+            assert type(message.channel) is objects.channel.TextChannel
+            await test(client, message.channel)
 
 client.run()

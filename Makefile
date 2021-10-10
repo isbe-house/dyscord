@@ -1,7 +1,7 @@
 
-export uid=$(id -u)
-export gid=$(id -g)
-
+export UID=$(shell id -u)
+export GID=$(shell id -g)
+export HOST_ADDRESS=$(shell hostname -f)
 
 # up: ## Start all containers
 # 	docker-compose \
@@ -29,13 +29,14 @@ down: ## Stop all containers
 #                 -f  docker-compose.yaml \
 #                 logs --follow --tail=20
 
-# clean: ## Delete volumes
-# 	docker system prune -f
+clean: ## Delete volumes
+	docker system prune -f
+	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage
 
 debug: ## Start interactive python shell to debug with
 	docker-compose \
                 -f docker-compose.yaml \
-                run --rm simple-discord /bin/bash
+                run --rm simple-discord-tests /bin/bash
 
 # start-debian: build ## Start interactive python shell to debug with
 # 	docker-compose \
@@ -52,18 +53,35 @@ jupyter: ## Start a jupyter environment for debugging and such
 test: ## Run all tests
 	make build
 	docker system prune -f
+	make test-pytest
+	make test-mypy
+	make test-flake8
+#	make test-docs
+
+
+test-pytest:
 	docker-compose \
                 -f  docker-compose.yaml \
                 run --rm simple-discord-tests \
                 python -m pytest --cov=src --durations=5 -vv --color=yes tests
+
+test-mypy:
 	docker-compose \
                 -f  docker-compose.yaml \
                 run --rm simple-discord-tests \
                 mypy src/simple_discord
+
+test-flake8:
 	docker-compose \
                 -f  docker-compose.yaml \
-                run simple-discord-tests \
+                run --rm simple-discord-tests \
                 flake8
+
+test-docs:
+	docker-compose \
+                -f  docker-compose.yaml \
+                run --rm simple-discord-tests \
+                pydocstyle --ignore=D300 src
 
 
 ######################################################################################################################################################
@@ -74,3 +92,4 @@ help:
 .DEFAULT_GOAL := help
 
 .PHONY: up down clean populate test build debug run
+# .SILENT: test up down up clean

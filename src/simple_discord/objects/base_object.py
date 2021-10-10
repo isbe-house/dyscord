@@ -1,7 +1,11 @@
 from . import snowflake
 
+from ..utilities import log
+
 
 class BaseDiscordObject:
+
+    _log = log.Log()
 
     def __init__(self):
         self.id: snowflake.Snowflake
@@ -24,14 +28,14 @@ class BaseDiscordObject:
         '''
         raise NotImplementedError(f'{self.__class__.__name__} does not yet implement this function.')
 
-    def cache(self):
-        '''
-        Save object to the cache for faster recall in the future.
-        '''
-        raise NotImplementedError(f'{self.__class__.__name__} does not yet implement this function.')
-
     def to_dict(self) -> dict:
         '''
         Convert object to dictionary suitable for API or other generic useage.
+        '''
+        raise NotImplementedError(f'{self.__class__.__name__} does not yet implement this function.')
+
+    def cache(self):
+        '''
+        Save object to the cache for faster recall in the future.
         '''
         raise NotImplementedError(f'{self.__class__.__name__} does not yet implement this function.')

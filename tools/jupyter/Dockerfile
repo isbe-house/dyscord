@@ -11,6 +11,5 @@ RUN rm requirements_test.txt
 
 COPY requirements.txt ./
 RUN python -m pip install --upgrade pip
-RUN pip install --no-cache-dir pytest pytest-cov flake8
 RUN pip install --no-cache-dir -r requirements.txt
 RUN rm requirements.txt
