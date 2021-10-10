@@ -9,7 +9,6 @@ def test_bad_validations_bad_name():
     with pytest.raises(ValueError):
         new_cmd.validate()
 
-
 def test_bad_validations_long_name():
     new_cmd = Command()
     new_cmd.generate(name='123123123412312312341231231234123', description='Not valid', type=COMMAND_TYPE.CHAT_INPUT)
@@ -74,4 +73,7 @@ def test_bad_options():
     new_cmd.options = []
     new_cmd.options.append('This string fails')  # type: ignore
     with pytest.raises(TypeError, match=r'str'):
+        new_cmd.validate()
+    new_cmd.generate(name='123123123412312312341231231234123', description='Not valid', type=Command.COMMAND_TYPE.CHAT_INPUT)
+    with pytest.raises(ValueError):
         new_cmd.validate()
