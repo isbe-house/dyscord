@@ -481,13 +481,6 @@ class InteractionDataStructure(BaseDiscordObject):
                 self.options.append(InteractionDataOptionStructure().from_dict(option_dict))
         return self
 
-    def to_dict(self) -> dict:
-        ret_dict: dict = dict()
-        return ret_dict
-
-    def validate(self):
-        pass
-
 
 class InteractionDataOptionStructure(BaseDiscordObject):
 
