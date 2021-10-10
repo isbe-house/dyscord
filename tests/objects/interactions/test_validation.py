@@ -9,6 +9,7 @@ def test_bad_validations_bad_name():
     with pytest.raises(ValueError):
         new_cmd.validate()
 
+
 def test_bad_validations_long_name():
     new_cmd = Command()
     new_cmd.generate(name='123123123412312312341231231234123', description='Not valid', type=COMMAND_TYPE.CHAT_INPUT)

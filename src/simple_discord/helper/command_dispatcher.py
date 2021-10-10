@@ -15,6 +15,7 @@ class CommandHandler:
 
     @classmethod
     async def command_handler(cls, client, interaction: 'interactions.InteractionStructure') -> None:  # noqa: C901
+
         # Check to see if we have already registered this command
         if interaction.data is None:
             return
@@ -49,6 +50,8 @@ class CommandHandler:
                 pass
             if (results is not None) and (results['name'] in cls.guild_lookup):
                 cls.registered_commands[interaction.data.id] = cls.guild_lookup[results['name']]
+                await cls.registered_commands[interaction.data.id](client, interaction)
+                return
             raise LookupError(f'Unable to find interaction {interaction.data.id} in Global or Guild!')
 
     @classmethod

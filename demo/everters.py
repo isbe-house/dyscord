@@ -13,3 +13,4 @@ async def global_complex(client, interaction: InteractionStructure):
 
 
 simple_discord.helper.CommandHandler.register_global_callback('complex', global_complex)
+simple_discord.helper.CommandHandler.register_guild_callback('complex', global_complex)

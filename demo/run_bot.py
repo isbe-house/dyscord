@@ -14,6 +14,7 @@ from src.simple_discord.utilities import Log
 from src.simple_discord.client import DiscordClient, API
 from src.simple_discord import objects, utilities
 from src.simple_discord.objects.interactions import Command
+from src import simple_discord
 from demo import everters
 
 log = Log()
@@ -55,6 +56,7 @@ def on_ready2(client, ready, raw_ready):
 
 @client.register_class
 class Foo:
+
     async def on_ready(self, client, ready, raw_ready):
         log.critical('IT WORKS!')
 
@@ -77,46 +79,10 @@ async def purge_commands(client, message):
             assert command.id is not None
             await API.delete_guild_application_command(guild.id, command.id)
 
-async def register_commands(client):
-    new_command = Command()
-    new_command.generate(
-        name='chat',
-        description='This is a more complex test.',
-        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
-    )
-    new_command.add_option_typed(
-        type=objects.interactions.enumerations.COMMAND_OPTION.BOOLEAN,
-        name='hit_them',
-        description='Age of the target',
-    )
-    new_command.validate()
-    data1 = new_command.to_dict()
+async def fleet_handler(client, interaction: simple_discord.objects.interactions.InteractionStructure):
+    pass
 
-    new_command = Command()
-    new_command.generate(
-        name='user',
-        description='',
-        type=objects.interactions.enumerations.COMMAND_TYPE.USER,
-    )
-    new_command.validate()
-    data2 = new_command.to_dict()
-
-    new_command = Command()
-    new_command.generate(
-        name='message',
-        description='',
-        type=objects.interactions.enumerations.COMMAND_TYPE.MESSAGE,
-    )
-    new_command.validate()
-    data3 = new_command.to_dict()
-
-    registration = await API.create_global_application_command(data1)
-    log.info(f'Registration1: {registration}')
-    registration = await API.create_global_application_command(data2)
-    log.info(f'Registration2: {registration}')
-    registration = await API.create_global_application_command(data3)
-    log.info(f'Registration3: {registration}')
-
+async def register_commands(client: simple_discord.client.DiscordClient, message):
     # Complex chat command
 
     new_command = Command()
@@ -134,6 +100,44 @@ async def register_commands(client):
     registration = await new_command.register_globally()
     log.info(f'Registration3: {registration}')
 
+    new_command = Command()
+    new_command.generate(
+        name='fleet',
+        description='This is a more complex test.',
+        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
+    )
+    scg = new_command.add_option_sub_command_group('manage', 'edit stuff')
+    sc = scg.add_option_sub_command('move_ships', 'Edit a user')
+    sc.add_option_typed(
+        sc.COMMAND_OPTION.INTEGER,
+        name='source',
+        description='.',
+    )
+    sc.add_option_typed(
+        sc.COMMAND_OPTION.INTEGER,
+        name='destination',
+        description='.',
+    )
+    opt = sc.add_option_typed(
+        sc.COMMAND_OPTION.STRING,
+        name='ship_type',
+        description='.',
+    )
+    opt.add_choice('frigate', 'frigate')
+    opt.add_choice('scout', 'scout')
+    sc.add_option_typed(
+        sc.COMMAND_OPTION.INTEGER,
+        name='ship_number',
+        description='.',
+    )
+
+    new_command.validate()
+
+    guild = objects.Guild()
+    guild.id = message.guild_id
+
+    registration = await new_command.register_to_guild(guild)
+    log.info(f'Registration3: {registration}')
 
 async def list_commands(client):
     client._log.info('Get global commands')
@@ -184,7 +188,7 @@ async def parse_message(client, message: objects.Message, raw_message):
             await message.channel.send_message('Purged commands!')
         elif 'REGISTER' in message.content:
             log.critical('Registering test commands.')
-            await register_commands(client)
+            await register_commands(client, message)
         elif 'BUTTON' in message.content:
             log.critical('Create and send some components.')
             await send_buttons(client, message.channel_id)
@@ -195,5 +199,7 @@ async def parse_message(client, message: objects.Message, raw_message):
             log.critical('Run test command.')
             assert type(message.channel) is objects.channel.TextChannel
             await test(client, message.channel)
+
+simple_discord.helper.CommandHandler.register_guild_callback('fleet', fleet_handler)
 
 client.run()
