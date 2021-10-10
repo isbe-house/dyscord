@@ -17,5 +17,5 @@ RUN pip install --no-cache-dir -r requirements_test.txt
 
 FROM TEST as DOCS
 
-RUN pip install --no-cache-dir mkdocs mkdocstrings
+RUN pip install --no-cache-dir mkdocs mkdocstrings mkdocs-autorefs mkdocs-material
 ENV PYTHONPATH=src

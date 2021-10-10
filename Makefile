@@ -24,10 +24,16 @@ down: ## Stop all containers
                 -f  docker-compose.yaml \
                 down
 
-docs: build ## Stop all containers
+docs: build build-docs ## Stop all containers
 	docker-compose \
         -f  docker-compose.yaml \
         run --rm --service-ports documentation
+
+build-docs: build
+	docker-compose \
+        -f  docker-compose.yaml \
+        run --rm documentation mkdocs build
+
 
 
 # logs: ## Display logs (follow)
@@ -64,7 +70,6 @@ test: ## Run all tests
 	make test-flake8
 #	make test-docs
 
-
 test-pytest:
 	docker-compose \
                 -f  docker-compose.yaml \
@@ -97,5 +102,5 @@ help:
 
 .DEFAULT_GOAL := help
 
-.PHONY: up down clean populate test build debug run docs
+.PHONY: up down clean populate test build debug run docs build-docs
 # .SILENT: test up down up clean

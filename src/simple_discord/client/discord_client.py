@@ -29,6 +29,7 @@ from .events import on_channel_create, on_channel_delete, on_channel_pins_update
 
 
 class DiscordClient:
+    '''Client for interaction with Discord.'''
 
     _log = utilities.Log()
     _wrapper_registrations: dict = defaultdict(lambda: list())
@@ -43,6 +44,11 @@ class DiscordClient:
     API = API
 
     def __init__(self, token: str, application_id: Optional[str] = None):
+        '''Instantiate a DiscordClient.
+        Args:
+            token (str): Valid token to access discord. Only `Bot` token's currently supported.
+            application_id (Optional[str]): The application id. Will be auto-fetched at connection.
+        '''
         # Discord attributes
         DiscordClient.token = token
         DiscordClient.application_id = application_id
@@ -73,6 +79,25 @@ class DiscordClient:
                           direct_message_reactions: bool = False,
                           direct_messages_typeing: bool = False,
                           ):
+        '''Configure intents before connecting.
+
+        Args:
+            guilds (bool): TBD
+            guild_members (bool): TBD
+            guild_bans (bool): TBD
+            guild_emoji_and_stickers (bool): TBD
+            guild_integrations (bool): TBD
+            guild_wehooks (bool): TBD
+            guild_invites (bool): TBD
+            guild_voice_states (bool): TBD
+            guild_presences (bool): TBD
+            guild_messages (bool): TBD
+            guild_message_reactions (bool): TBD
+            guild_message_typeing (bool): TBD
+            direct_messages (bool): TBD
+            direct_message_reactions (bool): TBD
+            direct_messages_typeing (bool): TBD
+        '''
         self.intent = 0
         if guilds:
             self.intent += Intents.GUILDS

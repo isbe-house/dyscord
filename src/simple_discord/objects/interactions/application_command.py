@@ -27,7 +27,6 @@ class Interactions(BaseDiscordObject):
 
 
 class ComponentAdder(abc.ABC):
-
     '''Allow other objects to start adding components to themselves with a common set of helper functions.
 
     Caution: This is an abstract class, and is not intended for direct instantiation.
@@ -47,6 +46,15 @@ class ComponentAdder(abc.ABC):
 
 
 class Command(BaseDiscordObject):
+    '''Command root used to generate new commands.
+
+    Attributes:
+        COMMAND_TYPE (COMMAND_TYPE, optional): Defaults to 1.
+        COMMAND_OPTION (COMMAND_OPTION):
+        id (Snowflake): Unique ID of the command.
+        type (Optional[COMMAND_TYPE]): Type of the command.
+
+    '''
 
     COMMAND_TYPE = enumerations.COMMAND_TYPE
     COMMAND_OPTION = enumerations.COMMAND_OPTION
