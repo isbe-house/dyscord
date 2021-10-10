@@ -189,6 +189,7 @@ nested_groups = {'application_id': '889065662641737791',
                                      'id': '185846097284038656',
                                      'public_flags': 0,
                                      'username': 'Soton'}},
-                 'token': 'aW50ZXJhY3Rpb246ODk2NTkxNDY1NzU1NTc4NDA4OjkxM0pTeXJXZGQ2YmFWb0NpSXJwU0V3blRJMkFtcXVnZGFHYWRTWk9FZ1Fka3l1eDJEUmFLVE5GT2o1T3hsU1I3cEltbmtPSXJHTmtxOHhDRHJoVTl6Z3QzTEduNFRhS3N6dVdUUlZXT0o5aTJOM00ycHlkYTdwWGE1dEo3eUcz',
+                 'token': 'aW50ZXJhY3Rpb246ODk2NTkxNDY1NzU1NTc4NDA4OjkxM0pTeXJXZGQ2YmFWb0NpSXJwU0V3blRJMkFtcXVnZGFHYWRTWk9FZ1Fka3l1eDJEUmFLVE5GT2o1T3hsU1I3cEltbmtPSXJHTmtxOHhDRHJoVTl6Z3QzTEduNFRhS3N6'
+                 'dVdUUlZXT0o5aTJOM00ycHlkYTdwWGE1dEo3eUcz',
                  'type': 2,
                  'version': 1}

@@ -488,6 +488,7 @@ class InteractionDataStructure(BaseDiscordObject):
     def validate(self):
         pass
 
+
 class InteractionDataOptionStructure(BaseDiscordObject):
 
     name: str                                                  # string the name of the invoked command Application Command

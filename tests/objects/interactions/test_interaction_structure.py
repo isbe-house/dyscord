@@ -1,4 +1,3 @@
-from pprint import pprint
 from src.simple_discord.objects.snowflake import Snowflake
 from src.simple_discord.objects.interactions import InteractionStructure, Command, enumerations
 from . import samples

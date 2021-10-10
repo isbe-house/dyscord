@@ -1,8 +1,4 @@
-from typing import Optional
-from src.simple_discord.client import DiscordClient
-from src.simple_discord.objects import snowflake
 from src.simple_discord.objects.interactions import InteractionStructure
-from src.simple_discord.objects.interactions.enumerations import BUTTON_STYLES
 from src import simple_discord
 
 

@@ -1,21 +1,20 @@
-from typing import Optional
+from typing import Callable, Dict, Optional
 
 from ..objects import interactions, snowflake
-from ..client import api
 from ..utilities import Log
 
 
 class CommandHandler:
     _log = Log()
 
-    registered_commands = dict()
+    registered_commands: Dict['snowflake.Snowflake', Callable] = dict()
 
-    global_lookup = dict()
+    global_lookup: Dict[str, Callable] = dict()
 
-    guild_lookup = dict()
+    guild_lookup: Dict[str, Callable] = dict()
 
     @classmethod
-    async def command_handler(cls, client, interaction: 'interactions.InteractionStructure'):
+    async def command_handler(cls, client, interaction: 'interactions.InteractionStructure') -> None:  # noqa: C901
         # Check to see if we have already registered this command
         if interaction.data is None:
             return
@@ -53,13 +52,13 @@ class CommandHandler:
             raise LookupError(f'Unable to find interaction {interaction.data.id} in Global or Guild!')
 
     @classmethod
-    def register_global_callback(cls, command_name, callback_function, command_id: Optional['snowflake.Snowflake'] = None):
+    def register_global_callback(cls, command_name, callback_function, command_id: Optional['snowflake.Snowflake'] = None) -> None:
         cls.global_lookup[command_name] = callback_function
         if command_id is not None:
             cls.registered_commands[command_id] = callback_function
 
     @classmethod
-    def register_guild_callback(cls, command_name, callback_function, command_id: Optional['snowflake.Snowflake'] = None):
+    def register_guild_callback(cls, command_name, callback_function, command_id: Optional['snowflake.Snowflake'] = None) -> None:
         cls.guild_lookup[command_name] = callback_function
         if command_id is not None:
             cls.registered_commands[command_id] = callback_function
