@@ -15,6 +15,7 @@ class API_V9:
     BASE_URL = 'https://discord.com/api/v9'
     TOKEN: str  # Overridden when the API is loaded in DiscordClient._connect
     APPLICATION_ID: str
+    USER_AGENT: str = 'Discord Bot ()'
 
     _lock = asyncio.Lock()
     _log = Log()
@@ -299,6 +300,25 @@ class API_V9:
                     url,
                     headers=cls.auth_header(),
                     json=message_payload,
+                )
+                try:
+                    r.raise_for_status()
+                except Exception:
+                    cls._log.exception(r.content)
+            await cls._handle_rate_limit(r)
+        return r.json()
+
+    # Channel methods
+
+    @classmethod
+    async def get_guild(cls, guild_id: 'objects.Snowflake') -> dict:
+        url = f'{cls.BASE_URL}/guilds/{guild_id}'
+
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    url,
+                    headers=cls.auth_header(),
                 )
                 try:
                     r.raise_for_status()

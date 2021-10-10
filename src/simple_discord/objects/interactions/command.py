@@ -1,9 +1,10 @@
+'''Commands that can be registered with the API.'''
+
 import abc
 import builtins
 import copy
 import re
 from typing import Optional, Union, List
-
 
 from ...client import api
 
@@ -18,10 +19,11 @@ class Command(BaseDiscordObject):
     '''Command root used to generate new commands.
 
     Attributes:
-        COMMAND_TYPE (COMMAND_TYPE, optional): Defaults to 1.
-        COMMAND_OPTION (COMMAND_OPTION):
+        COMMAND_TYPE (COMMAND_TYPE): Helper pointer to the COMMAND_TYPE enumeration.
+        COMMAND_OPTION (COMMAND_OPTION): Helper pointer to the COMMAND_OPTION enumeration.
         id (Snowflake): Unique ID of the command.
         type (Optional[COMMAND_TYPE]): Type of the command.
+        application_id: (Snowflake): Unique id of the parent application.
 
     '''
 
@@ -226,16 +228,31 @@ class Command(BaseDiscordObject):
         if type(self.default_permission) is not bool:
             raise TypeError(f'Default Permission is of incorrect type {type(self.default_permission)}, should be {type(True)}.')
 
+        assert self.total_characters() <= 4000,\
+            f'Found {self.total_characters():d} characters in name, description, and value fields. Max is 4,000.'
+
+    def total_characters(self) -> int:
+        '''Get the total characters in the name, description, and value.'''
+        total_characters = 0
+        if hasattr(self, 'name') and type(self.name) is str:
+            total_characters += len(self.name)
+        if hasattr(self, 'description') and type(self.description) is str:
+            total_characters += len(self.description)
+        if hasattr(self, 'options') and type(self.options) is list:
+            for option in self.options:
+                total_characters += option.total_characters()
+        return total_characters
+
 
 class CommandOptionsBase(abc.ABC, BaseDiscordObject):
 
     # Handy shortcut
     COMMAND_OPTION = enumerations.COMMAND_OPTION
 
-    type: 'enumerations.COMMAND_OPTION'                      # one of application command option type the type of option
-    name: str                                                          # string 1-32 character name
-    description: str                                                   # string 1-100 character description
-    required: bool                                                     # boolean if the parameter is required or optional--default false
+    type: 'enumerations.COMMAND_OPTION'                       # one of application command option type the type of option
+    name: str                                                 # string 1-32 character name
+    description: str                                          # string 1-100 character description
+    required: bool                                            # boolean if the parameter is required or optional--default false
     choices: Optional[List['CommandOptionChoiceStructure']]   # array of application command option choice choices for STRING, INTEGER, and
     # NUMBER types for the user to pick from, max 25
     options: Optional[List['CommandOptions']]                 # array of application command option if the option is a subcommand or subcommand group type,
@@ -294,6 +311,22 @@ class CommandOptionsBase(abc.ABC, BaseDiscordObject):
             for choice in self.choices:
                 choice.validate()
 
+    def total_characters(self) -> int:
+        '''Get the total characters in the name, description, and value.'''
+        total_characters = 0
+        if hasattr(self, 'name') and type(self.name) is str:
+            total_characters += len(self.name)
+        if hasattr(self, 'description') and type(self.description) is str:
+            total_characters += len(self.description)
+
+        if hasattr(self, 'choices') and type(self.choices) is list:
+            for choice in self.choices:
+                total_characters += choice.total_characters()
+        if hasattr(self, 'options') and type(self.options) is list:
+            for option in self.options:
+                total_characters += option.total_characters()
+        return total_characters
+
 
 class CommandOptions(CommandOptionsBase):
 
@@ -351,3 +384,12 @@ class CommandOptionChoiceStructure(BaseDiscordObject):
 
         if len(self.name) < 1 or len(self.name) > 100:
             raise ValueError(f'Length of name is {len(self.name)}, but be [1-100].')
+
+    def total_characters(self) -> int:
+        '''Get the total characters in the name, description, and value.'''
+        total_characters = 0
+        if hasattr(self, 'name') and type(self.name) is str:
+            total_characters += len(self.name)
+        if hasattr(self, 'value') and type(self.value) is str:
+            total_characters += len(self.value)
+        return total_characters

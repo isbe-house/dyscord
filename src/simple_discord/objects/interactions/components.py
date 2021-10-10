@@ -1,3 +1,5 @@
+'''Components that can be attached to messages.'''
+
 import abc
 from typing import Dict, List, Union, Optional
 

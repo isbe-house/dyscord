@@ -1,3 +1,8 @@
+'''Interactions with the discord API.
+
+For more information, see [Discord API](https://discord.com/developers/docs/interactions/application-commands).
+'''
+
 from .command import Command, CommandOptions, CommandOptionChoiceStructure
 from .interaction import InteractionStructure, InteractionResponse
 from .components import Component, ActionRow, Button, SelectMenu

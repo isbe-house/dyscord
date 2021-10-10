@@ -168,12 +168,12 @@ async def send_buttons(client, chan_id):
     await channel.send_message(msg)
 
 
-async def test(client, channel: objects.TextChannel):
+async def test(client, message: objects.Message):
 
     new_msg = objects.Message()
-    now = datetime.now()
-    new_msg.content = f'The time is {new_msg.formatter.timestamp(now, new_msg.formatter.TIMESTAMP_FLAGS.RELATIVE_TIME)}'
-    await channel.send_message(new_msg)
+    new_msg.content = f'The guild is {message.guild}'
+    assert type(message.channel) is objects.TextChannel
+    await message.channel.send_message(new_msg)
 
 
 @client.register_handler('MESSAGE_CREATE')
@@ -197,8 +197,8 @@ async def parse_message(client, message: objects.Message, raw_message):
             await list_commands(client)
         elif 'TEST' in message.content:
             log.critical('Run test command.')
-            assert type(message.channel) is objects.channel.TextChannel
-            await test(client, message.channel)
+            assert type(message) is objects.Message
+            await test(client, message)
 
 simple_discord.helper.CommandHandler.register_guild_callback('fleet', fleet_handler)
 

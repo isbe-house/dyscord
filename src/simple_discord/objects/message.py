@@ -4,7 +4,7 @@ import enum
 from typing import Union, Optional, List, Dict
 
 from .base_object import BaseDiscordObject
-from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed
+from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed, guild as ext_guild
 from ..utilities import cache, log
 from .interactions import components as ext_components
 
@@ -20,6 +20,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     id: 'snowflake.Snowflake'
     channel_id: 'snowflake.Snowflake'
     guild_id: Optional['snowflake.Snowflake']
+    guild: Optional['ext_guild.Guild']
     author: 'user.User'
     member: Optional['user.Member']
     content: str
@@ -67,6 +68,21 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
                 self._log.info('Got channel from the API.')
             self.channel = channel
             return channel
+
+        if name == 'guild' and 'guild_id' in self.__dict__:
+            assert type(self.guild_id) is snowflake.Snowflake
+            try:
+                guild = cache.Cache().get(self.guild_id)
+                self._log.info('Got guild from the cache.')
+            except LookupError:
+                loop = asyncio.get_event_loop()
+                guild_dict = loop.run_until_complete(api.API.get_guild(self.guild_id))
+                from pprint import pprint
+                pprint(guild_dict)
+                guild = ext_guild.Guild().from_dict(guild_dict)
+                self._log.info('Got guild from the API.')
+            self.guild = guild
+            return guild
         raise AttributeError(f'Failed to find \'{name}\'')
 
     def ingest_raw_dict(self, data) -> 'Message':
