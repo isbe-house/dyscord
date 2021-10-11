@@ -161,7 +161,7 @@ my_test_server = {'d': {
     't': 'GUILD_CREATE'}
 
 discord_dev_example = {'id': '2909267986263572999',
-                       'name': "Mason's Test Server",
+                       'name': 'Mason\'s Test Server',
                        'icon': '389030ec9db118cb5b85a732333b7c98',
                        'description': None,
                        'splash': '75610b05a0dd09ec2c3c7df9f6975ea0',
@@ -214,3 +214,12 @@ discord_dev_example = {'id': '2909267986263572999',
                        'preferred_locale': 'en-US',
                        'rules_channel_id': None,
                        'public_updates_channel_id': None}
+
+partial_guild_object = {
+    'id': '80351110224678912',
+    'name': '1337 Krew',
+    'icon': '8342729096ea3675442027381ff50dfe',
+    'owner': True,
+    'permissions': '36953089',
+    'features': ['COMMUNITY', 'NEWS']
+}

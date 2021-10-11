@@ -1,0 +1,16 @@
+site_name: Simple Discord
+
+nav:
+  - Index: index.md
+  - Reference: reference.md
+  - Examples: examples.md
+  - Changelog: changelog.md
+plugins:
+  - mkdocstrings:
+      default_handler: python
+      watch:
+        - src/simple_discord
+  - search:
+  - autorefs:
+theme:
+  name: "readthedocs"

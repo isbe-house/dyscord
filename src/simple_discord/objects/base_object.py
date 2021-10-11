@@ -7,15 +7,6 @@ class BaseDiscordObject:
 
     _log = log.Log()
 
-    def __init__(self):
-        self.id: snowflake.Snowflake
-
-    def __hash__(self):
-        return hash(self.id)
-
-    def __eq__(self, other):
-        return self.id == other.id
-
     def ingest_raw_dict(self, data: dict) -> 'BaseDiscordObject':
         '''
         Ingest and cache a given object for future use.

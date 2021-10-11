@@ -4,14 +4,15 @@ import enum
 from typing import Union, Optional, List, Dict
 
 from .base_object import BaseDiscordObject
-from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed
+from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed, guild as ext_guild
 from ..utilities import cache, log
-from .interactions import components as ext_components, application_command
+from .interactions import components as ext_components
 
 from ..client import api
 
 
-class Message(BaseDiscordObject, application_command.ComponentAdder, ext_embed.EmbedAdder):
+class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder):
+    '''Message containing infomation about it's content, origin, authors, etc.'''
 
     _log = log.Log()
 
@@ -20,6 +21,7 @@ class Message(BaseDiscordObject, application_command.ComponentAdder, ext_embed.E
     id: 'snowflake.Snowflake'
     channel_id: 'snowflake.Snowflake'
     guild_id: Optional['snowflake.Snowflake']
+    guild: Optional['ext_guild.Guild']
     author: 'user.User'
     member: Optional['user.Member']
     content: str
@@ -67,6 +69,19 @@ class Message(BaseDiscordObject, application_command.ComponentAdder, ext_embed.E
                 self._log.info('Got channel from the API.')
             self.channel = channel
             return channel
+
+        if name == 'guild' and 'guild_id' in self.__dict__:
+            assert type(self.guild_id) is snowflake.Snowflake
+            try:
+                guild = cache.Cache().get(self.guild_id)
+                self._log.info('Got guild from the cache.')
+            except LookupError:
+                loop = asyncio.get_event_loop()
+                guild_dict = loop.run_until_complete(api.API.get_guild(self.guild_id))
+                guild = ext_guild.Guild().from_dict(guild_dict)
+                self._log.info('Got guild from the API.')
+            self.guild = guild
+            return guild
         raise AttributeError(f'Failed to find \'{name}\'')
 
     def ingest_raw_dict(self, data) -> 'Message':
@@ -166,18 +181,11 @@ class Message(BaseDiscordObject, application_command.ComponentAdder, ext_embed.E
                 assert type(component) is ext_components.ActionRow,\
                     f'Got invalid type {type(component)} in Message.components, must be ActionRow.'
                 component.validate()
-
-                if type(component) is ext_components.ActionRow:
-                    for sub_component in component.components:
-                        if hasattr(sub_component, 'custom_id'):
-                            assert sub_component.custom_id not in custom_ids,\
-                                f'Found duplicate custom_id [{sub_component.custom_id}]'
-                            custom_ids.append(sub_component.custom_id)
-                else:
-                    if hasattr(component, 'custom_id'):
-                        assert component.custom_id not in custom_ids,\
-                            f'Found duplicate custom_id [{component.custom_id}]'
-                        custom_ids.append(component.custom_id)
+                for sub_component in component.components:
+                    if hasattr(sub_component, 'custom_id'):
+                        assert sub_component.custom_id not in custom_ids,\
+                            f'Found duplicate custom_id [{sub_component.custom_id}]'
+                        custom_ids.append(sub_component.custom_id)
 
         if hasattr(self, 'embeds'):
             assert type(self.embeds) is list,\

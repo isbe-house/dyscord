@@ -2,6 +2,55 @@ import enum
 
 
 class DISCORD_EVENTS(enum.Enum):
+    '''Enumeration of various discord events.
+    Attributes:
+        CHANNEL_CREATE (enum):
+        CHANNEL_DELETE (enum):
+        CHANNEL_PINS_UPDATE (enum):
+        CHANNEL_UPDATE (enum):
+        GUILD_BAN_ADD (enum):
+        GUILD_BAN_REMOVE (enum):
+        GUILD_CREATE (enum):
+        GUILD_DELETE (enum):
+        GUILD_EMOJIS_UPDATE (enum):
+        GUILD_INTEGRATIONS_UPDATE (enum):
+        GUILD_MEMBER_ADD (enum):
+        GUILD_MEMBER_REMOVE (enum):
+        GUILD_MEMBER_UPDATE (enum):
+        GUILD_ROLE_CREATE (enum):
+        GUILD_ROLE_DELETE (enum):
+        GUILD_ROLE_UPDATE (enum):
+        GUILD_STICKERS_UPDATE (enum):
+        GUILD_UPDATE (enum):
+        INTEGRATION_CREATE (enum):
+        INTEGRATION_DELETE (enum):
+        INTEGRATION_UPDATE (enum):
+        INVITE_CREATE (enum):
+        INVITE_DELETE (enum):
+        MESSAGE_CREATE (enum):
+        MESSAGE_DELETE (enum):
+        MESSAGE_DELETE_BULK (enum):
+        MESSAGE_REACTION_ADD (enum):
+        MESSAGE_REACTION_REMOVE (enum):
+        MESSAGE_REACTION_REMOVE_ALL (enum):
+        MESSAGE_REACTION_REMOVE_EMOJI (enum):
+        MESSAGE_UPDATE (enum):
+        PRESENCE_UPDATE (enum):
+        READY (enum):
+        STAGE_INSTANCE_CREATE (enum):
+        STAGE_INSTANCE_DELETE (enum):
+        STAGE_INSTANCE_UPDATE (enum):
+        THREAD_CREATE (enum):
+        THREAD_DELETE (enum):
+        THREAD_LIST_SYNC (enum):
+        THREAD_MEMBER_UPDATE (enum):
+        THREAD_MEMBERS_UPDATE (enum):
+        THREAD_UPDATE (enum):
+        TYPING_START (enum):
+        VOICE_STATE_UPDATE (enum):
+        WEBHOOKS_UPDATE (enum):
+        INTERACTION_CREATE (enum):
+    '''
     CHANNEL_CREATE = enum.auto()
     CHANNEL_DELETE = enum.auto()
     CHANNEL_PINS_UPDATE = enum.auto()

@@ -17,7 +17,14 @@ class CHANNEL_TYPE(enum.IntEnum):
 
 
 class COMMAND_TYPE(enum.IntEnum):
-    CHAT_INPUT = 1  # Slash commands; a text-based command that shows up when a user types /
+    '''Type of command.
+
+    Attributes:
+        CHAT_INPUT (int): Slash commands; a text-based command that shows up when a user types.
+        USER (int): A UI-based command that shows up when you right click or tap on a user.
+        MESSAGE (int): A UI-based command that shows up when you right click or tap on a message.
+    '''
+    CHAT_INPUT = 1  # Slash commands; a text-based command that shows up when a user types
     USER = 2  # A UI-based command that shows up when you right click or tap on a user
     MESSAGE = 3  # A UI-based command that shows up when you right click or tap on a message
 
