@@ -12,6 +12,7 @@ from ..client import api
 
 
 class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder):
+    '''Message containing infomation about it's content, origin, authors, etc.'''
 
     _log = log.Log()
 
@@ -77,8 +78,6 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
             except LookupError:
                 loop = asyncio.get_event_loop()
                 guild_dict = loop.run_until_complete(api.API.get_guild(self.guild_id))
-                from pprint import pprint
-                pprint(guild_dict)
                 guild = ext_guild.Guild().from_dict(guild_dict)
                 self._log.info('Got guild from the API.')
             self.guild = guild

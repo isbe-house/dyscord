@@ -131,6 +131,21 @@ async def register_commands(client: simple_discord.client.DiscordClient, message
         description='.',
     )
 
+    sc = scg.add_option_sub_command('launch_fleet', 'Edit a user')
+    sc.add_option_typed(
+        sc.COMMAND_OPTION.STRING,
+        name='target',
+        description='.',
+    )
+    # scg = new_command.add_option_sub_command_group('spawn', 'edit stuff')
+    sc = new_command.add_option_sub_command('create', 'Edit a user')
+    sc.add_option_typed(
+        sc.COMMAND_OPTION.STRING,
+        name='name',
+        description='.',
+    )
+
+
     new_command.validate()
 
     guild = objects.Guild()

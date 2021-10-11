@@ -19,6 +19,8 @@ from .. import utilities
 from .. import objects
 from .. import helper
 
+from ..version import __version__
+
 from .events import on_channel_create, on_channel_delete, on_channel_pins_update, on_channel_update, on_guild_ban_add, on_guild_ban_remove, on_guild_create,\
     on_guild_delete, on_guild_emojis_update, on_guild_integrations_update, on_guild_member_add, on_guild_member_remove, on_guild_member_update,\
     on_guild_role_create, on_guild_role_delete, on_guild_role_update, on_guild_stickers_update, on_guild_update, on_integration_create, on_integration_delete,\
@@ -34,6 +36,7 @@ class DiscordClient:
     _log = utilities.Log()
     _wrapper_registrations: dict = defaultdict(lambda: list())
     _wrapper_class_registrations: list = list()
+    _version = __version__
     me: objects.User
     session_id: str
     token: str
@@ -61,6 +64,7 @@ class DiscordClient:
         self._last_heartbeat_ack = None
         self._listener_task = None
         self._sequence_number = None
+        self._intents_defined = False
 
     def configure_intents(self,  # noqa: C901
                           guilds: bool = False,
@@ -129,6 +133,7 @@ class DiscordClient:
             self.intent += Intents.DIRECT_MESSAGE_REACTIONS
         if direct_messages_typeing:
             self.intent += Intents.DIRECT_MESSAGE_TYPING
+        self._intents_defined = True
 
     def run(self):
         '''
@@ -136,10 +141,19 @@ class DiscordClient:
         '''
         self._log.info('Starting...')
         self._log.info(f'Application ID: {self.application_id}')
-        nest_asyncio.apply()
         asyncio.run(self._run())
 
     async def _run(self):
+
+        if self._intents_defined == False:
+            warnings.warn('Started without defining intents. Client will likely get ZERO input. Consider calling the \'configure_intents\' function.', UserWarning)
+
+        # BUG: This might cause Runtime errors, we need to wait and see. See https://github.com/erdewit/nest_asyncio/issues/22
+        nest_asyncio.apply()
+
+        loop = asyncio.get_event_loop()
+        if not hasattr(loop, '_nest_patched'):
+            raise RuntimeError('Cannot run this library without running \'nest_asyncio.apply()\' first.')
 
         # Start up the listener
         await self._connect()

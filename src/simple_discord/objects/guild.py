@@ -8,8 +8,6 @@ from . import snowflake, channel as ext_channel
 
 class Guild(BaseDiscordObject):
 
-    # TODO: __str__, __repr__
-
     class VerificationLevels(enum.IntEnum):
         NONE = 0  # unrestricted
         LOW = 1  # must have verified email on account
@@ -104,6 +102,20 @@ class Guild(BaseDiscordObject):
     nsfw_level: type  # integer guild NSFW level
     stage_instances: type  # * array of stage instance objects Stage instances in the guild
     stickers: type  # array of sticker objects custom guild stickers
+
+    def __str__(self):
+        fields = []
+
+        if hasattr(self, 'id'):
+            fields.append(f'id={self.id}')
+
+        if hasattr(self, 'name'):
+            fields.append(f'name={self.name}')
+
+        return f'Guild({", ".join(fields)})'
+
+    def __repr__(self):
+        return self.__str__()
 
     def ingest_raw_dict(self, data) -> 'Guild':
         self.from_dict(data)

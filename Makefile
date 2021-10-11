@@ -34,8 +34,6 @@ build-docs: build
         -f  docker-compose.yaml \
         run --rm documentation mkdocs build
 
-
-
 # logs: ## Display logs (follow)
 # 	docker-compose \
 #                 -f  docker-compose.yaml \
@@ -44,6 +42,8 @@ build-docs: build
 clean: ## Delete volumes
 	docker system prune -f
 	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site
+	find . | grep -E '(__pycache__|\.pyc|\.pyo$)' | xargs rm -rf
+	rm -rf src/simple_discord_jmurrayufo.egg-info
 
 debug: ## Start interactive python shell to debug with
 	docker-compose \
@@ -98,7 +98,11 @@ test-docs:
 
 dist:
 	make build-docs
-	python3 setup.py sdist
+#	python3 setup.py sdist
+	python3 -m build
+
+release: dist
+	python3 -m twine upload --repository testpypi dist/*
 
 
 ######################################################################################################################################################
@@ -108,5 +112,5 @@ help:
 
 .DEFAULT_GOAL := help
 
-.PHONY: up down clean populate test build debug run docs build-docs dist
+.PHONY: up down clean populate test build debug run docs build-docs dist release
 # .SILENT: test up down up clean
