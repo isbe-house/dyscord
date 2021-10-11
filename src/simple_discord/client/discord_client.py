@@ -145,7 +145,7 @@ class DiscordClient:
 
     async def _run(self):
 
-        if self._intents_defined == False:
+        if self._intents_defined is False:
             warnings.warn('Started without defining intents. Client will likely get ZERO input. Consider calling the \'configure_intents\' function.', UserWarning)
 
         # BUG: This might cause Runtime errors, we need to wait and see. See https://github.com/erdewit/nest_asyncio/issues/22

@@ -145,7 +145,6 @@ async def register_commands(client: simple_discord.client.DiscordClient, message
         description='.',
     )
 
-
     new_command.validate()
 
     guild = objects.Guild()
