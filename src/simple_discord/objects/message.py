@@ -4,7 +4,7 @@ import enum
 from typing import Union, Optional, List, Dict
 
 from .base_object import BaseDiscordObject
-from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed, guild as ext_guild
+from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed, guild as ext_guild, role as ext_role
 from ..utilities import cache, log
 from .interactions import components as ext_components
 
@@ -30,7 +30,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     tts: bool
     mention_everyone: bool
     mentions: List['user.User']
-    # mention_roles: list[role.Role]  # Roles are TBD
+    mention_roles: List['ext_role.Role']  # Roles are TBD
     mention_channels: List['ext_channel.Channel']
     # attachments: list[attachment.Attachment]  # Attachments are TBD
     embeds: Optional[List[ext_embed.Embed]]
@@ -43,7 +43,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     # application: application.Application = None  # Application TBD
     application_id: 'snowflake.Snowflake'
     # message_reference: = None  # Message Reference TBD
-    # flags = None  # Message Flags TBD
+    flags: int  # Message Flags
     referenced_message: 'Message'
     # interaction = None  # Interactions TBD
     thread: 'ext_channel.Channel'
@@ -94,32 +94,46 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         # self.cache()
         return self
 
-    def from_dict(self, data) -> 'Message':
+    def from_dict(self, data: dict) -> 'Message':
         '''
         Parse an object from a dictionary and return it.
         '''
-
-        self.id = snowflake.Snowflake(data['id'])
-        self.channel_id = snowflake.Snowflake(data['channel_id'])
-        self.guild_id = snowflake.Snowflake(data['guild_id']) if (data.get('guild_id', None) is not None) else None
+        # Mandatory Fields
+        self.attachments = list()
+        for attachment in data['attachments']:
+            self.attachments.append(attachment)
         self.author = user.User().from_dict(data['author'])  # TODO: Update after we can parse in users.
-        if 'member' in data:
-            self.member = user.Member().from_dict(data['member'])  # TODO: Update after we can parse in users.
-            self.member.update_from_user(self.author)
+        self.channel_id = snowflake.Snowflake(data['channel_id'])
+        self.components = list()
+        for component in data['components']:
+            self.components.append(component)
         self.content = data['content']
-        self.timestamp = datetime.datetime.fromisoformat(data['timestamp'])
         self.edited_timestamp = datetime.datetime.fromisoformat(data['edited_timestamp']) if data['edited_timestamp'] is not None else None
-        self.tts = data['tts']
+        self.embeds = list()
+        for embed in data['embeds']:
+            self.embeds.append(embed)
+        self.flags = data['flags']
+        self.id = snowflake.Snowflake(data['id'])
         self.mention_everyone = data['mention_everyone']
-
+        self.mention_roles = []
+        for role in data['mention_roles']:
+            # self.mention_roles.append(role.Role().from_dict(role))
+            pass
         self.mentions = []
         for user_dict in data['mentions']:
             self.mentions.append(user.User().from_dict(user_dict))
-
-        self.nonce = data['nonce'] if 'nonce' in data else None
         self.pinned = data['pinned']
-        self.webhook_id = snowflake.Snowflake(data['webhook_id']) if (data.get('webhook_id', None) is not None) else None
+        self.timestamp = datetime.datetime.fromisoformat(data['timestamp'])
+        self.tts = data['tts']
         self.type = enumerations.MESSAGE_TYPE(data['type'])
+
+        # Optional fields
+        self.guild_id = snowflake.Snowflake(data['guild_id']) if (data.get('guild_id', None) is not None) else None
+        if 'member' in data:
+            self.member = user.Member().from_dict(data['member'])  # TODO: Update after we can parse in users.
+            self.member.update_from_user(self.author)
+        self.nonce = data['nonce'] if 'nonce' in data else None
+        self.webhook_id = snowflake.Snowflake(data['webhook_id']) if (data.get('webhook_id', None) is not None) else None
 
         return self
 
