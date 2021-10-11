@@ -145,3 +145,11 @@ message_from_a_thread = {'attachments': [],
                          'timestamp': '2021-09-24T19:36:34.867000+00:00',
                          'tts': False,
                          'type': 0}
+
+ALL = [
+    short_message,
+    self_and_role_mention,
+    simple_message_update,
+    direct_message,
+    message_from_a_thread,
+]
