@@ -1,4 +1,3 @@
-from . import snowflake
 
 from ..utilities import log
 
