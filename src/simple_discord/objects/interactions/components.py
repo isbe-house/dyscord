@@ -1,6 +1,7 @@
 '''Components that can be attached to messages.'''
 
 import abc
+import uuid
 from typing import Dict, List, Union, Optional
 
 from . import command, enumerations
@@ -35,6 +36,8 @@ class ActionRow(Component):
     type = enumerations.COMPONENT_TYPES.ACTION_ROW
     components: List[Union['Button', 'SelectMenu']]
 
+    BUTTON_STYLES = enumerations.BUTTON_STYLES
+
     def add_button(self,
                    style: enumerations.BUTTON_STYLES,
                    custom_id: Optional[str] = None,
@@ -53,6 +56,8 @@ class ActionRow(Component):
             new_button.emoji = emoji
         if custom_id is not None:
             new_button.custom_id = custom_id
+        elif custom_id is None and style != enumerations.BUTTON_STYLES.LINK:
+            new_button.custom_id = str(uuid.uuid4())
         if url is not None:
             new_button.url = url
         if disabled is not None:

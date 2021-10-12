@@ -7,7 +7,7 @@ from ..base_object import BaseDiscordObject
 
 from .. import snowflake
 
-from .. import user as ext_user, message as ext_message
+from .. import user as ext_user, message as ext_message, embed as ext_embed
 
 from . import enumerations, components as ext_components, command
 
@@ -50,6 +50,8 @@ class InteractionStructure(BaseDiscordObject):
             self.user = ext_user.User().from_dict(data['user'])
         if 'member' in data:
             self.member = ext_user.Member().from_dict(data['member'])
+        if 'message' in data:
+            self.message = ext_message.Message().from_dict(data['message'])
 
         return self
 
@@ -167,14 +169,14 @@ class InteractionResponse(BaseDiscordObject):
         new_dict['data'] = self.data.to_dict()
         return new_dict
 
-    async def send(self):
+    async def send(self) -> None:
         await api.API.interaction_respond(self.interaction_id, self.interaction_token, self.to_dict())
 
 
-class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder):
+class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder):
     tts: Optional[bool]
     content: Optional[str]
-    # embeds: List[embeds]  # TODO: Support embeds here.
+    embeds: Optional[List['ext_embed.Embed']]  # TODO: Support embeds here.
     # allowed_mentions: dict
     flags: int
     components: Optional[List[ext_components.Component]]
@@ -191,10 +193,16 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder):
             new_dict['content'] = self.content
         if hasattr(self, 'components'):
             new_dict['components'] = list()
-            assert type(new_dict['components']) is list
             assert type(self.components) is list
+            assert type(new_dict['components']) is list
             for component in self.components:
                 new_dict['components'].append(component.to_dict())
+        if hasattr(self, 'embeds'):
+            new_dict['embeds'] = list()
+            assert type(self.embeds) is list
+            assert type(new_dict['embeds']) is list
+            for embed in self.embeds:
+                new_dict['embeds'].append(embed.to_dict())
         return new_dict
 
     def generate(self,

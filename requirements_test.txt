@@ -3,3 +3,5 @@ pytest
 pytest-cov
 mypy
 pydocstyle
+types-cachetools
+types-emoji

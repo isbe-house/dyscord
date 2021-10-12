@@ -1,5 +1,5 @@
 
-from .command_dispatcher import CommandHandler
+from .command_handler import CommandHandler
 
 __all__ = [
     'CommandHandler',

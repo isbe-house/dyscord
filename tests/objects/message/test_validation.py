@@ -61,3 +61,13 @@ def test_bad_validation():
     row.add_button(BUTTON_STYLES.PRIMARY, str(uuid.uuid4()), label='1')
     with pytest.raises(AssertionError, match=r'discord allows a max of 5'):
         x.validate()
+
+    x = Message()
+    with pytest.raises(AssertionError, match=r'must have a content, embeds, or file'):
+        x.validate()
+
+    x = Message()
+    x.content = 'Passing test'
+    x.add_components().add_button(BUTTON_STYLES.PRIMARY, uuid.uuid4(), label='1')
+    with pytest.raises(AssertionError):
+        x.validate()

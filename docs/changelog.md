@@ -3,6 +3,8 @@
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
 ## [v0.1.1] WIP
+### Added
+- cachetools now required.
 
 ## [v0.1.0] 2021-10-09
 ### Added

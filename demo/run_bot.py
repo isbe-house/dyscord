@@ -16,6 +16,7 @@ from src.simple_discord import objects, utilities
 from src.simple_discord.objects.interactions import Command
 from src import simple_discord
 from demo import everters
+from demo.interaction import Question
 
 log = Log()
 log.setLevel(logging.INFO)
@@ -188,6 +189,10 @@ async def test(client, message: objects.Message):
     new_msg.content = f'The guild is {message.guild}'
     assert type(message.channel) is objects.TextChannel
     await message.channel.send_message(new_msg)
+
+    q = Question(message.channel_id)
+    await q.handle_question()
+    log.info('Finished test!')
 
 
 @client.register_handler('MESSAGE_CREATE')

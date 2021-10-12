@@ -42,26 +42,6 @@ def test_complex_samples():
         key_finder = key_finder.intersection(set(sample.keys()))
     print('All messages have the following:')
     print(key_finder)
-    '''
-       {
-        'attachments',
-        'author',
-        'channel_id',
-        'components',
-        'content'
-        'edited_timestamp',
-        'embeds',
-        'flags',
-        'id',
-        'mention_everyone',
-        'mention_roles',
-        'mentions',
-        'pinned',
-        'timestamp',
-        'tts',
-        'type',
-    }
-    '''
 
     for sample in samples.ALL:
         message = Message()
