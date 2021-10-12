@@ -246,7 +246,7 @@ class API_V9:
                                   interaction_id: 'objects.Snowflake',
                                   interaction_token: str,
                                   data_structure: dict,
-                                  ):
+                                  ) -> None:
         url = f'{cls.BASE_URL}/interactions/{interaction_id}/{interaction_token}/callback'
 
         async with cls._lock:
@@ -257,7 +257,6 @@ class API_V9:
                 )
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
-        cls._log.info(r.content)
 
     '''
     TODO: Implement the following API endpoints.

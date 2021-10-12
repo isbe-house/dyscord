@@ -73,7 +73,7 @@ class TextChannel(Channel):
             self.default_auto_archive_duration = data['default_auto_archive_duration']
         return self
 
-    async def send_message(self, message: Union[ext_message.Message, str]):
+    async def send_message(self, message: Union[ext_message.Message, str]) -> 'ext_message.Message':
         if type(message) is ext_message.Message:
             message.validate()
         elif type(message) is str:
@@ -81,9 +81,10 @@ class TextChannel(Channel):
             new_message.content = message
             message = new_message
         else:
-            raise TypeError
+            raise TypeError(f'send_message given invalid input of [{type(message)}].')
 
-        return await api.API.create_message(self.id, message.to_sendable_dict())
+        data = await api.API.create_message(self.id, message.to_sendable_dict())
+        return ext_message.Message().from_dict(data)
 
 
 class NewsChannel(Channel):

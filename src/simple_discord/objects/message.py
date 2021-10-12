@@ -148,7 +148,8 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         Sending a message only allows a subset of attributes. Ignore anything else about this message when producing that dict.
         '''
         new_dict: Dict[str, object] = dict()
-        new_dict['content'] = self.content if hasattr(self, 'content') else None
+        if hasattr(self, 'content'):
+            new_dict['content'] = self.content
         new_dict['tts'] = self.tts if hasattr(self, 'tts') else False
         # new_dict['file'] = None  # TODO: Handle a file upload.
         if hasattr(self, 'embeds'):
