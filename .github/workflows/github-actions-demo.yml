@@ -24,6 +24,7 @@ jobs:
           python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
       - name: Check out repository code
         uses: actions/checkout@v2
+      - run: python3 -m pip --upgrade pip
       - run: python3 -m pip -r requirements_test.txt
       - run: python3 -m pip -r requirements.txt
       - run: python3 -m pytest --cov=src --durations=5 -vv --color=yes tests
