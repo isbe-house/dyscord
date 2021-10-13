@@ -19,3 +19,10 @@ FROM TEST as DOCS
 
 RUN pip install --no-cache-dir mkdocs mkdocstrings mkdocs-autorefs mkdocs-material
 ENV PYTHONPATH=src
+
+FROM python:3.9 as RELEASE
+
+WORKDIR /usr/src/app
+
+RUN python -m pip install --upgrade pip
+RUN pip install --no-cache-dir twine

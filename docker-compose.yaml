@@ -53,3 +53,16 @@ services:
         ports:
         - "8000:8000"
         command: "mkdocs serve -a 0.0.0.0:8000"
+
+    releaser:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: RELEASE
+        restart: "no"
+        volumes:
+            - ./:/usr/src/app/
+        environment:
+            - TWINE_USERNAME=${TWINE_TEST_USERNAME}
+            - TWINE_PASSWORD=${TWINE_TEST_USERNAME}
+        user: "${UID}:${GID}"

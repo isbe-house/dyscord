@@ -3,8 +3,6 @@ from datetime import datetime, timedelta
 from copy import copy
 from typing import List, Union
 
-from src.simple_discord.objects.interactions.enumerations import INTERACTION_RESPONSE_TYPES
-
 from ..objects import channel, message
 from ..objects.interactions import interaction
 from ..utilities import Log
@@ -26,7 +24,7 @@ class Question:
         self.timeout = timeout
         self.answer = None
         self.last_interaction: 'interaction.InteractionStructure'
-        self._id_answer_map = dict()
+        self._id_answer_map: dict = dict()
 
         assert len(self.answers) <= 25
         assert type(self.answers) in [list, tuple]
@@ -39,11 +37,11 @@ class Question:
         Arguments:
             target: Channel to target, or interaction to respond to.
         '''
-        base = None
+        base: Union['message.Message', 'interaction.InteractionResponse'] = message.Message()
         if type(target) in [channel.TextChannel, channel.DMChannel]:
             base = message.Message(self.question)
         elif type(target) is interaction.InteractionStructure:
-            base = target.generate_response(type = target.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE)
+            base = target.generate_response(type=target.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE)
         assert base is not None
         ar = base.add_components()
 
@@ -53,10 +51,10 @@ class Question:
             button = ar.add_button(ar.BUTTON_STYLES.PRIMARY, label=answer, callback=self._call_back)
             self._id_answer_map[button.custom_id] = answer
 
-        if (type(target) in [channel.TextChannel, channel.DMChannel]) and (type(base) is message.Message):
-            await target.send_message(base)
+        if type(target) in [channel.TextChannel, channel.DMChannel]:
+            await target.send_message(base)  # type: ignore
         elif type(target) is interaction.InteractionStructure:
-            await base.send()
+            await base.send()  # type: ignore
 
         start_datetime = datetime.now()
 
@@ -69,7 +67,7 @@ class Question:
 
     async def _call_back(self, client, interaction: 'interaction.InteractionStructure'):
         self.last_interaction = interaction
-        response = interaction.generate_response(type = interaction.INTERACTION_RESPONSE_TYPES.DEFERRED_UPDATE_MESSAGE)
+        response = interaction.generate_response(type=interaction.INTERACTION_RESPONSE_TYPES.DEFERRED_UPDATE_MESSAGE)
         await response.send()
         assert interaction.data is not None
         self.answer = self._id_answer_map[interaction.data.custom_id]

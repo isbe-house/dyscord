@@ -2,6 +2,7 @@
 export UID=$(shell id -u)
 export GID=$(shell id -g)
 export HOST_ADDRESS=$(shell hostname -f)
+SHELL := /bin/bash
 
 # up: ## Start all containers
 # 	docker-compose \
@@ -26,13 +27,13 @@ down: ## Stop all containers
 
 docs: build build-docs ## Stop all containers
 	docker-compose \
-        -f  docker-compose.yaml \
-        run --rm --service-ports documentation
+                -f  docker-compose.yaml \
+                run --rm --service-ports documentation
 
 build-docs: build
 	docker-compose \
-        -f  docker-compose.yaml \
-        run --rm documentation mkdocs build
+                -f  docker-compose.yaml \
+                run --rm documentation mkdocs build
 
 # logs: ## Display logs (follow)
 # 	docker-compose \
@@ -96,14 +97,19 @@ test-docs:
 
 ######################################################################################################################################################
 
-dist:
+dist: clean
 	make build-docs
-#	python3 setup.py sdist
 	python3 -m build
 
-release: dist
-	python3 -m twine upload --repository testpypi dist/*
+release-test: dist
+	-source ~/.pypirc
+	docker-compose \
+                -f  docker-compose.yaml \
+                run --rm releaser \
+                python3 -m twine upload --repository testpypi dist/*
 
+release:
+	echo "${TWINE_USERNAME}"
 
 ######################################################################################################################################################
 
