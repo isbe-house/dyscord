@@ -10,7 +10,7 @@ with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 
 setuptools.setup(
-    name="simple-discord-jmurrayufo",
+    name="simple_discord",
     version=main_ns['__version__'],
     author="John Murray",
     author_email="jmurrayufo@gmail.com",
@@ -32,13 +32,13 @@ setuptools.setup(
     license='GPLv3',
     platforms=['any'],
     install_requires=[
+        'cachetools>=4.2.4',
         'colour>=0.1.5',
         'emoji>=1.5.0',
+        'httpx>=0.19.0',
+        'nest_asyncio>=1.5.1',
+        'orjson>=3.6.3',
         'requests>=2.26.0',
         'websockets>=10.0',
-        'httpx>=0.19.0',
-        'orjson>=3.6.3',
-        'nest_asyncio>=1.5.1',
-        'cachetools',
     ],
 )

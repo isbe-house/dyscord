@@ -1,5 +1,7 @@
 import asyncio
 import warnings
+import inspect
+import functools
 from cachetools import TTLCache
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -58,10 +60,10 @@ no cleanup occurs, the handler is cleaned after 15 minutes.
         cls.registered_custom_ids[custom_id] = obj
 
     @classmethod
-    def unregister_interaction_custom_id(cls, custom_id: str):
+    def unregister_interaction_custom_id(cls, custom_id: str, not_exists_ok: bool = False):
         if custom_id in cls.registered_custom_ids:
             del cls.registered_custom_ids[custom_id]
-        else:
+        elif not not_exists_ok:
             cls._log.warning(f'Observed improper attempt to remove interaction_id [{custom_id}].')
 
     @classmethod
@@ -121,10 +123,14 @@ no cleanup occurs, the handler is cleaned after 15 minutes.
         if callback_data.unlimited is False:
             del cls.registered_custom_ids[interaction.data.custom_id]
 
-        # TODO: Can we support sync functions here?
-        print(asyncio.iscoroutine(callback_data.callback))
-        if asyncio.iscoroutinefunction(callback_data.callback):
+        if cls.__iscoroutinefunction_or_partial(callback_data.callback):
             await callback_data.callback(client, interaction)
         else:
             warnings.warn('While sync functions are supported as callbacks in CommandHandler, they are STRONGLY counter-recommended!', UserWarning)
             callback_data.callback(client, interaction)
+
+    @classmethod
+    def __iscoroutinefunction_or_partial(cls, object):
+        while isinstance(object, functools.partial):
+            object = object.func
+        return inspect.iscoroutinefunction(object)

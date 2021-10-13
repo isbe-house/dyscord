@@ -137,3 +137,4 @@ discord_client_secret
 .ipynb_checkpoints
 .bash_history
 .python_history
+*.ipynb

@@ -3,6 +3,8 @@
 # Handle the weirdness of our docker env first
 import sys
 
+from src.simple_discord.objects import channel
+
 sys.path.insert(0, '.')
 
 # Do normal imports and run!
@@ -14,9 +16,9 @@ from src.simple_discord.utilities import Log
 from src.simple_discord.client import DiscordClient, API
 from src.simple_discord import objects, utilities
 from src.simple_discord.objects.interactions import Command
+from src.simple_discord.helper.questions import Question
 from src import simple_discord
-from demo import everters
-from demo.interaction import Question
+from demo import everters, command_functions
 
 log = Log()
 log.setLevel(logging.INFO)
@@ -47,23 +49,6 @@ client.configure_intents(
     direct_messages=True,
 )
 
-@client.register_handler('READY')
-async def on_ready(client, ready, raw_ready):
-    log.critical('IT WORKS!')
-
-@client.register_handler('READY')
-def on_ready2(client, ready, raw_ready):
-    log.critical('IT WORKS!')
-
-@client.register_class
-class Foo:
-
-    async def on_ready(self, client, ready, raw_ready):
-        log.critical('IT WORKS!')
-
-    async def on_message_create(self, client, message, raw_message):
-        log.info('Saw a message.')
-
 async def purge_commands(client, message):
     client._log.info('Get global commands')
     commands = await API.get_global_application_commands()
@@ -80,79 +65,25 @@ async def purge_commands(client, message):
             assert command.id is not None
             await API.delete_guild_application_command(guild.id, command.id)
 
-async def fleet_handler(client, interaction: simple_discord.objects.interactions.InteractionStructure):
-    pass
 
 async def register_commands(client: simple_discord.client.DiscordClient, message):
     # Complex chat command
 
-    new_command = Command()
-    new_command.generate(
-        name='complex',
-        description='This is a more complex test.',
-        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
-    )
-    scg = new_command.add_option_sub_command_group('edit', 'edit stuff')
-    sc = scg.add_option_sub_command('user', 'Edit a user')
-    sc.add_option_typed(sc.COMMAND_OPTION.USER, name='target', description='The poor sap you are gonna hit')
-
-    new_command.validate()
-
-    registration = await new_command.register_globally()
-    log.info(f'Registration3: {registration}')
-
-    new_command = Command()
-    new_command.generate(
-        name='fleet',
-        description='This is a more complex test.',
-        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
-    )
-    scg = new_command.add_option_sub_command_group('manage', 'edit stuff')
-    sc = scg.add_option_sub_command('move_ships', 'Edit a user')
-    sc.add_option_typed(
-        sc.COMMAND_OPTION.INTEGER,
-        name='source',
-        description='.',
-    )
-    sc.add_option_typed(
-        sc.COMMAND_OPTION.INTEGER,
-        name='destination',
-        description='.',
-    )
-    opt = sc.add_option_typed(
-        sc.COMMAND_OPTION.STRING,
-        name='ship_type',
-        description='.',
-    )
-    opt.add_choice('frigate', 'frigate')
-    opt.add_choice('scout', 'scout')
-    sc.add_option_typed(
-        sc.COMMAND_OPTION.INTEGER,
-        name='ship_number',
-        description='.',
-    )
-
-    sc = scg.add_option_sub_command('launch_fleet', 'Edit a user')
-    sc.add_option_typed(
-        sc.COMMAND_OPTION.STRING,
-        name='target',
-        description='.',
-    )
-    # scg = new_command.add_option_sub_command_group('spawn', 'edit stuff')
-    sc = new_command.add_option_sub_command('create', 'Edit a user')
-    sc.add_option_typed(
-        sc.COMMAND_OPTION.STRING,
-        name='name',
-        description='.',
-    )
-
-    new_command.validate()
-
     guild = objects.Guild()
     guild.id = message.guild_id
 
+    new_command = Command()
+    new_command.generate(
+        name='test',
+        description='Generic test slash command.',
+        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
+    )
+
+    new_command.validate()
+
     registration = await new_command.register_to_guild(guild)
     log.info(f'Registration3: {registration}')
+
 
 async def list_commands(client):
     client._log.info('Get global commands')
@@ -185,14 +116,11 @@ async def send_buttons(client, chan_id):
 
 async def test(client, message: objects.Message):
 
-    new_msg = objects.Message()
-    new_msg.content = f'The guild is {message.guild}'
-    assert type(message.channel) is objects.TextChannel
-    await message.channel.send_message(new_msg)
-
-    q = Question(message.channel_id)
-    await q.handle_question()
-    log.info('Finished test!')
+    q = Question('What is your favorite color?', ['blue', 'red'])
+    assert message is not None
+    assert type(message.channel) is channel.TextChannel
+    r = await q.ask(target=message.channel)
+    print(r)
 
 
 @client.register_handler('MESSAGE_CREATE')
@@ -202,7 +130,6 @@ async def parse_message(client, message: objects.Message, raw_message):
         if 'PURGE' in message.content:
             log.critical('Purging all commands.')
             await purge_commands(client, message)
-
             assert type(message.channel) is objects.TextChannel
             await message.channel.send_message('Purged commands!')
         elif 'REGISTER' in message.content:
@@ -219,6 +146,6 @@ async def parse_message(client, message: objects.Message, raw_message):
             assert type(message) is objects.Message
             await test(client, message)
 
-simple_discord.helper.CommandHandler.register_guild_callback('fleet', fleet_handler)
+simple_discord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
 
 client.run()
