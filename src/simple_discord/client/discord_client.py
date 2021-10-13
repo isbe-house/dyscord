@@ -140,7 +140,8 @@ class DiscordClient:
         Start the async loop and run forever.
         '''
         self._log.info('Starting...')
-        self._log.info(f'Application ID: {self.application_id}')
+        self._log.info(f'Application ID: [{self.application_id}]')
+        self._log.info(f'Version: [{__version__}]')
         asyncio.run(self._run())
 
     async def _run(self):
@@ -185,7 +186,7 @@ class DiscordClient:
             API.APPLICATION_ID = self.application_id
 
         gateway_uri = (await API.get_gateway_bot(self.token))['url']
-        self._log.info(f'Try to connect to {gateway_uri}')
+        self._log.debug(f'Try to connect to {gateway_uri}')
 
         if self._listener_task is not None:
             self._listener_task.cancel()
@@ -205,7 +206,7 @@ class DiscordClient:
             await asyncio.sleep(1)
             self._log.warning('Waiting on heartbeat...')
 
-        self._log.info('Heartbeat observed, begin to identify.')
+        self._log.debug('Heartbeat observed, begin to identify.')
 
         await self._identify()
 
@@ -257,7 +258,7 @@ class DiscordClient:
 
                 elif opcode == 10:
                     # Hello
-                    self._log.info('OPCODE: HELLO')
+                    self._log.debug('OPCODE: HELLO')
                     await self._handle_op_10(data)
 
                 elif opcode == 11:
@@ -319,7 +320,21 @@ class DiscordClient:
         self._log.info(f'Got a {event_type}')
         obj = None
 
-        if event_type == 'CHANNEL_CREATE':
+        if event_type == 'READY':
+            obj = objects.Ready().from_dict(data['d'])
+            DiscordClient.session_id = obj.session_id
+            DiscordClient.ready = True
+            DiscordClient.me = obj.user
+            self._log.info('Discord connection complete, we are ready!')
+            self._log.info(f'We are now {self.me}')
+
+            await self.on_ready(obj, data['d'])
+
+        elif not DiscordClient.ready:
+            self._log.info(f'Got event of type [{event_type}] before we were ready!')
+            return
+
+        elif event_type == 'CHANNEL_CREATE':
             pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
@@ -450,16 +465,6 @@ class DiscordClient:
             pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
-        elif event_type == 'READY':
-            obj = objects.Ready().from_dict(data['d'])
-            DiscordClient.session_id = obj.session_id
-            DiscordClient.ready = True
-            DiscordClient.me = obj.user
-            self._log.info('Discord connection complete, we are ready!')
-            self._log.info(f'We are now {self.me}')
-
-            await self.on_ready(obj, data['d'])
-
         elif event_type == 'STAGE_INSTANCE_CREATE':
             pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
@@ -511,7 +516,6 @@ class DiscordClient:
         elif event_type == 'INTERACTION_CREATE':
             obj = objects.interactions.InteractionStructure().from_dict(data['d'])
             self._log.info('Saw INTERACTION_CREATE event.')
-            pprint(data['d'])
             await helper.CommandHandler.command_handler(self, obj)
 
         else:

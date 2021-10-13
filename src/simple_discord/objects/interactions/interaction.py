@@ -1,3 +1,4 @@
+import asyncio
 from collections import defaultdict
 from typing import Optional, Union, List, Dict
 
@@ -31,6 +32,9 @@ class InteractionStructure(BaseDiscordObject):
     version: int
     message: Optional['ext_message.Message']
 
+    def __init__(self):
+        self._response_generated = False
+
     def from_dict(self, data: dict) -> 'InteractionStructure':
         self._log.info('Parsing  a InteractionStructure dict')
         self.application_id = snowflake.Snowflake(data['application_id'])
@@ -59,6 +63,10 @@ class InteractionStructure(BaseDiscordObject):
                           ephemeral: bool = False,
                           type: enumerations.INTERACTION_RESPONSE_TYPES = enumerations.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE,
                           ) -> 'InteractionResponse':
+        if self._response_generated:
+            raise RuntimeError('You cannot reuse a token from a response. Try generate_followup()?')
+        else:
+            self._response_generated = True
         new_response = InteractionResponse()
         new_response.interaction_id = self.id
         new_response.interaction_token = self.token
@@ -66,6 +74,14 @@ class InteractionStructure(BaseDiscordObject):
         if ephemeral:
             new_response.data.flags |= enumerations.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         return new_response
+
+    def generate_followup(self) -> 'InteractionResponse':
+        new_response = InteractionResponse(is_followup=True)
+        new_response.interaction_id = self.id
+        new_response.interaction_token = self.token
+
+        return new_response
+
 
 
 class InteractionDataStructure(BaseDiscordObject):
@@ -160,8 +176,9 @@ class InteractionResponse(BaseDiscordObject):
     interaction_id: 'snowflake.Snowflake'
     interaction_token: str
 
-    def __init__(self):
+    def __init__(self, is_followup=False):
         self.data = InteractionCallback()
+        self.is_followup = is_followup
 
     def to_dict(self) -> dict:
         new_dict: Dict[str, object] = dict()
@@ -170,7 +187,58 @@ class InteractionResponse(BaseDiscordObject):
         return new_dict
 
     async def send(self) -> None:
-        await api.API.interaction_respond(self.interaction_id, self.interaction_token, self.to_dict())
+        if self.is_followup:
+            raise RuntimeError('Cannot send an interaction which is a followup!')
+        await api.API.create_interaction_response(self.interaction_id, self.interaction_token, self.to_dict())
+
+    async def send_edit_original_response(self):
+        data = await self._generate_webhook_data()
+        await api.API.edit_original_interaction_response(self.interaction_token, data)
+
+    async def send_delete_initial_response(self):
+        await api.API.delete_original_interaction_response(self.interaction_token)
+
+    async def send_send_followup_message(self) -> 'ext_message.Message':
+        # TODO: We can do some cool stuff with overrides here, look into that. https://discord.com/developers/docs/resources/webhook#execute-webhook
+        data = await self._generate_webhook_data()
+        msg_dict = await api.API.create_followup_message(self.interaction_token, data)
+        new_message = ext_message.Message().from_dict(msg_dict)
+        return new_message
+
+    async def send_edit_followup_message(self) -> 'ext_message.Message':
+        # TODO: We can do some cool stuff with overrides here, look into that. https://discord.com/developers/docs/resources/webhook#execute-webhook
+        data = await self._generate_webhook_data()
+        msg_dict = await api.API.create_followup_message(self.interaction_token, data)
+        new_message = ext_message.Message().from_dict(msg_dict)
+        return new_message
+
+    async def _generate_webhook_data(self) -> dict:
+        # TODO: Support
+        data_structure = dict()
+        if hasattr(self.data, 'content'):
+            data_structure['content'] = self.data.content
+        if hasattr(self.data, 'embeds'):
+            data_structure['embeds'] = list()
+            for embed in self.data.embeds:
+                data_structure['embeds'].append(embed.to_dict())
+        if hasattr(self.data, 'components'):
+            data_structure['components'] = list()
+            for component in self.data.components:
+                data_structure['components'].append(component.to_dict())
+        return data_structure
+
+    def generate(self,
+                 tts: Optional[bool] = None,
+                 content: Optional[str] = None,
+                 flags: int = 0,
+                 ):
+        return self.data.generate(tts, content, flags)
+
+    def add_components(self) -> 'ext_components.ActionRow':
+        return self.data.add_components()
+
+    def add_embeds(self) -> 'ext_embed.Embed':
+        return self.data.add_embeds()
 
 
 class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder):
@@ -183,6 +251,8 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_
 
     def __init__(self):
         self.flags = 0
+        self.embeds = list()
+        self.components = list()
 
     def to_dict(self) -> dict:
         new_dict: Dict[str, object] = dict()
@@ -215,5 +285,4 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_
         if content is not None:
             self.content = content
         self.flags = flags
-        if hasattr(self, 'components'):
-            del self.components
+        self.components = []

@@ -2,11 +2,12 @@
 
 import abc
 import uuid
-from typing import Dict, List, Union, Optional
+from typing import Callable, Dict, List, Union, Optional
 
 from . import command, enumerations
 from ..base_object import BaseDiscordObject
 from .. import emoji
+from ...helper import command_handler
 
 
 class Component(BaseDiscordObject):
@@ -45,6 +46,8 @@ class ActionRow(Component):
                    emoji: Optional[emoji.Emoji] = None,
                    url: Optional[str] = None,
                    disabled: Optional[bool] = None,
+                   callback: Callable = None,
+                   unlimited_callbacks: bool = False,
                    ) -> 'Button':
         if not hasattr(self, 'components'):
             self.components = list()
@@ -64,6 +67,14 @@ class ActionRow(Component):
             new_button.disabled = disabled
 
         self.components.append(new_button)
+
+        if callback is not None:
+            command_handler.CommandHandler.register_interaction_custom_id(
+                new_button.custom_id,
+                callback,
+                unlimited_callbacks,
+            )
+
         return new_button
 
     def add_select_menu(self,
@@ -72,12 +83,16 @@ class ActionRow(Component):
                         min_values: Optional[int] = None,
                         max_values: Optional[int] = None,
                         disabled: Optional[bool] = None,
+                        callback: Callable = None,
+                        unlimited_callbacks: bool = False,
                         ) -> 'SelectMenu':
         if not hasattr(self, 'components'):
             self.components = list()
         new_select_menu = SelectMenu()
         if custom_id is not None:
             new_select_menu.custom_id = custom_id
+        else:
+            new_select_menu.custom_id = str(uuid.uuid4())
         if placeholder is not None:
             new_select_menu.placeholder = placeholder
         if min_values is not None:
@@ -88,6 +103,14 @@ class ActionRow(Component):
             new_select_menu.disabled = disabled
 
         self.components.append(new_select_menu)
+
+        if callback is not None:
+            command_handler.CommandHandler.register_interaction_custom_id(
+                new_select_menu.custom_id,
+                callback,
+                unlimited_callbacks,
+            )
+
         return new_select_menu
 
     def to_dict(self) -> dict:
@@ -183,9 +206,7 @@ class SelectMenu(Component):
     min_values: int
     max_values: int
 
-    def add_option(self):  # -> 'command.CommandOptions':
-        # TODO: Basically copy this in from our existing example.
-        pass
+    add_option_typed = command.Command.add_option_typed
 
     def to_dict(self) -> dict:
         new_dict: Dict[str, object] = dict()
