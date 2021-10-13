@@ -4,7 +4,6 @@ from pprint import pprint
 
 
 import httpx
-from src.simple_discord.objects.message import Message
 from src.simple_discord.objects.snowflake import Snowflake
 
 from ...utilities import Log
@@ -274,8 +273,8 @@ class API_V9:
 
     @classmethod
     async def get_original_interaction_response(cls,
-                                          interaction_token: str,
-                                          ) -> dict:
+                                                interaction_token: str,
+                                                ) -> dict:
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/@origional'
 
         async with cls._lock:
@@ -289,9 +288,9 @@ class API_V9:
 
     @classmethod
     async def edit_original_interaction_response(cls,
-                                          interaction_token: str,
-                                          data_structure: dict,
-                                          ) -> None:
+                                                 interaction_token: str,
+                                                 data_structure: dict,
+                                                 ) -> None:
         '''Edit Original Interaction Response
 
         PATCH/webhooks/{application.id}/{interaction.token}/messages/@original
@@ -311,8 +310,8 @@ class API_V9:
 
     @classmethod
     async def delete_original_interaction_response(cls,
-                                          interaction_token: str,
-                                          ) -> None:
+                                                   interaction_token: str,
+                                                   ) -> None:
         '''Delete Original Interaction Response
 
         DELETE/webhooks/{application.id}/{interaction.token}/messages/@original
@@ -338,7 +337,9 @@ class API_V9:
 
         POST/webhooks/{application.id}/{interaction.token}
 
-        Create a followup message for an Interaction. Functions the same as Execute Webhook, but wait is always true, and flags can be set to 64 in the body to send an ephemeral message. The thread_id query parameter is not required (and is furthermore ignored) when using this endpoint for interaction followups.'''
+        Create a followup message for an Interaction. Functions the same as Execute Webhook, but wait is always true,
+        and flags can be set to 64 in the body to send an ephemeral message. The thread_id query parameter is not required
+        (and is furthermore ignored) when using this endpoint for interaction followups.'''
 
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}'
 
@@ -373,10 +374,6 @@ class API_V9:
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
         return r.json()
-
-
-
-
 
     '''
     TODO: Implement the following API endpoints.
@@ -495,4 +492,4 @@ class API_V9:
 
     Delete Webhook Message
         DELETE/webhooks/{webhook.id}/{webhook.token}/messages/{message.id}
-    '''
+    '''  # noqa: E501

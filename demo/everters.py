@@ -1,5 +1,4 @@
 import asyncio
-from src.simple_discord.helper.questions import Question
 from src.simple_discord.objects.interactions import InteractionStructure
 from src import simple_discord
 
@@ -12,15 +11,17 @@ async def global_complex(client, interaction: InteractionStructure):
     user.id = target_user
     response.data.generate(content=f'Should I slap {user.mention_nickname}?')
     ar = response.data.add_components()
-    ar.add_button(ar.BUTTON_STYLES.SUCCESS,label='YES!', callback=yes)
-    ar.add_button(ar.BUTTON_STYLES.DANGER,label='NO!', callback=no)
+    ar.add_button(ar.BUTTON_STYLES.SUCCESS, label='YES!', callback=yes)
+    ar.add_button(ar.BUTTON_STYLES.DANGER, label='NO!', callback=no)
     await response.send()
+
 
 async def yes(client, interaction: InteractionStructure):
     print('YES')
     response = interaction.generate_response(True, interaction.INTERACTION_RESPONSE_TYPES.UPDATE_MESSAGE)
     response.data.generate(content='Ok!')
     await response.send()
+
 
 async def no(client, interaction: InteractionStructure):
     print('NO')

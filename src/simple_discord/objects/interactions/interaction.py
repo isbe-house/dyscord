@@ -1,4 +1,3 @@
-import asyncio
 from collections import defaultdict
 from typing import Optional, Union, List, Dict
 
@@ -81,7 +80,6 @@ class InteractionStructure(BaseDiscordObject):
         new_response.interaction_token = self.token
 
         return new_response
-
 
 
 class InteractionDataStructure(BaseDiscordObject):
@@ -214,15 +212,17 @@ class InteractionResponse(BaseDiscordObject):
 
     async def _generate_webhook_data(self) -> dict:
         # TODO: Support
-        data_structure = dict()
+        data_structure: dict = dict()
         if hasattr(self.data, 'content'):
             data_structure['content'] = self.data.content
         if hasattr(self.data, 'embeds'):
             data_structure['embeds'] = list()
+            assert type(self.data.embeds) is list
             for embed in self.data.embeds:
                 data_structure['embeds'].append(embed.to_dict())
         if hasattr(self.data, 'components'):
             data_structure['components'] = list()
+            assert type(self.data.components) is list
             for component in self.data.components:
                 data_structure['components'].append(component.to_dict())
         return data_structure
