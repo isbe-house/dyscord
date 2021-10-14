@@ -2,7 +2,6 @@ import asyncio
 import datetime
 from pprint import pprint
 
-import functools
 import httpx
 from src.simple_discord.objects.snowflake import Snowflake
 
@@ -538,7 +537,6 @@ class API_V9:
             r = await cls._invoke_method(method)
         return r.json()
 
-    @functools.func.ttl_cache(max_size=1024)
     @classmethod
     async def get_user(cls, user_id: 'Snowflake') -> dict:
         '''Get User.
