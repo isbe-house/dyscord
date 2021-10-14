@@ -2,6 +2,8 @@ from src.simple_discord.objects.snowflake import Snowflake
 from src.simple_discord.objects.interactions import InteractionStructure, Command, enumerations
 from . import samples
 
+from unittest.mock import patch
+
 
 def test_button_interaction():
     data = samples.button_press_interaction
@@ -10,7 +12,11 @@ def test_button_interaction():
     assert hasattr(obj, 'data')
 
 
-def test_text_interaction():
+@patch('src.simple_discord.client.api.api_v9.API_V9.get_user')
+def test_text_interaction(get_user_func):
+
+    get_user_func.return_value = samples.trigger_chat['data']['resolved']['users']['185846097284038656']
+
     data = samples.trigger_chat
     obj = InteractionStructure().from_dict(data)
     assert obj.application_id == Snowflake(data['application_id'])
@@ -24,7 +30,15 @@ def test_message():
     assert hasattr(obj, 'data')
 
 
-def test_complex_chat():
+@patch('src.simple_discord.client.api.api_v9.API_V9.get_user')
+def test_complex_chat(get_user_func):
+
+    get_user_func.return_value = {'avatar': 'b437e9bd4b0e487a097c4538c6cdce3f',
+                                  'discriminator': '2585',
+                                  'id': '185846097284038656',
+                                  'public_flags': 0,
+                                  'username': 'Soton'}
+
     data = samples.nested_groups
     obj = InteractionStructure().from_dict(data)
     assert obj.application_id == Snowflake(data['application_id'])
@@ -32,7 +46,9 @@ def test_complex_chat():
 
     assert obj.data is not None
 
-    assert obj.data.options[0].options[0].options[0].name == 'target'
+    assert type(obj.data.options) is dict
+    print(obj.data.options['edit'].options['user'].options['target'])
+    assert obj.data.options['edit'].options['user'].options['target'].username == 'Soton'
 
 
 def test_build_sub_commands():

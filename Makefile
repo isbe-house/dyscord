@@ -9,11 +9,11 @@ SHELL := /bin/bash
 #                 -f  docker-compose.yaml \
 #                 up -d --build simple-discord
 
-run: build ## Run container connected
+run: ## Run container connected
+	make down
 	docker-compose \
                 -f  docker-compose.yaml \
                 run --rm simple-discord
-#         # Add -d to the up part later
 
 build:
 	docker-compose \
@@ -73,27 +73,27 @@ test: ## Run all tests
 
 test-pytest:
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm simple-discord-tests \
-                python -m pytest --cov=src --durations=5 -vv --color=yes tests
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        python -m pytest --cov=src --durations=5 -vv --color=yes tests
 
 test-mypy:
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm simple-discord-tests \
-                mypy src/simple_discord
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        mypy src/simple_discord
 
 test-flake8:
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm simple-discord-tests \
-                flake8
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        flake8
 
 test-docs:
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm simple-discord-tests \
-                pydocstyle --ignore=D300 src
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        pydocstyle --ignore=D300 src
 
 ######################################################################################################################################################
 

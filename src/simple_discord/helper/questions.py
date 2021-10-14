@@ -1,10 +1,9 @@
 import asyncio
 from datetime import datetime, timedelta
 from copy import copy
-from typing import List, Union
+from typing import List
 
-from ..objects import channel, message
-from ..objects.interactions import interaction
+from ..objects.interactions import interaction as ext_interaction
 from ..utilities import Log
 
 
@@ -12,49 +11,48 @@ class Question:
     _log = Log()
     '''Ask a user a question, respond with the answer.'''
 
-    def __init__(self, question: str, answers: List['str'], timeout: timedelta = timedelta(minutes=15)):
+    def __init__(self,
+                 target: 'ext_interaction.InteractionStructure',
+                 question: str,
+                 answers: List['str'],
+                 timeout: timedelta = timedelta(minutes=15),
+                 cleanup: bool = False,
+                 ):
         '''Build a question.
 
         Arguments:
             question (str): Question to ask the user.
             answers (List[str]): Responses the user can give.
         '''
+        self.target = target
         self.question = question
         self.answers = copy(answers)
         self.timeout = timeout
         self.answer = None
-        self.last_interaction: 'interaction.InteractionStructure'
+        self.cleanup = cleanup
+        self.last_interaction: 'ext_interaction.InteractionStructure'
         self._id_answer_map: dict = dict()
 
         assert len(self.answers) <= 25
         assert type(self.answers) in [list, tuple]
 
-    async def ask(self,
-                  target: Union['channel.Channel', 'interaction.InteractionStructure']
-                  ) -> str:
+    async def ask(self) -> str:
         '''Ask a question.
 
         Arguments:
             target: Channel to target, or interaction to respond to.
         '''
-        base: Union['message.Message', 'interaction.InteractionResponse'] = message.Message()
-        if type(target) in [channel.TextChannel, channel.DMChannel]:
-            base = message.Message(self.question)
-        elif type(target) is interaction.InteractionStructure:
-            base = target.generate_response(type=target.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE)
-        assert base is not None
+        base = self.target.generate_response(type=self.target.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE)
+        base.generate(content=self.question)
         ar = base.add_components()
 
         for answer in self.answers:
-            if len(ar.components) == 5:
+            if hasattr(ar, 'components') and (len(ar.components) == 5):
                 ar = base.add_components()
             button = ar.add_button(ar.BUTTON_STYLES.PRIMARY, label=answer, callback=self._call_back)
             self._id_answer_map[button.custom_id] = answer
 
-        if type(target) in [channel.TextChannel, channel.DMChannel]:
-            await target.send_message(base)  # type: ignore
-        elif type(target) is interaction.InteractionStructure:
-            await base.send()  # type: ignore
+        await base.send()  # type: ignore
 
         start_datetime = datetime.now()
 
@@ -65,9 +63,13 @@ class Question:
 
         return str(self.answer)
 
-    async def _call_back(self, client, interaction: 'interaction.InteractionStructure'):
+    async def _call_back(self, client, interaction: 'ext_interaction.InteractionStructure'):
         self.last_interaction = interaction
-        response = interaction.generate_response(type=interaction.INTERACTION_RESPONSE_TYPES.DEFERRED_UPDATE_MESSAGE)
+        if self.cleanup:
+            print('RUN CLEANUP')
+            response = self.target.generate_followup()
+            await response.delete_initial_response()
+        response = interaction.generate_response(type=interaction.INTERACTION_RESPONSE_TYPES.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE)
         await response.send()
         assert interaction.data is not None
         self.answer = self._id_answer_map[interaction.data.custom_id]
