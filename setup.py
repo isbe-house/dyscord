@@ -40,5 +40,6 @@ setuptools.setup(
         'orjson>=3.6.3',
         'requests>=2.26.0',
         'websockets>=10.0',
+        'validators>=0.18.2',
     ],
 )

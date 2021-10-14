@@ -42,8 +42,8 @@ build-docs: build
 
 clean: ## Delete volumes
 	docker system prune -f
-	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site
-	find . | grep -E '(__pycache__|\.pyc|\.pyo$)' | xargs rm -rf
+	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site htmlcov src/simple_discord.egg-info
+	find . | grep -E \(__pycache__\|\.pyc\|\.pyo\$\) | xargs rm -rf
 	rm -rf src/simple_discord_jmurrayufo.egg-info
 
 debug: ## Start interactive python shell to debug with
@@ -76,6 +76,11 @@ test-pytest:
         -f  docker-compose.yaml \
         run --rm simple-discord-tests \
         python -m pytest --cov=src --durations=5 -vv --color=yes tests
+	docker-compose \
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        coverage html
+
 
 test-mypy:
 	docker-compose \
@@ -102,7 +107,6 @@ dist: clean
 	python3 -m build
 
 release-test: dist
-	-source ~/.pypirc
 	docker-compose \
                 -f  docker-compose.yaml \
                 run --rm releaser \
