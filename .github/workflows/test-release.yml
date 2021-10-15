@@ -9,7 +9,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
-      - run: python3 -m pip install --upgrade  pip twine
+      - run: python3 -m pip install --upgrade pip twine build
       - name: "Build release"
         run: python3 -m build
       - name: "Release to PyPi"
