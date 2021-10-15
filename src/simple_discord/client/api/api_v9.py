@@ -275,7 +275,11 @@ class API_V9:
                     url,
                     json=data_structure
                 )
-                r.raise_for_status()
+                try:
+                    r.raise_for_status()
+                except Exception:
+                    print(r.content)
+                    raise
             await cls._handle_rate_limit(r)
 
     @classmethod

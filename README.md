@@ -1,5 +1,8 @@
 # simple-discord
+
 A simplistic implementation of the discord API.
+
+[![Python Testing](https://github.com/jmurrayufo/simple-discord/actions/workflows/python-testing.yml/badge.svg?branch=main)](https://github.com/jmurrayufo/simple-discord/actions/workflows/python-testing.yml)
 
 # Current Status
 

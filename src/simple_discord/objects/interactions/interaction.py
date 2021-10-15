@@ -38,6 +38,16 @@ class InteractionStructure(BaseDiscordObject):
         self._response_generated = False
         self.id = None
 
+    @property
+    def can_respond(self):
+        # TODO: We could check timestamps here as well!
+        return self._response_generated is False
+
+    @property
+    def can_followup(self):
+        # TODO: We could check timestamps here as well!
+        return self._response_generated is True
+
     def from_dict(self, data: dict) -> 'InteractionStructure':
         self._log.info('Parsing  a InteractionStructure dict')
         self.application_id = snowflake.Snowflake(data['application_id'])
@@ -64,11 +74,11 @@ class InteractionStructure(BaseDiscordObject):
         return self
 
     def generate_response(self,
-                          ephemeral: bool = False,
                           type: enumerations.INTERACTION_RESPONSE_TYPES = enumerations.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE,
+                          ephemeral: bool = False,
                           ) -> 'InteractionResponse':
         if self._response_generated:
-            raise RuntimeError('You cannot reuse a token from a response. Try generate_followup()?')
+            raise RuntimeError('You cannot reuse a token from a response. Call generate_followup()')
         else:
             self._response_generated = True
         new_response = InteractionResponse()
@@ -79,12 +89,18 @@ class InteractionStructure(BaseDiscordObject):
             new_response.data.flags |= enumerations.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         return new_response
 
-    def generate_followup(self) -> 'InteractionResponse':
-        new_response = InteractionResponse(is_followup=True)
-        new_response.interaction_id = self.id
-        new_response.interaction_token = self.token
+    def generate_followup(self,
+                          ephemeral: bool = False,
+                          ) -> 'InteractionFollowup':
+        if self._response_generated is False:
+            raise RuntimeError('You cannot followup on an interaction until you respond to it. Call generate_response()')
+        new_followup = InteractionFollowup()
+        new_followup.interaction_id = self.id
+        new_followup.interaction_token = self.token
+        if ephemeral:
+            new_followup.data.flags |= enumerations.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
 
-        return new_response
+        return new_followup
 
 
 class InteractionDataStructure(BaseDiscordObject):
@@ -181,7 +197,6 @@ class InteractionDataOptionStructure(BaseDiscordObject):
                 self.value = snowflake.Snowflake(data['value'])
         self.options = dict()
         if 'options' in data:
-            print('LOOP OPTIONS')
             for option_dict in data['options']:
                 self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id).parse(guild_id)
         return self
@@ -239,9 +254,8 @@ class InteractionResponse(BaseDiscordObject):
     interaction_id: 'snowflake.Snowflake'
     interaction_token: str
 
-    def __init__(self, is_followup: bool = False):
+    def __init__(self):
         self.data = InteractionCallback()
-        self.is_followup: bool = is_followup
         self.last_followup_message: Optional['ext_message.Message'] = None
 
     def to_dict(self) -> dict:
@@ -251,8 +265,6 @@ class InteractionResponse(BaseDiscordObject):
         return new_dict
 
     async def send(self) -> None:
-        if self.is_followup:
-            raise RuntimeError('Cannot send an interaction which is a followup!')
         await api.API.create_interaction_response(self.interaction_id, self.interaction_token, self.to_dict())
 
     async def edit_original_response(self):
@@ -262,13 +274,51 @@ class InteractionResponse(BaseDiscordObject):
     async def delete_initial_response(self):
         await api.API.delete_original_interaction_response(self.interaction_token)
 
-    async def send_followup_message(self) -> 'ext_message.Message':
+    def generate(self,
+                 content: Optional[str] = None,
+                 tts: Optional[bool] = None,
+                 ephemeral: bool = False,
+                 ):
+        return self.data.generate(tts, content, ephemeral)
+
+    def add_components(self) -> 'ext_components.ActionRow':
+        return self.data.add_components()
+
+    def add_embeds(self) -> 'ext_embed.Embed':
+        return self.data.add_embeds()
+
+
+class InteractionFollowup(BaseDiscordObject):
+
+    data: 'InteractionCallback'
+
+    # The following are part of our local book keeping, not the discord structure.
+    interaction_id: 'snowflake.Snowflake'
+    interaction_token: str
+
+    def __init__(self):
+        self.data = InteractionCallback()
+        self.last_followup_message: Optional['ext_message.Message'] = None
+
+    def to_dict(self) -> dict:
+        new_dict: Dict[str, object] = dict()
+        new_dict['data'] = self.data.to_dict()
+        return new_dict
+
+    async def send(self) -> 'ext_message.Message':
         # TODO: We can do some cool stuff with overrides here, look into that. https://discord.com/developers/docs/resources/webhook#execute-webhook
         data = await self._generate_webhook_data()
         msg_dict = await api.API.create_followup_message(self.interaction_token, data)
         new_message = ext_message.Message().from_dict(msg_dict)
         self.last_followup_message = new_message
         return new_message
+
+    async def edit_original_response(self):
+        data = await self._generate_webhook_data()
+        await api.API.edit_original_interaction_response(self.interaction_token, data)
+
+    async def delete_initial_response(self):
+        await api.API.delete_original_interaction_response(self.interaction_token)
 
     async def edit_followup_message(self, message: Optional['ext_message.Message'] = None) -> 'ext_message.Message':
         # TODO: We can do some cool stuff with overrides here, look into that. https://discord.com/developers/docs/resources/webhook#execute-webhook
