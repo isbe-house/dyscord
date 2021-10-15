@@ -22,7 +22,7 @@ class CommandHandler:
 
     registered_commands: Dict['snowflake.Snowflake', Callable] = dict()
 
-    registered_custom_ids: TTLCache[str, CallbackData] = TTLCache(
+    registered_custom_ids: 'TTLCache[str, CallbackData]' = TTLCache(
         maxsize=float('inf'),
         ttl=timedelta(minutes=15),  # type: ignore
         timer=datetime.now,  # type: ignore
