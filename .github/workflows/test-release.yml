@@ -13,7 +13,7 @@ jobs:
       - name: "Build release"
         run: python3 -m build
       - name: "Release to PyPi"
-        run: python3 -m twsine upload --repository testpypi dist/*
+        run: python3 -m twine upload --repository testpypi dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_RELEASE_TOKEN }}
