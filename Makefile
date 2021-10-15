@@ -99,7 +99,7 @@ test-doc-strings:
 	docker-compose \
         -f  docker-compose.yaml \
         run --rm simple-discord-tests \
-        pydocstyle --ignore=D300,D203,D100,D104 src
+        pydocstyle --add-ignore=D407,D300,D203,D100,D104 --convention=google src
 
 ######################################################################################################################################################
 

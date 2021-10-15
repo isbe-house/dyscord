@@ -48,9 +48,10 @@ class DiscordClient:
 
     def __init__(self, token: str, application_id: Optional[str] = None):
         '''Instantiate a DiscordClient.
+
         Args:
             token (str): Valid token to access discord. Only `Bot` token's currently supported.
-            application_id (Optional[str]): The application id. Will be auto-fetched at connection.
+            application_id (str): The application id. Will be auto-fetched at connection.
         '''
         # Discord attributes
         DiscordClient.token = token
@@ -136,9 +137,7 @@ class DiscordClient:
         self._intents_defined = True
 
     def run(self):
-        '''
-        Start the async loop and run forever.
-        '''
+        '''Start the async loop and run forever.'''
         self._log.info('Starting...')
         self._log.info(f'Application ID: [{self.application_id}]')
         self._log.info(f'Version: [{__version__}]')
@@ -179,9 +178,7 @@ class DiscordClient:
                             raise
 
     async def _connect(self):
-        '''
-        TODO: Implement connection to discord's servers.
-        '''
+        '''TODO: Implement connection to discord's servers.'''
 
         API.TOKEN = self.token
         if type(self.application_id) is str:
@@ -596,9 +593,7 @@ class DiscordClient:
 
     @classmethod
     def register_handler(cls, event: str):
-        '''
-        Register a given function to a given event string.
-        '''
+        '''Register a given function to a given event string.'''
         if not hasattr(objects.DISCORD_EVENTS, event):
             raise ValueError(f'Attempted to bind to unknown event \'{event}\', must be exact match for existing {objects.DISCORD_EVENTS} entry.')
 
@@ -622,6 +617,10 @@ class DiscordClient:
 
     @classmethod
     def register_class(cls, target_class):
+        '''Register a given class and attempt to call any valid on_<event> functions.
+
+        By convention functions of the class should be async.
+        '''
 
         @functools.wraps(target_class)
         async def class_wrapper(cls, *args, **kwargs):

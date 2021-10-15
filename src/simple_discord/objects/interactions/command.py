@@ -192,6 +192,7 @@ class Command(BaseDiscordObject):
         return ret_dict
 
     def validate(self):  # noqa: C901
+        '''Validate object is prepared for dispatch to discord.'''
         regex = r'^[\w-]{1,32}$'
         if not re.match(regex, self.name):
             raise ValueError(f'Name of \'{self.name}\' does not match \'{regex}\'.')
@@ -300,6 +301,7 @@ class CommandOptionsBase(abc.ABC, BaseDiscordObject):
         return ret_dict
 
     def validate(self):
+        '''Validate object is prepared for dispatch to discord.'''
         regex = r'^[\w-]{1,32}$'
         if not re.match(regex, self.name):
             raise ValueError(f'Name of \'{self.name}\' does not match \'{regex}\'.')
@@ -348,6 +350,7 @@ class CommandOptions(CommandOptionsBase):
         return new_choice
 
     def validate(self):
+        '''Validate object is prepared for dispatch to discord.'''
         return super().validate()
 
 
@@ -385,6 +388,7 @@ class CommandOptionChoiceStructure(BaseDiscordObject):
         return ret_dict
 
     def validate(self):
+        '''Validate object is prepared for dispatch to discord.'''
         regex = r'^[\w-]{1,32}$'
         if not re.match(regex, self.name):
             raise ValueError(f'Name of \'{self.name}\' does not match \'{regex}\'.')

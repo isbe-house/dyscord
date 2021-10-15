@@ -20,6 +20,7 @@ class InteractionResponseHelper(ABC):
                  cleanup: bool = False,
                  auto_respond: bool = False,
                  ):
+        '''Constructor for abstract Interaction Response Helpers.'''
         self.target = target
         self.question = question
         self.timeout = timeout
@@ -75,6 +76,11 @@ class InteractionResponseHelper(ABC):
             await response.send()
 
     def generate_response(self, type: 'ext_interaction.enumerations.INTERACTION_RESPONSE_TYPES' = None, ephemeral: bool = True):
+        '''Generate a response from the interaction.
+
+        Raises:
+            RuntimeError: When cleanup or auto_respond are set to true.
+        '''
         if self.cleanup:
             raise RuntimeError('You cannot respond to a message you asked us to cleanup.')
         if self.auto_respond:

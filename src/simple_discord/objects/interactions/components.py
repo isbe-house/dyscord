@@ -124,6 +124,7 @@ class ActionRow(Component):
         return new_dict
 
     def validate(self):
+        '''Validate object is prepared for dispatch to discord.'''
         if hasattr(self, 'components'):
             assert type(self.components) is list,\
                 f'Got invalid type {type(self.components)} of ActionRow.components, must be list.'
@@ -167,6 +168,7 @@ class Button(Component):
         return new_dict
 
     def validate(self):
+        '''Validate object is prepared for dispatch to discord.'''
         assert self.type == enumerations.COMPONENT_TYPES.BUTTON,\
             f'Got invalid value {self.type} of Button.type, must be {enumerations.COMPONENT_TYPES.BUTTON}.'
         assert type(self.type) is enumerations.COMPONENT_TYPES,\
@@ -229,4 +231,5 @@ class SelectMenu(Component):
         return new_dict
 
     def validate(self):
+        '''Validate object is prepared for dispatch to discord.'''
         pass
