@@ -9,11 +9,11 @@ SHELL := /bin/bash
 #                 -f  docker-compose.yaml \
 #                 up -d --build simple-discord
 
-run: build ## Run container connected
+run: ## Run container connected
+	make down
 	docker-compose \
                 -f  docker-compose.yaml \
                 run --rm simple-discord
-#         # Add -d to the up part later
 
 build:
 	docker-compose \
@@ -42,14 +42,15 @@ build-docs: build
 
 clean: ## Delete volumes
 	docker system prune -f
-	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site
-	find . | grep -E '(__pycache__|\.pyc|\.pyo$)' | xargs rm -rf
+	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site htmlcov src/simple_discord.egg-info
+	find . | grep -E \(__pycache__\|\.pyc\|\.pyo\$\) | xargs rm -rf
 	rm -rf src/simple_discord_jmurrayufo.egg-info
 
 debug: ## Start interactive python shell to debug with
 	docker-compose \
                 -f docker-compose.yaml \
-                run --rm simple-discord-tests /bin/bash
+                run --rm releaser /bin/bash
+                # run --rm simple-discord-tests /bin/bash
 
 # start-debian: build ## Start interactive python shell to debug with
 # 	docker-compose \
@@ -73,40 +74,47 @@ test: ## Run all tests
 
 test-pytest:
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm simple-discord-tests \
-                python -m pytest --cov=src --durations=5 -vv --color=yes tests
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        python -m pytest --cov=src --durations=5 -vv --color=yes tests
+	docker-compose \
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        coverage html
+
 
 test-mypy:
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm simple-discord-tests \
-                mypy src/simple_discord
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        mypy src/simple_discord
 
 test-flake8:
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm simple-discord-tests \
-                flake8
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        flake8
 
 test-docs:
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm simple-discord-tests \
-                pydocstyle --ignore=D300 src
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        pydocstyle --ignore=D300 src
 
 ######################################################################################################################################################
 
 dist: clean
 	make build-docs
-	python3 -m build
 
 release-test: dist
-	-source ~/.pypirc
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm releaser \
-                python3 -m twine upload --repository testpypi dist/*
+        -f  docker-compose.yaml \
+        run --rm releaser \
+        python3 -m build
+	docker-compose \
+        -f  docker-compose.yaml \
+        run --rm releaser \
+        python3 -m twine upload --repository testpypi dist/*
 
 release:
 	echo "${TWINE_USERNAME}"

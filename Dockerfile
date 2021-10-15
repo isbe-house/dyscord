@@ -26,3 +26,6 @@ WORKDIR /usr/src/app
 
 RUN python -m pip install --upgrade pip
 RUN pip install --no-cache-dir twine
+
+ARG TWINE_USERNAME
+ARG TWINE_PASSWORD

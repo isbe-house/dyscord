@@ -4,7 +4,7 @@ import abc
 import builtins
 import copy
 import re
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Dict
 
 from ...client import api
 
@@ -165,7 +165,7 @@ class Command(BaseDiscordObject):
         return self
 
     def to_dict(self) -> dict:
-        ret_dict: dict[str, Union[object, list]] = dict()
+        ret_dict: Dict[str, Union[object, list]] = dict()
         if hasattr(self, 'id'):
             ret_dict['id'] = str(self.id)
         if hasattr(self, 'type') and self.type is not None:
@@ -277,7 +277,7 @@ class CommandOptionsBase(abc.ABC, BaseDiscordObject):
         return self
 
     def to_dict(self) -> dict:
-        ret_dict: dict[str, Union[object, list]] = dict()
+        ret_dict: Dict[str, Union[object, list]] = dict()
         if hasattr(self, 'type'):
             ret_dict['type'] = self.type.value
         ret_dict['name'] = self.name
@@ -371,7 +371,7 @@ class CommandOptionChoiceStructure(BaseDiscordObject):
         return self
 
     def to_dict(self) -> dict:
-        ret_dict: dict[str, object] = dict()
+        ret_dict: Dict[str, object] = dict()
         ret_dict['name'] = self.name
         ret_dict['value'] = self.value
 

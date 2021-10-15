@@ -2,11 +2,15 @@ import abc
 import datetime
 from typing import Optional, List, Dict
 
+import validators  # type: ignore
+
 from .base_object import BaseDiscordObject
 from . import enumerations
 
 
 class Embed(BaseDiscordObject):
+
+    EMBED_TYPES = enumerations.EMBED_TYPES
 
     title: Optional[str]
     type: Optional['enumerations.EMBED_TYPES']  # DEPRECATED
@@ -113,6 +117,8 @@ class Embed(BaseDiscordObject):
         if hasattr(self, 'url'):
             assert type(self.url) is str,\
                 f'Got invalid type {type(self.url)} for url.'
+            if not validators.url(self.url, public=False):
+                raise AssertionError(f'URL fails validation: [{self.url}].')
 
         if hasattr(self, 'timestamp'):
             assert type(self.timestamp) is datetime.datetime,\
@@ -142,6 +148,26 @@ class Embed(BaseDiscordObject):
             assert type(self.author) is EmbedAuthor,\
                 f'Got invalid type {type(self.author)} for author.'
             self.author.validate()
+
+        if hasattr(self, 'image'):
+            assert type(self.image) is EmbedImage,\
+                f'Got invalid type {type(self.image)} for image.'
+            self.image.validate()
+
+        if hasattr(self, 'thumbnail'):
+            assert type(self.thumbnail) is EmbedThumbnail,\
+                f'Got invalid type {type(self.thumbnail)} for thumbnail.'
+            self.thumbnail.validate()
+
+        if hasattr(self, 'video'):
+            assert type(self.video) is EmbedVideo,\
+                f'Got invalid type {type(self.video)} for video.'
+            self.video.validate()
+
+        if hasattr(self, 'provider'):
+            assert type(self.provider) is EmbedProvider,\
+                f'Got invalid type {type(self.provider)} for provider.'
+            self.provider.validate()
 
         assert total_length <= 6000,\
             f'Total characters in embed is {total_length}. Max API limit is 6000.'
@@ -315,8 +341,8 @@ class EmbedImage(BaseDiscordObject):
         if hasattr(self, 'proxy_url'):
             assert type(self.proxy_url) is str,\
                 f'Got invalid type {type(self.proxy_url)} for proxy_url. Must be str.'
-            assert self.proxy.startswith(('http://', 'https://')),\
-                f'Got invalid proxy {self.proxy}, must start with http:// or https://.'
+            assert self.proxy_url.startswith(('http://', 'https://')),\
+                f'Got invalid proxy {self.proxy_url}, must start with http:// or https://.'
 
         if hasattr(self, 'height'):
             assert type(self.height) is int,\

@@ -8,7 +8,7 @@ from .ready import Ready
 from .snowflake import Snowflake
 from .user import User, Member
 from .role import Role
-from .embed import Embed
+from .embed import Embed, EmbedAdder
 
 from .channel import Channel, ChannelImporter, CategoryChannel, NewsChannel, TextChannel, StoreChannel, VoiceChannel
 
@@ -19,19 +19,20 @@ __all__ = [
     'Channel',
     'ChannelImporter',
     'DISCORD_EVENTS',
+    'Embed',
+    'EmbedAdder',
     'Emoji',
     'Guild',
     'interactions',
+    'Member',
     'Message',
     'NewsChannel',
     'Permissions',
     'Ready',
+    'Role',
     'Snowflake',
     'StoreChannel',
     'TextChannel',
     'User',
     'VoiceChannel',
-    'Member',
-    'Role',
-    'Embed',
 ]

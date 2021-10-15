@@ -31,6 +31,7 @@ class Channel:
     def from_dict(self, data, parent_guild=None):
         self.id = snowflake.Snowflake(data['id'])
         self.type = self.CHANNEL_TYPES(data['type'])
+        self.name = data.get('name', '<DirectMessage>')
         return self
 
     @classmethod
@@ -62,13 +63,18 @@ class TextChannel(Channel):
             self.guild_id = snowflake.Snowflake(data['guild_id'])
         self.name = data['name']
         self.type = enumerations.CHANNEL_TYPES(data['type'])
-        self.position = data['position']
-        self.rate_limit_per_user = data['rate_limit_per_user']
+        if 'position' in data:
+            self.position = data['position']
+        if 'rate_limit_per_user' in data:
+            self.rate_limit_per_user = data['rate_limit_per_user']
         if 'nsfw' in data:
             self.nsfw = data['nsfw']
-        self.topic = data['topic']
-        self.last_message_id = snowflake.Snowflake(data['last_message_id'])
-        self.parent_id = snowflake.Snowflake(data['parent_id'])
+        if 'topic' in data:
+            self.topic = data['topic']
+        if 'last_message_id' in data:
+            self.last_message_id = snowflake.Snowflake(data['last_message_id'])
+        if 'parent_id' in data:
+            self.parent_id = snowflake.Snowflake(data['parent_id'])
         if 'default_auto_archive_duration' in data:
             self.default_auto_archive_duration = data['default_auto_archive_duration']
         return self
@@ -170,6 +176,10 @@ class StoreChannel(Channel):
 class ChannelImporter:
     @classmethod
     def ingest_raw_dict(cls, data, parent_guild=None) -> "Channel":
+        return cls.from_dict(data, parent_guild)
+
+    @classmethod
+    def from_dict(cls, data, parent_guild=None) -> "Channel":
         new_channel: Channel
 
         if data["type"] == Channel.CHANNEL_TYPES.GUILD_TEXT:
@@ -202,6 +212,6 @@ class ChannelImporter:
         else:
             raise ValueError(f'Dict contained unknown channel type. {data["type"]}, {Channel.CHANNEL_TYPES(data["type"]).name}')
 
-        new_channel.ingest_raw_dict(data, parent_guild)
+        new_channel.from_dict(data, parent_guild)
 
         return new_channel

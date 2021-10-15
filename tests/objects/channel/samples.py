@@ -119,4 +119,10 @@ dev_thread = {
     }
 }
 
-all = [dev_category, dev_dm, dev_group_dm, dev_guild_news, dev_guild_text, dev_guild_voice, dev_store, dev_thread]
+partial_resolved = {'id': '889282264507248650',
+                    'name': 'general2',
+                    'parent_id': '804392362629267456',
+                    'permissions': '1099511627775',
+                    'type': 0}
+
+all = [dev_category, dev_dm, dev_group_dm, dev_guild_news, dev_guild_text, dev_guild_voice, dev_store, dev_thread, partial_resolved]

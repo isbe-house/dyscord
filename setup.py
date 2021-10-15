@@ -22,13 +22,13 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/jmurrayufo/simple-discord/issues",
     },
     classifiers=[
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
-    python_requires=">=3.7",
+    python_requires=">=3.9",
     license='GPLv3',
     platforms=['any'],
     install_requires=[
@@ -40,5 +40,6 @@ setuptools.setup(
         'orjson>=3.6.3',
         'requests>=2.26.0',
         'websockets>=10.0',
+        'validators>=0.18.2',
     ],
 )

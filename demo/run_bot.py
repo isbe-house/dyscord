@@ -3,22 +3,21 @@
 # Handle the weirdness of our docker env first
 import sys
 
-from src.simple_discord.objects import channel
-
-sys.path.insert(0, '.')
+sys.path.insert(0, '/usr/src/app/')
 
 # Do normal imports and run!
 import logging
 import uuid
-from datetime import datetime, timedelta
 
-from src.simple_discord.utilities import Log
-from src.simple_discord.client import DiscordClient, API
 from src.simple_discord import objects, utilities
+from src.simple_discord.client import DiscordClient, API
 from src.simple_discord.objects.interactions import Command
-from src.simple_discord.helper.questions import Question
+from src.simple_discord.objects.message import Message
+from src.simple_discord.utilities import Log
+from src.simple_discord.objects.guild import Guild
+
 from src import simple_discord
-from demo import everters, command_functions
+from demo import command_functions
 
 log = Log()
 log.setLevel(logging.INFO)
@@ -49,21 +48,23 @@ client.configure_intents(
     direct_messages=True,
 )
 
-async def purge_commands(client, message):
+async def purge_commands(client, message: Message):
     client._log.info('Get global commands')
     commands = await API.get_global_application_commands()
     for command in commands:
+        print(command)
         command = Command().from_dict(command)
         assert command.id is not None
         await API.delete_global_application_command(command.id)
 
     client._log.info('Get guild commands')
-    for guild in utilities.Cache().guilds:
-        commands = await API.get_guild_application_commands(guild.id)
-        for command in commands:
-            command = Command().from_dict(command)
-            assert command.id is not None
-            await API.delete_guild_application_command(guild.id, command.id)
+    guild: Guild = message.guild
+    commands = await API.get_guild_application_commands(guild.id)
+    for command in commands:
+        print(command)
+        # command = Command().from_dict(command)
+        # assert command.id is not None
+        # await API.delete_guild_application_command(guild.id, command.id)
 
 
 async def register_commands(client: simple_discord.client.DiscordClient, message):
@@ -78,11 +79,32 @@ async def register_commands(client: simple_discord.client.DiscordClient, message
         description='Generic test slash command.',
         type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
     )
+    new_command.add_option_typed(new_command.COMMAND_OPTION.BOOLEAN, 'cleanup', 'Cleanup commands after execution?', required=False)
 
     new_command.validate()
 
     registration = await new_command.register_to_guild(guild)
-    log.info(f'Registration3: {registration}')
+    log.info(f'Registration: {registration}')
+
+    new_command = Command()
+    new_command.generate(
+        name='complex',
+        description='Test lots of complicated things.',
+        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
+    )
+
+    new_command.add_option_typed(new_command.COMMAND_OPTION.CHANNEL, 'channel', 'Channel test', required=False)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.USER, 'user', 'User test', required=False)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.INTEGER, 'int', 'A simple number', required=False)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.MENTIONABLE, 'mention', 'Mention someone', required=False)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.NUMBER, 'float', 'Float something BIG', required=False)
+
+    new_command.validate()
+    from pprint import pprint
+    pprint(new_command.to_dict())
+
+    registration = await new_command.register_to_guild(guild)
+    log.info(f'Registration: {registration}')
 
 
 async def list_commands(client):
@@ -115,12 +137,7 @@ async def send_buttons(client, chan_id):
 
 
 async def test(client, message: objects.Message):
-
-    q = Question('What is your favorite color?', ['blue', 'red'])
-    assert message is not None
-    assert type(message.channel) is channel.TextChannel
-    r = await q.ask(target=message.channel)
-    print(r)
+    await API.get_user('185846097284038656')
 
 
 @client.register_handler('MESSAGE_CREATE')
@@ -147,5 +164,6 @@ async def parse_message(client, message: objects.Message, raw_message):
             await test(client, message)
 
 simple_discord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
+simple_discord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)
 
 client.run()

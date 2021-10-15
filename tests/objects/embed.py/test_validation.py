@@ -72,3 +72,20 @@ def test_hidden(blank_embed: Embed):
         blank_embed.add_field('X' * 256, 'X' * 1024)
     with pytest.raises(AssertionError):
         blank_embed.validate()
+
+
+def test_bad_url(blank_embed: Embed):
+
+    blank_embed.generate(url='localhost')
+    with pytest.raises(AssertionError):
+        blank_embed.validate()
+
+    blank_embed.generate(url='ftpdd://google.com')
+    with pytest.raises(AssertionError):
+        blank_embed.validate()
+
+    blank_embed.generate(url='http://google.com')
+    blank_embed.validate()
+
+    blank_embed.generate(url='https://google.com')
+    blank_embed.validate()

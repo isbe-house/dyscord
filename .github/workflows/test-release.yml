@@ -1,0 +1,19 @@
+name: Test Release
+on: workflow_dispatch
+jobs:
+  Release-Python:
+    runs-on: self-hosted
+    name: Test Release
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+      - run: python3 -m pip install --upgrade  pip twine
+      - name: "Build release"
+        run: python3 -m build
+      - name: "Release to PyPi"
+        run: python3 -m twsine upload --repository testpypi dist/*
+        env:
+          - TWINE_USERNAME: __token__
+          - TWINE_PASSWORD: ${{ secrets.TEST_PYPI_RELEASE_TOKEN }}

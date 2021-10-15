@@ -1,5 +1,8 @@
+import asyncio
 from collections import defaultdict
-from typing import Optional, Union, List, Dict
+from typing import Any, Optional, Union, List, Dict
+
+from src.simple_discord.objects import channel
 
 from ...client import api
 
@@ -7,7 +10,7 @@ from ..base_object import BaseDiscordObject
 
 from .. import snowflake
 
-from .. import user as ext_user, message as ext_message, embed as ext_embed
+from .. import user as ext_user, message as ext_message, embed as ext_embed, role
 
 from . import enumerations, components as ext_components, command
 
@@ -33,6 +36,7 @@ class InteractionStructure(BaseDiscordObject):
 
     def __init__(self):
         self._response_generated = False
+        self.id = None
 
     def from_dict(self, data: dict) -> 'InteractionStructure':
         self._log.info('Parsing  a InteractionStructure dict')
@@ -43,10 +47,11 @@ class InteractionStructure(BaseDiscordObject):
         self.type = enumerations.INTERACTION_TYPES(data['type'])
         if 'channel_id' in data:
             self.channel_id = snowflake.Snowflake(data['channel_id'])
-        if 'data' in data:
-            self.data = InteractionDataStructure().from_dict(data['data'])
         if 'guild_id' in data:
             self.guild_id = snowflake.Snowflake(data['guild_id'])
+        if 'data' in data:
+            guild_id = data['guild_id'] if 'guild_id' in data else None
+            self.data = InteractionDataStructure().from_dict(data['data'], guild_id)
         if 'channel_id' in data:
             self.channel_id = snowflake.Snowflake(data['channel_id'])
         if 'user' in data:
@@ -87,13 +92,13 @@ class InteractionDataStructure(BaseDiscordObject):
     name: str  # string the name of the invoked command Application Command
     type: enumerations.COMMAND_TYPE  # integer the type of the invoked command Application Command
     resolved: Dict[str, dict]  # ? resolved data converted users + roles + channels Application Command
-    options: List  # ? array of application command interaction data option the params + values from the user Application Command
+    options: Dict[str, Any]  # ? array of application command interaction data option the params + values from the user Application Command
     custom_id: str  # ? string the custom_id of the component Component
     component_type: Optional[enumerations.COMPONENT_TYPES]  # ? integer the type of the component Component
     values: Optional[List['command.CommandOptions']]  # ? array of select option values the values the user selected Component (Select)
     target_id: Optional[snowflake.Snowflake]  # ? snowflake id the of user or message targetted by a user or message command
 
-    def from_dict(self, data: dict) -> 'InteractionDataStructure':  # noqa: C901
+    def from_dict(self, data: dict, guild_id: Optional['snowflake.Snowflake'] = None) -> 'InteractionDataStructure':  # noqa: C901
         self._log.info('Parse a InteractionDataStructure dict.')
         if 'id' in data:
             self.id = snowflake.Snowflake(data['id'])
@@ -113,6 +118,14 @@ class InteractionDataStructure(BaseDiscordObject):
                         self.resolved[resolution_type][entry_id] = ext_user.User()
                     elif resolution_type == 'messages':
                         self.resolved[resolution_type][entry_id] = ext_message.Message()
+                    elif resolution_type == 'channels':
+                        self.resolved[resolution_type][entry_id] = channel.ChannelImporter()
+                    elif resolution_type == 'roles':
+                        self.resolved[resolution_type][entry_id] = role.Role()
+                    else:
+                        self._log.critical(f'Cannot resolve type [{resolution_type}]!')
+                        raise TypeError
+
                     self.resolved[resolution_type][entry_id].from_dict(data['resolved'][resolution_type][entry_id])
         if 'component_type' in data:
             self.component_type = enumerations.COMPONENT_TYPES(data['component_type'])
@@ -120,10 +133,11 @@ class InteractionDataStructure(BaseDiscordObject):
             self.custom_id = str(data['custom_id'])
         if 'target_id' in data:
             self.target_id = snowflake.Snowflake(data['target_id'])
+
+        self.options = dict()
         if 'options' in data:
-            self.options = list()
             for option_dict in data['options']:
-                self.options.append(InteractionDataOptionStructure().from_dict(option_dict))
+                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id).parse(guild_id)
         return self
 
 
@@ -132,9 +146,18 @@ class InteractionDataOptionStructure(BaseDiscordObject):
     name: str                                                  # string the name of the invoked command Application Command
     type: enumerations.COMMAND_OPTION                          # integer the type of the invoked command Application Command
     value: Optional[Union[str, int, bool, 'snowflake.Snowflake', float]]               # the value of the pair
-    options: Optional[List['InteractionDataOptionStructure']]  # Present when command is a group or subcommand
+    options: Optional[Dict[str, Any]]  # Present when command is a group or subcommand
 
-    def from_dict(self, data: dict) -> 'InteractionDataOptionStructure':  # noqa: C901
+    def __getitem__(self, key: str):
+        if hasattr(self, 'options') and type(self.options) is dict:
+            return self.options[key]
+
+    def __contains__(self, item: str):
+        if hasattr(self, 'options') and type(self.options) is dict:
+            return item in self.options
+
+    def from_dict(self, data: dict, guild_id: Optional['snowflake.Snowflake'] = None) -> 'InteractionDataOptionStructure':  # noqa: C901
+
         self.name = data['name']
         self.type = enumerations.COMMAND_OPTION(data['type'])
         if 'value' in data:
@@ -156,11 +179,53 @@ class InteractionDataOptionStructure(BaseDiscordObject):
             elif self.type == enumerations.COMMAND_OPTION.MENTIONABLE:
                 # TODO: Actually lookup the mentionable here and replace the snowflake with a full object.
                 self.value = snowflake.Snowflake(data['value'])
+        self.options = dict()
         if 'options' in data:
-            self.options = list()
+            print('LOOP OPTIONS')
             for option_dict in data['options']:
-                self.options.append(InteractionDataOptionStructure().from_dict(option_dict))
+                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id).parse(guild_id)
         return self
+
+    def parse(self, guild_id: Optional['snowflake.Snowflake'] = None):  # noqa: C901
+        '''Look at the type field of self and attempt to return a sane result.
+
+        For SUB_COMMAND and SUB_COMMAND_GROUP types, return another InteractionDataOptionStructure object.
+        For all others, attempt to reference the type and handle it.
+        '''
+        CO = enumerations.COMMAND_OPTION
+
+        if self.type in [CO.SUB_COMMAND, CO.SUB_COMMAND_GROUP]:
+            return self
+
+        if self.type in [CO.STRING, CO.INTEGER, CO.BOOLEAN, CO.NUMBER]:
+            return self.value
+
+        assert type(self.value) is snowflake.Snowflake
+
+        if self.type == CO.USER:
+            return ext_user.User().from_dict(asyncio.run(api.API.get_user(self.value)))
+
+        if self.type == CO.CHANNEL:
+            return channel.Channel().from_dict(asyncio.run(api.API.get_channel(self.value)))
+
+        if self.type == CO.ROLE:
+            assert type(guild_id) is snowflake.Snowflake
+            roles_list = asyncio.run(api.API.get_guild_roles(guild_id))
+            for role_dict in roles_list:
+                if role_dict['id'] == self.value:
+                    return role.Role().from_dict(role_dict)
+
+        if self.type == CO.MENTIONABLE:
+            print(guild_id)
+            print(type(guild_id))
+            try:
+                return ext_user.User().from_dict(asyncio.run(api.API.get_user(self.value)))
+            except Exception:
+                assert type(guild_id) is snowflake.Snowflake
+                roles_list = asyncio.run(api.API.get_guild_roles(guild_id))
+                for role_dict in roles_list:
+                    if role_dict['id'] == self.value:
+                        return role.Role().from_dict(role_dict)
 
 
 class InteractionResponse(BaseDiscordObject):
@@ -174,9 +239,10 @@ class InteractionResponse(BaseDiscordObject):
     interaction_id: 'snowflake.Snowflake'
     interaction_token: str
 
-    def __init__(self, is_followup=False):
+    def __init__(self, is_followup: bool = False):
         self.data = InteractionCallback()
-        self.is_followup = is_followup
+        self.is_followup: bool = is_followup
+        self.last_followup_message: Optional['ext_message.Message'] = None
 
     def to_dict(self) -> dict:
         new_dict: Dict[str, object] = dict()
@@ -189,26 +255,41 @@ class InteractionResponse(BaseDiscordObject):
             raise RuntimeError('Cannot send an interaction which is a followup!')
         await api.API.create_interaction_response(self.interaction_id, self.interaction_token, self.to_dict())
 
-    async def send_edit_original_response(self):
+    async def edit_original_response(self):
         data = await self._generate_webhook_data()
         await api.API.edit_original_interaction_response(self.interaction_token, data)
 
-    async def send_delete_initial_response(self):
+    async def delete_initial_response(self):
         await api.API.delete_original_interaction_response(self.interaction_token)
 
-    async def send_send_followup_message(self) -> 'ext_message.Message':
+    async def send_followup_message(self) -> 'ext_message.Message':
         # TODO: We can do some cool stuff with overrides here, look into that. https://discord.com/developers/docs/resources/webhook#execute-webhook
         data = await self._generate_webhook_data()
         msg_dict = await api.API.create_followup_message(self.interaction_token, data)
         new_message = ext_message.Message().from_dict(msg_dict)
+        self.last_followup_message = new_message
         return new_message
 
-    async def send_edit_followup_message(self) -> 'ext_message.Message':
+    async def edit_followup_message(self, message: Optional['ext_message.Message'] = None) -> 'ext_message.Message':
         # TODO: We can do some cool stuff with overrides here, look into that. https://discord.com/developers/docs/resources/webhook#execute-webhook
         data = await self._generate_webhook_data()
-        msg_dict = await api.API.create_followup_message(self.interaction_token, data)
+        if message is None:
+            if self.last_followup_message is not None:
+                message = self.last_followup_message
+            else:
+                raise ValueError('Must give specific followup message, or have sent one already.')
+        msg_dict = await api.API.edit_followup_message(self.interaction_token, message.id, data)
         new_message = ext_message.Message().from_dict(msg_dict)
+        self.last_followup_message = new_message
         return new_message
+
+    async def delete_followup_message(self, message: Optional['ext_message.Message'] = None) -> None:
+        if message is None:
+            if self.last_followup_message is not None:
+                message = self.last_followup_message
+            else:
+                raise ValueError('Must give specific followup message, or have sent one already.')
+        await api.API.delete_followup_message(self.interaction_token, message.id)
 
     async def _generate_webhook_data(self) -> dict:
         # TODO: Support
@@ -228,11 +309,11 @@ class InteractionResponse(BaseDiscordObject):
         return data_structure
 
     def generate(self,
-                 tts: Optional[bool] = None,
                  content: Optional[str] = None,
-                 flags: int = 0,
+                 tts: Optional[bool] = None,
+                 ephemeral: bool = False,
                  ):
-        return self.data.generate(tts, content, flags)
+        return self.data.generate(tts, content, ephemeral)
 
     def add_components(self) -> 'ext_components.ActionRow':
         return self.data.add_components()
@@ -242,6 +323,9 @@ class InteractionResponse(BaseDiscordObject):
 
 
 class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder):
+
+    INTERACTION_CALLBACK_FLAGS = enumerations.INTERACTION_CALLBACK_FLAGS
+
     tts: Optional[bool]
     content: Optional[str]
     embeds: Optional[List['ext_embed.Embed']]  # TODO: Support embeds here.
@@ -278,11 +362,13 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_
     def generate(self,
                  tts: Optional[bool] = None,
                  content: Optional[str] = None,
-                 flags: int = 0,
+                 ephemeral: bool = False,
                  ):
         if tts is not None:
             self.tts = tts
         if content is not None:
             self.content = content
-        self.flags = flags
+        self.flags = 0
+        if ephemeral:
+            self.flags |= self.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         self.components = []

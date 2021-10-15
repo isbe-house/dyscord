@@ -2,7 +2,6 @@ import asyncio
 import datetime
 from pprint import pprint
 
-
 import httpx
 from src.simple_discord.objects.snowflake import Snowflake
 
@@ -22,7 +21,7 @@ class API_V9:
     _log = Log()
 
     @classmethod
-    def auth_header(cls):
+    def _auth_header(cls):
         return {'Authorization': f'Bot {cls.TOKEN}', 'Content-Type': 'application/json'}
 
     @classmethod
@@ -38,6 +37,18 @@ class API_V9:
         if int(headers["x-ratelimit-remaining"]) == 0:
             cls._log.warning(f'Rate limit encountered, waiting for {time_until_reset}.')
             await asyncio.sleep(time_until_reset.total_seconds())
+
+    @classmethod
+    async def _invoke_method(cls, method):
+        async with cls._lock:
+            r = await method
+            try:
+                r.raise_for_status()
+            except Exception:
+                cls._log.exception(r.content)
+                raise
+            await cls._handle_rate_limit(r)
+        return r
 
     # GATEWAY ENDPOINTS
 
@@ -78,7 +89,7 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                 )
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
@@ -97,7 +108,7 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.post(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                     json=command_structure,
                 )
                 r.raise_for_status()
@@ -112,7 +123,7 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                 )
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
@@ -129,7 +140,7 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.patch(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                     json=command_structure,
                 )
                 r.raise_for_status()
@@ -144,7 +155,7 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.delete(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                 )
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
@@ -162,7 +173,7 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                 )
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
@@ -179,7 +190,7 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.post(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                     json=command_structure,
                 )
                 try:
@@ -202,7 +213,7 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                 )
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
@@ -228,9 +239,13 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.delete(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                 )
-                r.raise_for_status()
+                try:
+                    r.raise_for_status()
+                except Exception:
+                    pprint(r.json())
+                    raise
             await cls._handle_rate_limit(r)
 
     @classmethod
@@ -244,13 +259,6 @@ class API_V9:
 
     # Interaction Methods
     '''
-    Get Followup Message
-        GET/webhooks/{application.id}/{interaction.token}/messages/{message.id}
-        Returns a followup message for an Interaction. Functions the same as Get Webhook Message. Does not support ephemeral followups.
-
-    Delete Followup Message
-        DELETE/webhooks/{application.id}/{interaction.token}/messages/{message.id}
-        Deletes a followup message for an Interaction. Returns 204 on success. Does not support ephemeral followups.
     '''
 
     @classmethod
@@ -267,7 +275,6 @@ class API_V9:
                     url,
                     json=data_structure
                 )
-                print(r.json())
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
 
@@ -325,6 +332,7 @@ class API_V9:
                 r = await client.delete(
                     url,
                 )
+                print(r.content)
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
 
@@ -349,7 +357,37 @@ class API_V9:
                     url,
                     json=data_structure
                 )
-                r.raise_for_status()
+                try:
+                    r.raise_for_status()
+                except Exception:
+                    print(r)
+                    raise
+            await cls._handle_rate_limit(r)
+        return r.json()
+
+    @classmethod
+    async def get_followup_message(cls,
+                                   interaction_token: str,
+                                   message_id: 'Snowflake',
+                                   ) -> dict:
+        '''Get Followup Message
+
+        GET/webhooks/{application.id}/{interaction.token}/messages/{message.id}
+
+        Returns a followup message for an Interaction. Functions the same as Get Webhook Message. Does not support ephemeral followups.'''
+
+        url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/{message_id}'
+
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    url
+                )
+                try:
+                    r.raise_for_status()
+                except Exception:
+                    print(r)
+                    raise
             await cls._handle_rate_limit(r)
         return r.json()
 
@@ -374,6 +412,27 @@ class API_V9:
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
         return r.json()
+
+    @classmethod
+    async def delete_followup_message(cls,
+                                      interaction_token: str,
+                                      message_id: 'Snowflake',
+                                      ):
+        '''Delete Followup Message.
+
+        DELETE/webhooks/{application.id}/{interaction.token}/messages/{message.id}
+
+        Deletes a followup message for an Interaction. Returns 204 on success. Does not support ephemeral followups.'''
+
+        url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/{message_id}'
+
+        async with cls._lock:
+            async with httpx.AsyncClient() as client:
+                r = await client.delete(
+                    url
+                )
+                r.raise_for_status()
+            await cls._handle_rate_limit(r)
 
     '''
     TODO: Implement the following API endpoints.
@@ -401,7 +460,7 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                 )
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
@@ -416,13 +475,14 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.post(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                     json=message_payload,
                 )
                 try:
                     r.raise_for_status()
                 except Exception:
                     cls._log.exception(r.content)
+                    raise
             await cls._handle_rate_limit(r)
         return r.json()
 
@@ -436,14 +496,95 @@ class API_V9:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
                     url,
-                    headers=cls.auth_header(),
+                    headers=cls._auth_header(),
                 )
                 try:
                     r.raise_for_status()
                 except Exception:
                     cls._log.exception(r.content)
+                    raise
             await cls._handle_rate_limit(r)
         return r.json()
+
+    @classmethod
+    async def get_guild_roles(cls, guild_id: 'Snowflake', ) -> dict:
+        '''Get Guild Roles.
+
+        GET/guilds/{guild.id}/roles
+
+        Returns a list of role objects for the guild.
+        '''
+        url = f'{cls.BASE_URL}/guilds/{guild_id}/roles'
+        async with httpx.AsyncClient() as client:
+            method = client.get(url, headers=cls._auth_header())
+            r = await cls._invoke_method(method)
+        return r.json()
+
+    # User methods
+
+    @classmethod
+    async def get_current_user(cls) -> dict:
+        '''Get Current User.
+
+        GET/users/@me
+
+        Returns the user object of the requester's account. For OAuth2, this requires the identify scope, which will return the object without an email,
+        and optionally the email scope, which returns the object with an email.
+        '''
+        url = f'{cls.BASE_URL}/users/@me'
+        async with httpx.AsyncClient() as client:
+            method = client.get(url, headers=cls._auth_header())
+            r = await cls._invoke_method(method)
+        return r.json()
+
+    @classmethod
+    async def get_user(cls, user_id: 'Snowflake') -> dict:
+        '''Get User.
+
+        GET/users/{user.id}
+
+        Returns a user object for a given user ID.
+        '''
+        url = f'{cls.BASE_URL}/users/{user_id}'
+        async with httpx.AsyncClient() as client:
+            method = client.get(url, headers=cls._auth_header())
+            r = await cls._invoke_method(method)
+        return r.json()
+
+    @classmethod
+    async def create_dm(cls, recipient_id: 'Snowflake') -> dict:
+        '''Create DM.
+
+        POST/users/@me/channels
+
+        Create a new DM channel with a user. Returns a DM channel object.
+        '''
+        url = f'{cls.BASE_URL}/users/@me/channels'
+        async with httpx.AsyncClient() as client:
+            method = client.post(url,
+                                 json={'recipient_id': recipient_id},
+                                 headers=cls._auth_header(),
+                                 )
+            r = await cls._invoke_method(method)
+        return r.json()
+
+    '''
+    Modify Current User
+        PATCH/users/@me
+        Modify the requester's user account settings. Returns a user object on success.
+
+    Get Current User Guilds
+        GET/users/@me/guilds
+        Returns a list of partial guild objects the current user is a member of. Requires the guilds OAuth2 scope.
+
+    Leave Guild
+        DELETE/users/@me/guilds/{guild.id}
+        Leave a guild. Returns a 204 empty response on success.
+
+    Get User Connections
+        GET/users/@me/connections
+        Returns a list of connection objects. Requires the connections OAuth2 scope.
+    '''  # noqa: E501
 
     # Webhook methods
 

@@ -142,6 +142,7 @@ class DiscordClient:
         self._log.info('Starting...')
         self._log.info(f'Application ID: [{self.application_id}]')
         self._log.info(f'Version: [{__version__}]')
+        nest_asyncio.apply()
         asyncio.run(self._run())
 
     async def _run(self):
@@ -149,7 +150,8 @@ class DiscordClient:
         if self._intents_defined is False:
             warnings.warn('Started without defining intents. Client will likely get ZERO input. Consider calling the \'configure_intents\' function.', UserWarning)
 
-        # BUG: This might cause Runtime errors, we need to wait and see. See https://github.com/erdewit/nest_asyncio/issues/22
+        # BUG: This might cause Runtime errors, we need to wait and see. See https://github.com/erdewit/nest_asyncio/issues/22.
+        # This will be left here for now, as it avoids weird issues and allows us to work if the user bypasses run().
         nest_asyncio.apply()
 
         loop = asyncio.get_event_loop()
@@ -514,6 +516,7 @@ class DiscordClient:
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTERACTION_CREATE':
+            pprint(data)
             obj = objects.interactions.InteractionStructure().from_dict(data['d'])
             self._log.info('Saw INTERACTION_CREATE event.')
             await helper.CommandHandler.command_handler(self, obj)
