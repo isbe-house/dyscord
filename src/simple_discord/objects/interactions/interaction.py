@@ -414,6 +414,13 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_
                  content: Optional[str] = None,
                  ephemeral: bool = False,
                  ):
+        '''Customize common attributes of a callback.
+
+        Arguments:
+            tts (bool): Send message as text to speech.
+            content (str): Text contents of the message to send.
+            ephemeral (bool): Only show message to the target user, default is `False`.
+        '''
         if tts is not None:
             self.tts = tts
         if content is not None:

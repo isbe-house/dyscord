@@ -39,5 +39,5 @@ jobs:
       - name: "Test: flake8"
         run: flake8
       - name: Pydocsstyle
-        run: pydocstyle --ignore=D300 src
+        run: pydocstyle --ignore=D300,D203,D100,D104 src
         continue-on-error: true

@@ -3,10 +3,12 @@ from .. import objects
 
 
 async def on_channel_create(self, object: BaseDiscordObject, raw_object: dict):
+    '''Respond to CHANNEL_CREATE event.'''
     pass
 
 
 async def on_channel_delete(self, object: BaseDiscordObject, raw_object: dict):
+    '''Respond to CHANNEL_DELETE event.'''
     pass
 
 

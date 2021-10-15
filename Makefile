@@ -70,7 +70,7 @@ test: ## Run all tests
 	make test-pytest
 	make test-mypy
 	make test-flake8
-#	make test-docs
+#	make test-doc-strings
 
 test-pytest:
 	docker-compose \
@@ -95,11 +95,11 @@ test-flake8:
         run --rm simple-discord-tests \
         flake8
 
-test-docs:
+test-doc-strings:
 	docker-compose \
         -f  docker-compose.yaml \
         run --rm simple-discord-tests \
-        pydocstyle --ignore=D300 src
+        pydocstyle --ignore=D300,D203,D100,D104 src
 
 ######################################################################################################################################################
 
@@ -126,5 +126,5 @@ help:
 
 .DEFAULT_GOAL := help
 
-.PHONY: up down clean populate test build debug run docs build-docs dist release
+.PHONY: up down clean populate test build debug run doc-strings build-docs dist release
 # .SILENT: test up down up clean
