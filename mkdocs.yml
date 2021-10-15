@@ -2,9 +2,9 @@ site_name: Simple Discord
 
 nav:
   - Index: index.md
-  - Reference: reference.md
   - Examples: examples.md
   - Changelog: changelog.md
+  - Reference: reference.md
 plugins:
   - mkdocstrings:
       default_handler: python
