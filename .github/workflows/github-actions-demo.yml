@@ -20,3 +20,8 @@ jobs:
       - name: Pydocsstyle
         run: pydocstyle --ignore=D300 src
         continue-on-error: true
+      - name: "Save: Coverage"
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact
+          path: htmlcov
