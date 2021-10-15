@@ -18,7 +18,7 @@ jobs:
       - name: "LS again"
         run: ls -larth
       - name: "Tarball coverage"
-        run: tar xzf coverage.tar.gz htmlcov
+        run: tar zcvf coverage.tar.gz htmlcov
       - name: "Save: Coverage"
         uses: actions/upload-artifact@v2
         with:
