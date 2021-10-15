@@ -15,5 +15,5 @@ jobs:
       - name: "Release to PyPi"
         run: python3 -m twsine upload --repository testpypi dist/*
         env:
-          - TWINE_USERNAME: "__token__"
-          - TWINE_PASSWORD: ${{ secrets.TEST_PYPI_RELEASE_TOKEN }}
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_RELEASE_TOKEN }}
