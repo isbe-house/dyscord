@@ -49,7 +49,8 @@ clean: ## Delete volumes
 debug: ## Start interactive python shell to debug with
 	docker-compose \
                 -f docker-compose.yaml \
-                run --rm simple-discord-tests /bin/bash
+                run --rm releaser /bin/bash
+                # run --rm simple-discord-tests /bin/bash
 
 # start-debian: build ## Start interactive python shell to debug with
 # 	docker-compose \
@@ -104,13 +105,16 @@ test-docs:
 
 dist: clean
 	make build-docs
-	python3 -m build
 
 release-test: dist
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm releaser \
-                python3 -m twine upload --repository testpypi dist/*
+        -f  docker-compose.yaml \
+        run --rm releaser \
+        python3 -m build
+	docker-compose \
+        -f  docker-compose.yaml \
+        run --rm releaser \
+        python3 -m twine upload --repository testpypi dist/*
 
 release:
 	echo "${TWINE_USERNAME}"

@@ -32,7 +32,7 @@ jobs:
       - name: "Save: Coverage"
         uses: actions/upload-artifact@v2
         with:
-          name: my-artifact
+          name: coverage-tars
           path: coverage-${{ matrix.python-version }}.tar.gz
       - name: "Test: mypy"
         run: mypy src/simple_discord
