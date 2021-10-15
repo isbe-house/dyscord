@@ -3,6 +3,10 @@ on: [push]
 jobs:
   Test-Python:
     runs-on: self-hosted
+    strategy:
+      matrix:
+        python-version: [ '3.6', '3.7', '3.8', '3.9', '3.10', 'pypy-3.6', 'pypy-3.7' ]
+    name: Python ${{ matrix.python-version }} sample
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -18,17 +22,12 @@ jobs:
       - name: "LS again"
         run: ls -larth
       - name: "Tarball coverage"
-        run: tar zcvf coverage.tar.gz htmlcov
+        run: tar zcvf coverage-${{ matrix.python-version }}.tar.gz htmlcov
       - name: "Save: Coverage"
         uses: actions/upload-artifact@v2
         with:
           name: my-artifact
-          path: coverage.tar.gz
-      - name: "Save: Coverage folder"
-        uses: actions/upload-artifact@v2
-        with:
-          name: htmlcov
-          path: htmlcov
+          path: coverage-${{ matrix.python-version }}.tar.gz
       - name: "Test: mypy"
         run: mypy src/simple_discord
       - name: "Test: flake8"
