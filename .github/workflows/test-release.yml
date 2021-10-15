@@ -1,7 +1,7 @@
 name: Test Release
 on: workflow_dispatch
 jobs:
-  Test-Python:
+  Release-Python:
     runs-on: self-hosted
     name: Test Release
     steps:
