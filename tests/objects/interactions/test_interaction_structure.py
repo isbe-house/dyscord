@@ -2,7 +2,7 @@ from src.simple_discord.objects.snowflake import Snowflake
 from src.simple_discord.objects.interactions import InteractionStructure, Command, enumerations
 from . import samples
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 
 def test_button_interaction():
@@ -12,15 +12,25 @@ def test_button_interaction():
     assert hasattr(obj, 'data')
 
 
-@patch('src.simple_discord.client.api.api_v9.API_V9.get_user')
-def test_text_interaction(get_user_func):
-
-    get_user_func.return_value = samples.trigger_chat['data']['resolved']['users']['185846097284038656']
+@patch('src.simple_discord.client.api.API')
+def test_text_interaction(api_mock):
+    api_mock.get_user = AsyncMock(return_value=samples.trigger_chat['data']['resolved']['users']['185846097284038656'])
 
     data = samples.trigger_chat
     obj = InteractionStructure().from_dict(data)
     assert obj.application_id == Snowflake(data['application_id'])
     assert hasattr(obj, 'data')
+    api_mock.get_user.assert_called()
+
+    response = obj.generate_response()
+    ar = response.add_components()
+    ar.add_button(ar.BUTTON_STYLES.PRIMARY, 'foo', 'My Button')
+    ar.add_select_menu('bar', 'placeholder?')
+
+    followup = obj.generate_followup()
+    followup.generate('This is a followup message!', tts=True)
+
+    assert followup
 
 
 def test_message():

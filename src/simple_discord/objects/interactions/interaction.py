@@ -36,6 +36,7 @@ class InteractionStructure(BaseDiscordObject):
 
     def __init__(self):
         self._response_generated = False
+        self.id = None
 
     def from_dict(self, data: dict) -> 'InteractionStructure':
         self._log.info('Parsing  a InteractionStructure dict')
@@ -310,9 +311,9 @@ class InteractionResponse(BaseDiscordObject):
     def generate(self,
                  content: Optional[str] = None,
                  tts: Optional[bool] = None,
-                 flags: int = 0,
+                 ephemeral: bool = False,
                  ):
-        return self.data.generate(tts, content, flags)
+        return self.data.generate(tts, content, ephemeral)
 
     def add_components(self) -> 'ext_components.ActionRow':
         return self.data.add_components()
@@ -322,6 +323,9 @@ class InteractionResponse(BaseDiscordObject):
 
 
 class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder):
+
+    INTERACTION_CALLBACK_FLAGS = enumerations.INTERACTION_CALLBACK_FLAGS
+
     tts: Optional[bool]
     content: Optional[str]
     embeds: Optional[List['ext_embed.Embed']]  # TODO: Support embeds here.
@@ -358,11 +362,13 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_
     def generate(self,
                  tts: Optional[bool] = None,
                  content: Optional[str] = None,
-                 flags: int = 0,
+                 ephemeral: bool = False,
                  ):
         if tts is not None:
             self.tts = tts
         if content is not None:
             self.content = content
-        self.flags = flags
+        self.flags = 0
+        if ephemeral:
+            self.flags |= self.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         self.components = []
