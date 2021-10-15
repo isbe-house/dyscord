@@ -24,6 +24,11 @@ jobs:
         with:
           name: my-artifact
           path: coverage.tar.gz
+      - name: "Save: Coverage folder"
+        uses: actions/upload-artifact@v2
+        with:
+          name: htmlcov
+          path: htmlcov
       - name: "Test: mypy"
         run: mypy src/simple_discord
       - name: "Test: flake8"
