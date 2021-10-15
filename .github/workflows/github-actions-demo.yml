@@ -20,6 +20,8 @@ jobs:
       - name: Pydocsstyle
         run: pydocstyle --ignore=D300 src
         continue-on-error: true
+      - name: "LS cwd"
+        run: ls -lart
       - name: "Tarball coverage"
         run: tar xzf coverage.tar.gz htmlcov
       - name: "Save: Coverage"
