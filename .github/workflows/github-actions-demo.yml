@@ -13,15 +13,8 @@ jobs:
       - run: python3 -m pip install -r requirements.txt
       - name: "Test: pytest"
         run: python3 -m pytest --cov=src --durations=5 -vv --color=yes tests
-      - name: "Test: mypy"
-        run: mypy src/simple_discord
-      - name: "Test: flake8"
-        run: flake8
-      - name: Pydocsstyle
-        run: pydocstyle --ignore=D300 src
-        continue-on-error: true
-      - name: "LS cwd"
-        run: ls -lart
+      - name: "Produce coverage HTML"
+        run: coverage html
       - name: "Tarball coverage"
         run: tar xzf coverage.tar.gz htmlcov
       - name: "Save: Coverage"
@@ -29,3 +22,10 @@ jobs:
         with:
           name: my-artifact
           path: coverage.tar.gz
+      - name: "Test: mypy"
+        run: mypy src/simple_discord
+      - name: "Test: flake8"
+        run: flake8
+      - name: Pydocsstyle
+        run: pydocstyle --ignore=D300 src
+        continue-on-error: true
