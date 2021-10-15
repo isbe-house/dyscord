@@ -100,11 +100,40 @@ async def register_commands(client: simple_discord.client.DiscordClient, message
     new_command.add_option_typed(new_command.COMMAND_OPTION.NUMBER, 'float', 'Float something BIG', required=False)
 
     new_command.validate()
-    from pprint import pprint
-    pprint(new_command.to_dict())
 
     registration = await new_command.register_to_guild(guild)
     log.info(f'Registration: {registration}')
+
+    new_command = Command()
+    new_command.generate(
+        'hunt',
+        'Hunt Showdown.',
+        new_command.COMMAND_TYPE.CHAT_INPUT,
+    )
+
+    scg = new_command.add_option_sub_command_group(
+        'stats',
+        'Statistics about hunt.',
+    )
+    sc = scg.add_option_sub_command(
+        'game',
+        'Stats from a game',
+    )
+
+    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'p1-stars', 'Stars from player 1', required=True)
+    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'p2-stars', 'Stars from player 1', required=False)
+    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'p3-stars', 'Stars from player 1', required=False)
+
+    sc.add_option_typed(sc.COMMAND_OPTION.BOOLEAN, 'survived', 'Did you survive?', required=False)
+    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'bounties', 'How many bounties did the team extract?', required=False)
+    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'kills', 'How many kills by the team?', required=False)
+    co = sc.add_option_typed(sc.COMMAND_OPTION.STRING, 'map', 'Which map?', required=False)
+    co.add_choice('lawson-delta', 'Lawson Delta')
+    co.add_choice('stillwater-bayouu', 'Stillwater Bayouu')
+    co.add_choice('desalle', 'DeSalle')
+
+    new_command.validate()
+    registration = await new_command.register_to_guild(guild)
 
 
 async def list_commands(client):
@@ -165,5 +194,6 @@ async def parse_message(client, message: objects.Message, raw_message):
 
 simple_discord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
 simple_discord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)
+simple_discord.helper.CommandHandler.register_guild_callback('hunt', command_functions.hunt)
 
 client.run()

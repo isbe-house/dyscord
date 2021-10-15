@@ -311,6 +311,10 @@ class CommandOptionsBase(abc.ABC, BaseDiscordObject):
             for choice in self.choices:
                 choice.validate()
 
+        if hasattr(self, 'options') and self.options is not None:
+            for option in self.options:
+                option.validate()
+
     def total_characters(self) -> int:
         '''Get the total characters in the name, description, and value.'''
         total_characters = 0
@@ -342,6 +346,9 @@ class CommandOptions(CommandOptionsBase):
         self.choices.append(new_choice)
 
         return new_choice
+
+    def validate(self):
+        return super().validate()
 
 
 class CommandOptionSubCommandGroup(CommandOptionsBase):
