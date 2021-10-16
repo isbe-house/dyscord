@@ -21,10 +21,9 @@ jobs:
           # python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
       - name: Set up GCC
         if: ${{ contains(matrix.python-version, 'pypy') }}
-        uses: egor-tensin/setup-gcc@v1
-        with:
-          version: latest
-          platform: x64
+        run: |
+          apt update;
+          apt install -y gcc;
       - run: python3 -m pip install --upgrade  pip
       - run: python3 -m pip install -r requirements_test.txt
       - run: python3 -m pip install -r requirements.txt
