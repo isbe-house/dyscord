@@ -18,6 +18,7 @@ from src.simple_discord.objects.guild import Guild
 
 from src import simple_discord
 from demo import command_functions
+from demo.mongo import Mongo
 
 log = Log()
 log.setLevel(logging.INFO)
@@ -168,6 +169,15 @@ async def send_buttons(client, chan_id):
 async def test(client, message: objects.Message):
     await API.get_user('185846097284038656')
 
+@client.register_handler('ANY')
+async def handle_any(client: simple_discord.client.DiscordClient, object, raw_object):
+
+    m_client = Mongo.client
+    type = raw_object.get('t', 'NA')
+    type = f'type_{type}'
+    m_client.dev.raw_events.insert_one(raw_object)
+    m_client.dev[type].insert_one(raw_object)
+
 
 @client.register_handler('MESSAGE_CREATE')
 async def parse_message(client, message: objects.Message, raw_message):
@@ -196,4 +206,5 @@ simple_discord.helper.CommandHandler.register_guild_callback('test', command_fun
 simple_discord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)
 simple_discord.helper.CommandHandler.register_guild_callback('hunt', command_functions.hunt)
 
+Mongo.connect()
 client.run()

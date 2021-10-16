@@ -27,6 +27,10 @@ services:
             - discord_client_secret
         environment:
             - PYTHONDONTWRITEBYTECODE=1
+            - "MONGO_URL=mongodb://root:root@mongo:27017/admin"
+        depends_on:
+            - mongo
+            - mongo-express
 
     simple-discord-tests:
         build:
@@ -66,3 +70,22 @@ services:
             - TWINE_USERNAME=${TWINE_TEST_USERNAME}
             - TWINE_PASSWORD=${TWINE_TEST_PASSWORD}
         user: "${UID}:${GID}"
+
+    # For local development.
+    mongo:
+        image: mongo:4.4.3
+        restart: always
+        command: --wiredTigerCacheSizeGB 0.25
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: root
+
+    # For local development.
+    mongo-express:
+        image: mongo-express
+        restart: always
+        ports:
+            - 8100:8081
+        environment:
+            ME_CONFIG_MONGODB_ADMINUSERNAME: root
+            ME_CONFIG_MONGODB_ADMINPASSWORD: root

@@ -21,7 +21,7 @@ from .. import helper
 
 from ..version import __version__
 
-from .events import on_channel_create, on_channel_delete, on_channel_pins_update, on_channel_update, on_guild_ban_add, on_guild_ban_remove, on_guild_create,\
+from .events import on_any, on_channel_create, on_channel_delete, on_channel_pins_update, on_channel_update, on_guild_ban_add, on_guild_ban_remove, on_guild_create,\
     on_guild_delete, on_guild_emojis_update, on_guild_integrations_update, on_guild_member_add, on_guild_member_remove, on_guild_member_update,\
     on_guild_role_create, on_guild_role_delete, on_guild_role_update, on_guild_stickers_update, on_guild_update, on_integration_create, on_integration_delete,\
     on_integration_update, on_invite_create, on_invite_delete, on_message_create, on_message_delete, on_message_delete_bulk, on_message_reaction_add,\
@@ -334,27 +334,21 @@ class DiscordClient:
             return
 
         elif event_type == 'CHANNEL_CREATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'CHANNEL_DELETE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'CHANNEL_PINS_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'CHANNEL_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_BAN_ADD':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_BAN_REMOVE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_CREATE':
@@ -364,67 +358,51 @@ class DiscordClient:
             # pprint(data['d'])
 
         elif event_type == 'GUILD_DELETE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_EMOJIS_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_INTEGRATIONS_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_MEMBER_ADD':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_MEMBER_REMOVE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_MEMBER_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_ROLE_CREATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_ROLE_DELETE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_ROLE_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_STICKERS_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTEGRATION_CREATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTEGRATION_DELETE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTEGRATION_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INVITE_CREATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INVITE_DELETE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_CREATE':
@@ -433,87 +411,66 @@ class DiscordClient:
             await self.on_message_create(obj, data['d'])
 
         elif event_type == 'MESSAGE_DELETE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_DELETE_BULK':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_REACTION_ADD':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_REACTION_REMOVE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_REACTION_REMOVE_ALL':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_REACTION_REMOVE_EMOJI':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'PRESENCE_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'STAGE_INSTANCE_CREATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'STAGE_INSTANCE_DELETE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'STAGE_INSTANCE_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_CREATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_DELETE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_LIST_SYNC':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_MEMBER_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_MEMBERS_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'TYPING_START':
-            # pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'VOICE_STATE_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'WEBHOOKS_UPDATE':
-            pprint(data)
             self._log.warning(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTERACTION_CREATE':
-            pprint(data)
             obj = objects.interactions.InteractionStructure().from_dict(data['d'])
             self._log.info('Saw INTERACTION_CREATE event.')
             await helper.CommandHandler.command_handler(self, obj)
@@ -527,9 +484,9 @@ class DiscordClient:
         if obj is not None:
             for user_function in DiscordClient._wrapper_registrations[event_type]:
                 if asyncio.iscoroutinefunction(user_function):
-                    await user_function(self, obj, data['d'])
+                    await user_function(self, obj, data)
                 else:
-                    user_function(self, obj, data['d'])
+                    user_function(self, obj, data)
 
             for user_class in DiscordClient._wrapper_class_registrations:
                 if hasattr(user_class, f'on_{event_type.lower()}'):
@@ -539,11 +496,32 @@ class DiscordClient:
                         warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
 
                     if asyncio.iscoroutinefunction(user_function):
-                        await user_function(user_class, self, obj, data['d'])
+                        await user_function(user_class, self, obj, data)
                     else:
-                        user_function(user_class, self, obj, data['d'])
+                        user_function(user_class, self, obj, data)
+
+         # Handle the special case of the ANY event.
+        for user_function in DiscordClient._wrapper_registrations['ANY']:
+            if asyncio.iscoroutinefunction(user_function):
+                await user_function(self, obj, data)
+            else:
+                user_function(self, obj, data)
+
+        for user_class in DiscordClient._wrapper_class_registrations:
+            if hasattr(user_class, f'on_any'):
+                user_function = getattr(user_class, f'on_{event_type.lower()}')
+
+                if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
+                    warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
+
+                if asyncio.iscoroutinefunction(user_function):
+                    await user_function(user_class, self, obj, data)
+                else:
+                    user_function(user_class, self, obj, data)
+
 
     # Register all out events
+    on_any = on_any
     on_channel_create = on_channel_create
     on_channel_delete = on_channel_delete
     on_channel_pins_update = on_channel_pins_update
@@ -594,7 +572,7 @@ class DiscordClient:
     @classmethod
     def register_handler(cls, event: str):
         '''Register a given function to a given event string.'''
-        if not hasattr(objects.DISCORD_EVENTS, event):
+        if not hasattr(objects.DISCORD_EVENTS, event) and event != 'ANY':
             raise ValueError(f'Attempted to bind to unknown event \'{event}\', must be exact match for existing {objects.DISCORD_EVENTS} entry.')
 
         def func_wrapper(func):

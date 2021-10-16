@@ -1,5 +1,19 @@
+from typing import Optional
+
 from ..objects.base_object import BaseDiscordObject
 from .. import objects
+
+
+async def on_any(self, object: Optional[BaseDiscordObject], raw_event: dict):
+    '''Called for every event.
+
+    Arguments:
+        self (DiscordClient): Client
+        object (BaseDiscordObject): Python object representing the event.
+        raw_object (dict): Raw dict from discord API.
+
+    '''
+    pass
 
 
 async def on_channel_create(self, object: BaseDiscordObject, raw_object: dict):

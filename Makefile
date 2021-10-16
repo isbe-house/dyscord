@@ -6,39 +6,39 @@ SHELL := /bin/bash
 
 # up: ## Start all containers
 # 	docker-compose \
-#                 -f  docker-compose.yaml \
-#                 up -d --build simple-discord
+#         -f  docker-compose.yaml \
+#         up -d --build simple-discord
 
 run: ## Run container connected
 	make down
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm simple-discord
+        -f  docker-compose.yaml \
+        run --rm simple-discord
 
 build:
 	docker-compose \
-                -f docker-compose.yaml \
-                build
+        -f docker-compose.yaml \
+        build
 
 down: ## Stop all containers
 	docker-compose \
-                -f  docker-compose.yaml \
-                down
+        -f  docker-compose.yaml \
+        down
 
 docs: build build-docs ## Stop all containers
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm --service-ports documentation
+        -f  docker-compose.yaml \
+        run --rm --service-ports documentation
 
 build-docs: build
 	docker-compose \
-                -f  docker-compose.yaml \
-                run --rm documentation mkdocs build
+        -f  docker-compose.yaml \
+        run --rm documentation mkdocs build
 
 # logs: ## Display logs (follow)
 # 	docker-compose \
-#                 -f  docker-compose.yaml \
-#                 logs --follow --tail=20
+#         -f  docker-compose.yaml \
+#         logs --follow --tail=20
 
 clean: ## Delete volumes
 	docker system prune -f
@@ -48,21 +48,17 @@ clean: ## Delete volumes
 
 debug: ## Start interactive python shell to debug with
 	docker-compose \
-                -f docker-compose.yaml \
-                run --rm simple-discord-tests /bin/bash
-                # run --rm simple-discord-tests /bin/bash
+        -f docker-compose.yaml \
+        run --rm simple-discord-tests /bin/bash
+        # run --rm simple-discord-tests /bin/bash
 
-# start-debian: build ## Start interactive python shell to debug with
-# 	docker-compose \
-#                 -f docker-compose.yaml \
-#                 run --rm debian /bin/bash
 jupyter: ## Start a jupyter environment for debugging and such
 	docker-compose \
-                -f tools/jupyter/docker-compose.yaml \
-                build
+        -f tools/jupyter/docker-compose.yaml \
+        build
 	docker-compose \
-                -f  tools/jupyter/docker-compose.yaml \
-                run --rm simple-discord-jupyter
+        -f  tools/jupyter/docker-compose.yaml \
+        run --rm simple-discord-jupyter
 
 test: ## Run all tests
 	make build
@@ -71,6 +67,7 @@ test: ## Run all tests
 	make test-mypy
 	make test-flake8
 #	make test-doc-strings
+	make test-review
 
 test-pytest:
 	docker-compose \
@@ -81,7 +78,6 @@ test-pytest:
         -f  docker-compose.yaml \
         run --rm simple-discord-tests \
         coverage html
-
 
 test-mypy:
 	docker-compose \
@@ -100,6 +96,12 @@ test-doc-strings:
         -f  docker-compose.yaml \
         run --rm simple-discord-tests \
         pydocstyle --add-ignore=D407,D300,D203,D100,D104 --convention=google src
+
+test-review:
+	docker-compose \
+        -f  docker-compose.yaml \
+        run --rm simple-discord-tests \
+        pip-review
 
 ######################################################################################################################################################
 
