@@ -49,7 +49,7 @@ clean: ## Delete volumes
 debug: ## Start interactive python shell to debug with
 	docker-compose \
                 -f docker-compose.yaml \
-                run --rm releaser /bin/bash
+                run --rm simple-discord-tests /bin/bash
                 # run --rm simple-discord-tests /bin/bash
 
 # start-debian: build ## Start interactive python shell to debug with
