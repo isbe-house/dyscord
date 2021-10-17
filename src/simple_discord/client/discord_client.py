@@ -73,7 +73,7 @@ class DiscordClient:
                           guild_bans: bool = False,
                           guild_emoji_and_stickers: bool = False,
                           guild_integrations: bool = False,
-                          guild_wehooks: bool = False,
+                          guild_webhooks: bool = False,
                           guild_invites: bool = False,
                           guild_voice_states: bool = False,
                           guild_presences: bool = False,
@@ -92,7 +92,7 @@ class DiscordClient:
             guild_bans (bool): TBD
             guild_emoji_and_stickers (bool): TBD
             guild_integrations (bool): TBD
-            guild_wehooks (bool): TBD
+            guild_webhooks (bool): TBD
             guild_invites (bool): TBD
             guild_voice_states (bool): TBD
             guild_presences (bool): TBD
@@ -114,7 +114,7 @@ class DiscordClient:
             self.intent += Intents.GUILD_EMOJIS_AND_STICKERS
         if guild_integrations:
             self.intent += Intents.GUILD_INTEGRATIONS
-        if guild_wehooks:
+        if guild_webhooks:
             self.intent += Intents.GUILD_WEBHOOKS
         if guild_invites:
             self.intent += Intents.GUILD_INVITES
