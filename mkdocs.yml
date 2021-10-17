@@ -1,4 +1,4 @@
-site_name: Simple Discord
+site_name: Dyscord
 
 nav:
   - Index: index.md
@@ -14,3 +14,4 @@ plugins:
   - autorefs:
 theme:
   name: "readthedocs"
+  # name: "material"

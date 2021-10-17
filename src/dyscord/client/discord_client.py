@@ -333,22 +333,22 @@ class DiscordClient:
             return
 
         elif event_type == 'CHANNEL_CREATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'CHANNEL_DELETE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'CHANNEL_PINS_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'CHANNEL_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_BAN_ADD':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_BAN_REMOVE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_CREATE':
             # Cache in guild
@@ -357,52 +357,52 @@ class DiscordClient:
             # pprint(data['d'])
 
         elif event_type == 'GUILD_DELETE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_EMOJIS_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_INTEGRATIONS_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_MEMBER_ADD':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_MEMBER_REMOVE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_MEMBER_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_ROLE_CREATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_ROLE_DELETE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_ROLE_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_STICKERS_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTEGRATION_CREATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTEGRATION_DELETE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTEGRATION_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INVITE_CREATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INVITE_DELETE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_CREATE':
             obj = objects.Message()
@@ -410,64 +410,64 @@ class DiscordClient:
             await self.on_message_create(obj, data['d'])
 
         elif event_type == 'MESSAGE_DELETE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_DELETE_BULK':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_REACTION_ADD':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_REACTION_REMOVE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_REACTION_REMOVE_ALL':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_REACTION_REMOVE_EMOJI':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'PRESENCE_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'STAGE_INSTANCE_CREATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'STAGE_INSTANCE_DELETE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'STAGE_INSTANCE_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_CREATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_DELETE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_LIST_SYNC':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_MEMBER_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_MEMBERS_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'TYPING_START':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'VOICE_STATE_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'WEBHOOKS_UPDATE':
-            self._log.warning(f'Encountered unhandled event {event_type}')
+            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTERACTION_CREATE':
             obj = objects.interactions.InteractionStructure().from_dict(data['d'])

@@ -4,6 +4,9 @@ export GID=$(shell id -g)
 export HOST_ADDRESS=$(shell hostname -f)
 SHELL := /bin/bash
 
+export TWINE_USERNAME=${TWINE_USERNAME:-"UNDEFINED"}
+export TWINE_PASSWORD=${TWINE_PASSWORD:-"UNDEFINED"}
+
 # up: ## Start all containers
 # 	docker-compose \
 #         -f  docker-compose.yaml \
@@ -107,15 +110,19 @@ test-review:
 dist: clean
 	make build-docs
 
-release-test: dist
+release-test:
 	docker-compose \
 		-f  docker-compose.yaml \
 		run --rm releaser \
-		python3 -m build
-	docker-compose \
-		-f  docker-compose.yaml \
-		run --rm releaser \
-		python3 -m twine upload --repository testpypi dist/*
+		printenv
+	# docker-compose \
+	# 	-f  docker-compose.yaml \
+	# 	run --rm releaser \
+	# 	python3 -m build
+	# docker-compose \
+	# 	-f  docker-compose.yaml \
+	# 	run --rm releaser \
+	# 	python3 -m twine upload --repository testpypi dist/*
 
 release:
 	docker-compose \
