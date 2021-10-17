@@ -500,7 +500,7 @@ class DiscordClient:
                     else:
                         user_function(user_class, self, obj, data)
 
-         # Handle the special case of the ANY event.
+        # Handle the special case of the ANY event.
         for user_function in DiscordClient._wrapper_registrations['ANY']:
             if asyncio.iscoroutinefunction(user_function):
                 await user_function(self, obj, data)
@@ -508,7 +508,7 @@ class DiscordClient:
                 user_function(self, obj, data)
 
         for user_class in DiscordClient._wrapper_class_registrations:
-            if hasattr(user_class, f'on_any'):
+            if hasattr(user_class, 'on_any'):
                 user_function = getattr(user_class, f'on_{event_type.lower()}')
 
                 if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
@@ -518,7 +518,6 @@ class DiscordClient:
                     await user_function(user_class, self, obj, data)
                 else:
                     user_function(user_class, self, obj, data)
-
 
     # Register all out events
     on_any = on_any
