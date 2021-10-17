@@ -3,8 +3,6 @@
 # Handle the weirdness of our docker env first
 import sys
 
-from src.dyscord.objects.snowflake import Snowflake
-
 sys.path.insert(0, '/usr/src/app/')
 
 # Do normal imports and run!
@@ -15,6 +13,7 @@ from src.dyscord import objects, utilities
 from src.dyscord.client import DiscordClient, API
 from src.dyscord.objects.interactions import Command
 from src.dyscord.objects.message import Message
+from src.dyscord.objects import Snowflake
 from src.dyscord.utilities import Log
 from src.dyscord.objects.guild import Guild
 
