@@ -14,7 +14,7 @@ setuptools.setup(
     version=main_ns['__version__'],
     author="John Murray",
     author_email="jmurrayufo@gmail.com",
-    description="A simple implementation of the discord API",
+    description="A simple implementation of the discord API.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jmurrayufo/dyscord",
