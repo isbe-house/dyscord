@@ -19,9 +19,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           # python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
-      - run: python3 -m pip install --upgrade  pip
-      - run: python3 -m pip install -r requirements_test.txt
-      - run: python3 -m pip install -r requirements.txt
+      - run: python3 -m pip install --user --upgrade  pip
+      - run: python3 -m pip install --user -r requirements_test.txt
+      - run: python3 -m pip install --user -r requirements.txt
       - name: "Test: pytest"
         run: python3 -m pytest --cov=src --durations=5 -vv --color=yes tests
       - name: "Produce coverage HTML"
