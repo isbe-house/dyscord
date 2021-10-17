@@ -2,6 +2,7 @@ import logging
 
 
 class Log:
+    '''Generalized logging class for easy import.'''
 
     log = logging.getLogger('simple-discord')
     log.setLevel(logging.INFO)
@@ -11,4 +12,5 @@ class Log:
     log.addHandler(_ch)
 
     def __getattr__(self, name):
+        '''Map in the logging class attributes.'''
         return getattr(self.log, name)

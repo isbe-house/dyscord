@@ -93,7 +93,7 @@ class Embed(BaseDiscordObject):
             self.color = color
 
     def validate(self):  # noqa: C901
-
+        '''Validate object is prepared for dispatch to discord.'''
         total_length = 0
 
         if hasattr(self, 'title'):
@@ -291,7 +291,7 @@ class EmbedFooter(BaseDiscordObject):
         return new_dict
 
     def validate(self):
-
+        '''Validate object is prepared for dispatch to discord.'''
         assert len(self.text) <= 2048,\
             f'Got invalid length of text, {len(self.text)} elements long. Max is 2048.'
 
@@ -332,7 +332,7 @@ class EmbedImage(BaseDiscordObject):
         return new_dict
 
     def validate(self):
-
+        '''Validate object is prepared for dispatch to discord.'''
         assert type(self.url) is str,\
             f'Got invalid type {type(self.url)} for url. Must be str.'
         assert self.url.startswith(('http://', 'https://')),\
@@ -377,7 +377,7 @@ class EmbedThumbnail(BaseDiscordObject):
         return new_dict
 
     def validate(self):
-
+        '''Validate object is prepared for dispatch to discord.'''
         assert type(self.url) is str,\
             f'Got invalid type {type(self.url)} for url. Must be str.'
         assert self.url.startswith(('http://', 'https://')),\
@@ -423,7 +423,7 @@ class EmbedVideo(BaseDiscordObject):
         return new_dict
 
     def validate(self):
-
+        '''Validate object is prepared for dispatch to discord.'''
         if hasattr(self, 'url'):
             assert type(self.url) is str,\
                 f'Got invalid type {type(self.url)} for url. Must be str.'
@@ -460,6 +460,7 @@ class EmbedProvider(BaseDiscordObject):
         return new_dict
 
     def validate(self):
+        '''Validate object is prepared for dispatch to discord.'''
         if hasattr(self, 'name'):
             assert type(self.name) is str,\
                 f'Got invalid type {type(self.name)} for name. Must be str.'
@@ -497,6 +498,7 @@ class EmbedAuthor(BaseDiscordObject):
         return new_dict
 
     def validate(self):
+        '''Validate object is prepared for dispatch to discord.'''
         if hasattr(self, 'name'):
             assert type(self.name) is str,\
                 f'Got invalid type {type(self.name)} for name. Must be str.'
@@ -542,6 +544,7 @@ class EmbedField(BaseDiscordObject):
         return new_dict
 
     def validate(self):
+        '''Validate object is prepared for dispatch to discord.'''
         if hasattr(self, 'name'):
             assert type(self.name) is str,\
                 f'Got invalid type {type(self.name)} for name. Must be str.'

@@ -171,9 +171,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         return new_dict
 
     def validate(self):
-        '''
-        Validate a message for sending to discord.
-        '''
+        '''Validate object is prepared for dispatch to discord.'''
         assert hasattr(self, 'content') or hasattr(self, 'embeds') or hasattr(self, 'file'),\
             'Message must have a content, embeds, or file to be valid for sending.'
 

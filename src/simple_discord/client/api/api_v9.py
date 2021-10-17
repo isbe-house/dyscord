@@ -254,6 +254,7 @@ class API_V9:
                                                        command_id: 'objects.Snowflake',
                                                        command_structure: dict,
                                                        ):
+        '''TODO: Copy from api docs.'''
         # PUT /applications/{application.id}/guilds/{guild.id}/commands/{command.id}
         raise NotImplementedError('TBD')
 
@@ -267,6 +268,7 @@ class API_V9:
                                           interaction_token: str,
                                           data_structure: dict,
                                           ) -> None:
+        '''TODO: Copy from api docs.'''
         url = f'{cls.BASE_URL}/interactions/{interaction_id}/{interaction_token}/callback'
 
         async with cls._lock:
@@ -286,6 +288,7 @@ class API_V9:
     async def get_original_interaction_response(cls,
                                                 interaction_token: str,
                                                 ) -> dict:
+        '''TODO: Copy from api docs.'''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/@origional'
 
         async with cls._lock:
@@ -302,12 +305,12 @@ class API_V9:
                                                  interaction_token: str,
                                                  data_structure: dict,
                                                  ) -> None:
-        '''Edit Original Interaction Response
+        '''Edit Original Interaction Response.
 
         PATCH/webhooks/{application.id}/{interaction.token}/messages/@original
 
-        Edits the initial Interaction response. Functions the same as Edit Webhook Message.'''
-
+        Edits the initial Interaction response. Functions the same as Edit Webhook Message.
+        '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/@original'
 
         async with cls._lock:
@@ -323,12 +326,12 @@ class API_V9:
     async def delete_original_interaction_response(cls,
                                                    interaction_token: str,
                                                    ) -> None:
-        '''Delete Original Interaction Response
+        '''Delete Original Interaction Response.
 
         DELETE/webhooks/{application.id}/{interaction.token}/messages/@original
 
-        Deletes the initial Interaction response. Returns 204 on success.'''
-
+        Deletes the initial Interaction response. Returns 204 on success.
+        '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/@original'
 
         async with cls._lock:
@@ -345,14 +348,14 @@ class API_V9:
                                       interaction_token: str,
                                       data_structure: dict,
                                       ) -> dict:
-        '''Create Followup Message
+        '''Create Followup Message.
 
         POST/webhooks/{application.id}/{interaction.token}
 
         Create a followup message for an Interaction. Functions the same as Execute Webhook, but wait is always true,
         and flags can be set to 64 in the body to send an ephemeral message. The thread_id query parameter is not required
-        (and is furthermore ignored) when using this endpoint for interaction followups.'''
-
+        (and is furthermore ignored) when using this endpoint for interaction followups.
+        '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}'
 
         async with cls._lock:
@@ -374,12 +377,12 @@ class API_V9:
                                    interaction_token: str,
                                    message_id: 'Snowflake',
                                    ) -> dict:
-        '''Get Followup Message
+        '''Get Followup Message.
 
         GET/webhooks/{application.id}/{interaction.token}/messages/{message.id}
 
-        Returns a followup message for an Interaction. Functions the same as Get Webhook Message. Does not support ephemeral followups.'''
-
+        Returns a followup message for an Interaction. Functions the same as Get Webhook Message. Does not support ephemeral followups.
+        '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/{message_id}'
 
         async with cls._lock:
@@ -401,10 +404,12 @@ class API_V9:
                                     message_id: 'Snowflake',
                                     data_structure: dict,
                                     ) -> dict:
-        '''Edit Followup Message
-        PATCH/webhooks/{application.id}/{interaction.token}/messages/{message.id}
-        Edits a followup message for an Interaction. Functions the same as Edit Webhook Message. Does not support ephemeral followups.'''
+        '''Edit Followup Message.
 
+        PATCH/webhooks/{application.id}/{interaction.token}/messages/{message.id}
+
+        Edits a followup message for an Interaction. Functions the same as Edit Webhook Message. Does not support ephemeral followups.
+        '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/{message_id}'
 
         async with cls._lock:
@@ -472,7 +477,11 @@ class API_V9:
         return r.json()
 
     @classmethod
-    async def create_message(cls, channel_id: 'objects.Snowflake', message_payload: dict):
+    async def create_message(cls,
+                             channel_id: 'objects.Snowflake',
+                             message_payload: dict,
+                             ):
+        '''TODO: Copy from api docs.'''
         url = f'{cls.BASE_URL}/channels/{channel_id}/messages'
 
         async with cls._lock:
