@@ -1,11 +1,13 @@
 from typing import Union, Optional
+from abc import ABC
 
 from .. import utilities
 from ..client import api
 from . import snowflake, message as ext_message, enumerations
 
 
-class Channel:
+class Channel(ABC):
+    '''Abstract base class for Channels.'''
 
     _log = utilities.Log()
 
@@ -17,18 +19,23 @@ class Channel:
     type: 'enumerations.CHANNEL_TYPES'
 
     def __str__(self):
+        '''Return string representation.'''
         return f'{self.__class__.__name__}(name=\'{self.name}\', type={self.type.name})'
 
     def __repr__(self):
+        '''Return string representation.'''
         return self.__str__()
 
     def cache(self):
+        '''Deprecated caching function.'''
         utilities.Cache().add(self)
 
     def ingest_raw_dict(self, data, parent_guild=None):
+        '''Parse a Channel from an API compliant dict.'''
         raise NotImplementedError()
 
-    def from_dict(self, data, parent_guild=None):
+    def from_dict(self, data, parent_guild=None) -> 'Channel':
+        '''Parse a Channel from an API compliant dict.'''
         self.id = snowflake.Snowflake(data['id'])
         self.type = self.CHANNEL_TYPES(data['type'])
         self.name = data.get('name', '<DirectMessage>')
@@ -36,10 +43,12 @@ class Channel:
 
     @classmethod
     async def get_channel(cls, channel_id: snowflake.Snowflake):
+        '''Invoke cache or API to get a channel of given channel_id.'''
         return ChannelImporter().ingest_raw_dict(await api.API.get_channel(channel_id))
 
 
 class TextChannel(Channel):
+    '''Text channel. May be public or private depending on privacy settings.'''
 
     guild_id: 'snowflake.Snowflake'
     # permission_overwrites: list
@@ -51,6 +60,7 @@ class TextChannel(Channel):
     default_auto_archive_duration: int
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "TextChannel":
+        '''Parse a TextChannel from an API compliant dict.'''
         super().from_dict(data, parent_guild)
         self.from_dict(data, parent_guild=None)
 
@@ -58,6 +68,7 @@ class TextChannel(Channel):
         return self
 
     def from_dict(self, data, parent_guild=None):
+        '''Parse a TextChannel from an API compliant dict.'''
         self.id = snowflake.Snowflake(data['id'])
         if 'guild_id' in data:
             self.guild_id = snowflake.Snowflake(data['guild_id'])
@@ -80,6 +91,7 @@ class TextChannel(Channel):
         return self
 
     async def send_message(self, message: Union[ext_message.Message, str]) -> 'ext_message.Message':
+        '''Send message to this channel. Will also accept a string.'''
         if type(message) is ext_message.Message:
             message.validate()
         elif type(message) is str:
@@ -94,8 +106,10 @@ class TextChannel(Channel):
 
 
 class NewsChannel(Channel):
+    '''News channel.'''
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "NewsChannel":
+        '''Parse a NewsChannel from an API compliant dict.'''
         super().from_dict(data, parent_guild)
 
         self._log.debug("Ingest called.")
@@ -104,8 +118,10 @@ class NewsChannel(Channel):
 
 
 class VoiceChannel(Channel):
+    '''Voice channel.'''
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "VoiceChannel":
+        '''Parse a VoiceChannel from an API compliant dict.'''
         super().from_dict(data, parent_guild)
 
         self._log.debug("Ingest called.")
@@ -114,8 +130,10 @@ class VoiceChannel(Channel):
 
 
 class DMChannel(Channel):
+    '''Direct Message with a specific user.'''
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "DMChannel":
+        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
         super().from_dict(data, parent_guild)
 
         self._log.debug("Ingest called.")
@@ -124,8 +142,10 @@ class DMChannel(Channel):
 
 
 class GroupDMChannel(Channel):
+    '''DM with several users.'''
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "GroupDMChannel":
+        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
         super().from_dict(data, parent_guild)
 
         self._log.debug("Ingest called.")
@@ -134,8 +154,10 @@ class GroupDMChannel(Channel):
 
 
 class GuildPublicThread(Channel):
+    '''Public thread.'''
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "GuildPublicThread":
+        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
         super().from_dict(data, parent_guild)
 
         self._log.debug("Ingest called.")
@@ -144,8 +166,10 @@ class GuildPublicThread(Channel):
 
 
 class GuildPrivateThread(Channel):
+    '''Private thread.'''
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "GuildPrivateThread":
+        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
         super().from_dict(data, parent_guild)
 
         self._log.debug("Ingest called.")
@@ -154,8 +178,10 @@ class GuildPrivateThread(Channel):
 
 
 class CategoryChannel(Channel):
+    '''Not a text channel, used for grouping servers in discord's GUI.'''
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "CategoryChannel":
+        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
         super().from_dict(data, parent_guild)
 
         self._log.debug("Ingest called.")
@@ -164,8 +190,10 @@ class CategoryChannel(Channel):
 
 
 class StoreChannel(Channel):
+    '''Channel to sell things in.'''
 
     def ingest_raw_dict(self, data, parent_guild=None) -> "StoreChannel":
+        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
         super().from_dict(data, parent_guild)
 
         self._log.debug("Ingest called.")
@@ -174,13 +202,26 @@ class StoreChannel(Channel):
 
 
 class ChannelImporter:
+    '''Dynamic Channel identifier and parser.'''
+
     @classmethod
-    def ingest_raw_dict(cls, data, parent_guild=None) -> "Channel":
+    def ingest_raw_dict(cls, data, parent_guild=None) -> 'Channel':
+        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
         return cls.from_dict(data, parent_guild)
 
     @classmethod
-    def from_dict(cls, data, parent_guild=None) -> "Channel":
-        new_channel: Channel
+    def from_dict(cls, data, parent_guild=None) -> 'Union[TextChannel, DMChannel, VoiceChannel, GroupDMChannel, GuildPublicThread, GuildPrivateThread, CategoryChannel, NewsChannel, StoreChannel]':
+        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
+        new_channel: Union[TextChannel,
+                           DMChannel,
+                           VoiceChannel,
+                           GroupDMChannel,
+                           GuildPublicThread,
+                           GuildPrivateThread,
+                           CategoryChannel,
+                           NewsChannel,
+                           StoreChannel,
+                           ]
 
         if data["type"] == Channel.CHANNEL_TYPES.GUILD_TEXT:
             new_channel = TextChannel()

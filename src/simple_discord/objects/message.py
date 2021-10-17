@@ -53,11 +53,12 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     def __init__(self,
                  content: str = None
                  ):
+        '''Init.'''
         if content is not None:
             self.content = content
 
     def __getattr__(self, name):
-
+        '''Do dynamic lookup on various fields that may not be populated, but have valid representations in the API.'''
         if name == 'channel' and 'channel_id' in self.__dict__:
             try:
                 channel = cache.Cache().get(self.channel_id)
@@ -85,9 +86,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         raise AttributeError(f'Failed to find \'{name}\'')
 
     def ingest_raw_dict(self, data) -> 'Message':
-        '''
-        Ingest and cache a given object for future use.
-        '''
+        '''Ingest and cache a given object for future use.'''
         self.from_dict(data)
 
         # I do not believe we need to cache these at this time.
@@ -95,9 +94,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         return self
 
     def from_dict(self, data: dict) -> 'Message':
-        '''
-        Parse an object from a dictionary and return it.
-        '''
+        '''Parse a Message from an API compliant dict.'''
         # Mandatory Fields
         self.attachments = list()
         for attachment in data['attachments']:
@@ -138,15 +135,11 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         return self
 
     def cache(self):
-        '''
-        Sav object to the cache for faster recall in the future.
-        '''
+        '''Sav object to the cache for faster recall in the future.'''
         raise NotImplementedError(f'{__class__.__name__} does not yet implement this function.')
 
     def to_sendable_dict(self) -> dict:
-        '''
-        Sending a message only allows a subset of attributes. Ignore anything else about this message when producing that dict.
-        '''
+        '''Sending a message only allows a subset of attributes. Ignore anything else about this message when producing that dict.'''
         new_dict: Dict[str, object] = dict()
         if hasattr(self, 'content'):
             new_dict['content'] = self.content
@@ -211,8 +204,10 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
                 embed.validate()
 
     class formatter:
+        '''Helper formatting functions.'''
 
         class TIMESTAMP_FLAGS(enum.Enum):
+            '''Types of timestamp displays.'''
             SHORT_TIME = 't'
             LONG_TIME = 'T'
             SHORT_DATE = 'd'
@@ -223,14 +218,17 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
 
         @classmethod
         def timestamp(cls, timestamp: datetime.datetime, flag: Union[TIMESTAMP_FLAGS, str] = TIMESTAMP_FLAGS.DEFAULT) -> str:
+            '''Return valid timestamp string. Discord will display this in a useful way.'''
             if type(flag) is cls.TIMESTAMP_FLAGS:
                 flag = flag.value
             return f'<t:{int(timestamp.timestamp())}:{flag}>'
 
         @classmethod
         def user(cls, user_id: snowflake.Snowflake):
+            '''Return valid mention string for the user's name.'''
             return f'<@{user_id}>'
 
         @classmethod
         def user_nickname(cls, user_id: snowflake.Snowflake):
+            '''Return valid mention string for the user's nickname.'''
             return f'<@!{user_id}>'

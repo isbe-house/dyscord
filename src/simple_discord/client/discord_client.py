@@ -179,7 +179,6 @@ class DiscordClient:
 
     async def _connect(self):
         '''TODO: Implement connection to discord's servers.'''
-
         API.TOKEN = self.token
         if type(self.application_id) is str:
             API.APPLICATION_ID = self.application_id

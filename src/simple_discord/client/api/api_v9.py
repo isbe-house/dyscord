@@ -11,6 +11,7 @@ from ... import objects
 
 
 class API_V9:
+    '''Version 9 of the discord API.'''
 
     BASE_URL = 'https://discord.com/api/v9'
     TOKEN: str  # Overridden when the API is loaded in DiscordClient._connect
@@ -54,7 +55,7 @@ class API_V9:
 
     @classmethod
     async def get_gateway_bot(cls, token) -> dict:
-
+        '''Get URL of the gateway for bots.'''
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
@@ -72,7 +73,7 @@ class API_V9:
 
     @classmethod
     async def get_gateway(cls) -> dict:
-
+        '''Get URL of the gateway.'''
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.get(f'{cls.BASE_URL}/gateway')
@@ -83,6 +84,7 @@ class API_V9:
 
     @classmethod
     async def get_global_application_commands(cls):
+        '''Get all global application commands.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands'
 
         async with cls._lock:
@@ -97,6 +99,7 @@ class API_V9:
 
     @classmethod
     async def create_global_application_command(cls, command_structure: dict):
+        '''Create or update a global application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands'
 
         # if 'description' in command_structure and command_structure['type'] is not 1:
@@ -117,6 +120,7 @@ class API_V9:
 
     @classmethod
     async def get_global_application_command(cls, command_id: 'objects.Snowflake'):
+        '''Get a global application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
 
         async with cls._lock:
@@ -134,6 +138,7 @@ class API_V9:
                                               command_id: 'objects.Snowflake',
                                               command_structure: dict
                                               ):
+        '''Edit a global application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
 
         async with cls._lock:
@@ -149,6 +154,7 @@ class API_V9:
 
     @classmethod
     async def delete_global_application_command(cls, command_id: 'objects.Snowflake'):
+        '''Delete a global application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
 
         async with cls._lock:
@@ -162,11 +168,13 @@ class API_V9:
 
     @classmethod
     async def bulk_overwrite_global_application_commands(cls, command_id: 'objects.Snowflake'):
+        '''Unimplemented.'''
         # PUT/applications/{application.id}/commands
         raise NotImplementedError('TBD')
 
     @classmethod
     async def get_guild_application_commands(cls, guild_id: 'objects.Snowflake'):
+        '''Get all application commands from a specific guild.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands'
 
         async with cls._lock:
@@ -184,6 +192,7 @@ class API_V9:
                                                guild_id: 'objects.Snowflake',
                                                command_structure: dict
                                                ) -> dict:
+        '''Create a guild appplication command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands'
 
         async with cls._lock:
@@ -207,6 +216,7 @@ class API_V9:
                                             guild_id: 'objects.Snowflake',
                                             command_id: 'objects.Snowflake',
                                             ) -> dict:
+        '''Get a specific guild application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands/{command_id}'
 
         async with cls._lock:
@@ -225,6 +235,7 @@ class API_V9:
                                              command_id: 'objects.Snowflake',
                                              command_structure: dict,
                                              ):
+        '''Edit a guild application command.'''
         # PATCH /applications/{application.id}/guilds/{guild.id}/commands/{command.id}
         raise NotImplementedError('TBD')
 
@@ -233,6 +244,7 @@ class API_V9:
                                                guild_id: 'objects.Snowflake',
                                                command_id: 'objects.Snowflake',
                                                ):
+        '''Delete an application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands/{command_id}'
 
         async with cls._lock:
@@ -431,8 +443,8 @@ class API_V9:
 
         DELETE/webhooks/{application.id}/{interaction.token}/messages/{message.id}
 
-        Deletes a followup message for an Interaction. Returns 204 on success. Does not support ephemeral followups.'''
-
+        Deletes a followup message for an Interaction. Returns 204 on success. Does not support ephemeral followups.
+        '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/{message_id}'
 
         async with cls._lock:
@@ -463,6 +475,7 @@ class API_V9:
 
     @classmethod
     async def get_channel(cls, channel_id: 'objects.Snowflake'):
+        '''Get channel by ID.'''
         url = f'{cls.BASE_URL}/channels/{channel_id}'
 
         async with cls._lock:
@@ -503,6 +516,10 @@ class API_V9:
 
     @classmethod
     async def get_guild(cls, guild_id: 'objects.Snowflake') -> dict:
+        '''Get guilds.
+
+        TODO: Document this.
+        '''
         url = f'{cls.BASE_URL}/guilds/{guild_id}'
 
         async with cls._lock:

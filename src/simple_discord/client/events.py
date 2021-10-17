@@ -10,8 +10,7 @@ async def on_any(self, object: Optional[BaseDiscordObject], raw_event: dict):
     Arguments:
         self (DiscordClient): Client
         object (BaseDiscordObject): Python object representing the event.
-        raw_object (dict): Raw dict from discord API.
-
+        raw_event (dict): Raw dict from discord API.
     '''
     pass
 

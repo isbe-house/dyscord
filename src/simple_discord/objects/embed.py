@@ -9,6 +9,7 @@ from . import enumerations
 
 
 class Embed(BaseDiscordObject):
+    '''Rich context holder for a message.'''
 
     EMBED_TYPES = enumerations.EMBED_TYPES
 
@@ -27,9 +28,11 @@ class Embed(BaseDiscordObject):
     fields: Optional[List['EmbedField']]        # fields information
 
     def __str__(self):
+        '''Return string representation.'''
         return 'Embed()'
 
     def to_dict(self) -> 'dict':  # noqa: C901
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
 
         if hasattr(self, 'title'):
@@ -73,7 +76,7 @@ class Embed(BaseDiscordObject):
                  timestamp: Optional['datetime.datetime'] = None,
                  color: Optional[int] = None,  # TODO: Support a rich color class here.
                  ):
-
+        '''Generate various elements of an Embed.'''
         if title is not None:
             self.title = title
 
@@ -177,6 +180,7 @@ class Embed(BaseDiscordObject):
                    icon_url: str = None,
                    proxy_icon_url: str = None,
                    ) -> 'EmbedFooter':
+        '''Add footer to the Embed.'''
         self.footer = EmbedFooter()
         self.footer.text = text
         if icon_url is not None:
@@ -191,6 +195,7 @@ class Embed(BaseDiscordObject):
                   height: int = None,
                   width: int = None,
                   ) -> 'EmbedImage':
+        '''Add image to the Embed.'''
         self.image = EmbedImage()
         self.image.url = url
         if proxy_url is not None:
@@ -207,6 +212,7 @@ class Embed(BaseDiscordObject):
                       height: int = None,
                       width: int = None,
                       ) -> 'EmbedThumbnail':
+        '''Add thumbnail to the Embed.'''
         self.thumbnail = EmbedThumbnail()
         self.thumbnail.url = url
         if proxy_url is not None:
@@ -223,6 +229,7 @@ class Embed(BaseDiscordObject):
                   height: int = None,
                   width: int = None,
                   ) -> 'EmbedVideo':
+        '''Add video to the Embed.'''
         self.video = EmbedVideo()
         self.video.url = url
         if proxy_url is not None:
@@ -237,6 +244,7 @@ class Embed(BaseDiscordObject):
                      name: Optional[str] = None,
                      url: Optional[str] = None,
                      ) -> 'EmbedProvider':
+        '''Add provider to the Embed.'''
         self.provider = EmbedProvider()
         if name is not None:
             self.provider.name = name
@@ -250,6 +258,7 @@ class Embed(BaseDiscordObject):
                    icon_url: Optional[str] = None,
                    proxy_icon_url: Optional[str] = None,
                    ) -> 'EmbedAuthor':
+        '''Add author to the Embed.'''
         self.author = EmbedAuthor()
         self.author.name = name
         if url is not None:
@@ -265,6 +274,7 @@ class Embed(BaseDiscordObject):
                   value: str,
                   inline: bool = False,
                   ) -> 'EmbedField':
+        '''Add a generic field to the Embed.'''
         if not hasattr(self, 'fields') or type(self.fields) is not list:
             self.fields = list()
         new_field = EmbedField()
@@ -276,11 +286,14 @@ class Embed(BaseDiscordObject):
 
 
 class EmbedFooter(BaseDiscordObject):
+    '''Footer details for the Embed.'''
+
     text: str  # footer text
     icon_url: Optional[str]  # url of footer icon (only supports http(s) and attachments)
     proxy_icon_url: Optional[str]  # a proxied url of footer icon
 
     def to_dict(self) -> 'dict':
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         if hasattr(self, 'text'):
             new_dict['text'] = self.text
@@ -309,6 +322,7 @@ class EmbedFooter(BaseDiscordObject):
 
 
 class EmbedImage(BaseDiscordObject):
+    '''Image to embed.'''
 
     url: str  # source url of thumbnail (only supports http(s) and attachments)
     proxy_url: Optional[str]  # a proxied url of the thumbnail
@@ -316,7 +330,7 @@ class EmbedImage(BaseDiscordObject):
     width: Optional[int]  # width of thumbnail
 
     def to_dict(self) -> 'dict':
-
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         new_dict['url'] = self.url
 
@@ -354,6 +368,7 @@ class EmbedImage(BaseDiscordObject):
 
 
 class EmbedThumbnail(BaseDiscordObject):
+    '''Thumbnail to embed.'''
 
     url: str  # source url of thumbnail (only supports http(s) and attachments)
     proxy_url: Optional[str]  # a proxied url of the thumbnail
@@ -361,7 +376,7 @@ class EmbedThumbnail(BaseDiscordObject):
     width: Optional[int]  # width of thumbnail
 
     def to_dict(self) -> 'dict':
-
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         new_dict['url'] = self.url
 
@@ -399,6 +414,7 @@ class EmbedThumbnail(BaseDiscordObject):
 
 
 class EmbedVideo(BaseDiscordObject):
+    '''Video to embed.'''
 
     url: Optional[str]  # source url of thumbnail (only supports http(s) and attachments)
     proxy_url: Optional[str]  # a proxied url of the thumbnail
@@ -406,7 +422,7 @@ class EmbedVideo(BaseDiscordObject):
     width: Optional[int]  # width of thumbnail
 
     def to_dict(self) -> 'dict':
-
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         if hasattr(self, 'url'):
             new_dict['url'] = self.url
@@ -446,10 +462,13 @@ class EmbedVideo(BaseDiscordObject):
 
 
 class EmbedProvider(BaseDiscordObject):
+    '''Provider of the content from the Embed.'''
+
     name: str  # name of author
     url: str  # url of author
 
     def to_dict(self) -> 'dict':
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
 
         if hasattr(self, 'name'):
@@ -475,12 +494,15 @@ class EmbedProvider(BaseDiscordObject):
 
 
 class EmbedAuthor(BaseDiscordObject):
+    '''Author of the content from the Embed.'''
+
     name: str  # name of author
     url: str  # url of author
     icon_url: str  # url of author icon (only supports http(s) and attachments)
     proxy_icon_url: str  # a proxied url of author icon
 
     def to_dict(self) -> 'dict':
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
 
         if hasattr(self, 'name'):
@@ -525,11 +547,14 @@ class EmbedAuthor(BaseDiscordObject):
 
 
 class EmbedField(BaseDiscordObject):
+    '''Single field of an Embed.'''
+
     name: str               # name of the field
     value: str              # value of the field
     inline: bool            # whether or not this field should display inline
 
     def to_dict(self) -> 'dict':
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
 
         if hasattr(self, 'name'):
@@ -563,16 +588,13 @@ class EmbedField(BaseDiscordObject):
 
 
 class EmbedAdder(abc.ABC):
-
     '''Allow other objects to start adding components to themselves with a common set of helper functions.
 
     Caution: This is an abstract class, and is not intended for direct instantiation.
     '''
 
     def add_embeds(self) -> 'Embed':
-        '''
-        Start adding components by starting an ACTION_ROW.
-        '''
+        '''Start adding components by starting an ActionRow.'''
         if not hasattr(self, 'embeds'):
             self.embeds: Optional[List['Embed']] = list()
         assert type(self.embeds) is list

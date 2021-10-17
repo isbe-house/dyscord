@@ -3,6 +3,7 @@ import enum
 
 class DISCORD_EVENTS(enum.Enum):
     '''Enumeration of various discord events.
+
     Attributes:
         CHANNEL_CREATE (enum):
         CHANNEL_DELETE (enum):
@@ -100,6 +101,7 @@ class DISCORD_EVENTS(enum.Enum):
 
 
 class MESSAGE_TYPE(enum.IntEnum):
+    '''Types of messages.'''
     DEFAULT = 0
     RECIPIENT_ADD = 1
     RECIPIENT_REMOVE = 2
@@ -126,6 +128,7 @@ class MESSAGE_TYPE(enum.IntEnum):
 
 
 class CHANNEL_TYPES(enum.IntEnum):
+    '''Types of channels.'''
     GUILD_TEXT = 0  # a text channel within a server
     DM = 1  # a direct message between users
     GUILD_VOICE = 2  # a voice channel within a server
@@ -140,6 +143,7 @@ class CHANNEL_TYPES(enum.IntEnum):
 
 
 class EMBED_TYPES(enum.Enum):
+    '''Types of Embeds.'''
     rich = enum.auto()      # generic embed rendered from embed attributes
     image = enum.auto()     # image embed
     video = enum.auto()     # video embed

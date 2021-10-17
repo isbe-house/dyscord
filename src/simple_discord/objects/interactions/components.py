@@ -10,7 +10,8 @@ from .. import emoji
 from ...helper import command_handler
 
 
-class Component(BaseDiscordObject):
+class Component(BaseDiscordObject, abc.ABC):
+    '''Base class for Components.'''
     type: enumerations.COMPONENT_TYPES
 
 
@@ -21,9 +22,7 @@ class ComponentAdder(abc.ABC):
     '''
 
     def add_components(self) -> 'ActionRow':
-        '''
-        Start adding components by starting an ACTION_ROW.
-        '''
+        '''Start adding components by starting an ACTION_ROW.'''
         if not hasattr(self, 'components'):
             self.components: Optional[List['Component']] = list()
         assert type(self.components) is list
@@ -34,6 +33,7 @@ class ComponentAdder(abc.ABC):
 
 
 class ActionRow(Component):
+    '''Intermediate Component that holds Button or SelectMenu objects.'''
     type = enumerations.COMPONENT_TYPES.ACTION_ROW
     components: List[Union['Button', 'SelectMenu']]
 
@@ -49,6 +49,21 @@ class ActionRow(Component):
                    callback: Callable = None,
                    unlimited_callbacks: bool = False,
                    ) -> 'Button':
+        '''Append a Button item to the ActionRow, and return it.
+
+        Arguments:
+            style (BUTTON_STYLES): Style of button to be used.
+            custom_id (str): Unique string to be returned by the API when item is selected. Default is UUID4.
+            label (str): Actual text user will see.
+            emoji (Emoji): Emoji rather than label to display.
+            url: (str): URL for BUTTON_STYLES.LINK buttons.
+            disabled (bool): Item will display, but is not interactable.
+            callback (Callable): Callback function when user selects an item. Should be
+            unlimited_callbacks (bool): Request callbacks even if custom_id has already been called.
+
+        Returns:
+            Button
+        '''
         if not hasattr(self, 'components'):
             self.components = list()
         new_button = Button()
@@ -86,6 +101,20 @@ class ActionRow(Component):
                         callback: Callable = None,
                         unlimited_callbacks: bool = False,
                         ) -> 'SelectMenu':
+        '''Append a SelectMenu item to the ActionRow, and return it.
+
+        Arguments:
+            custom_id (str): Unique string to be returned by the API when item is selected. Default is UUID4.
+            placeholder (str): Text to appear in the box before user selection begins.
+            min_values (int): Min number of items user must select. Default is 1.
+            max_values (int): Max number of items user can select. Default is 1.
+            disabled (bool): Item will display, but is not interactable.
+            callback (Callable): Callback function when user selects an item. Should be
+            unlimited_callbacks (bool): Request callbacks even if custom_id has already been called.
+
+        Returns:
+            SelectMenu
+        '''
         if not hasattr(self, 'components'):
             self.components = list()
         new_select_menu = SelectMenu()
@@ -114,6 +143,7 @@ class ActionRow(Component):
         return new_select_menu
 
     def to_dict(self) -> dict:
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         new_dict['type'] = self.type.value
         new_dict['components'] = list()
@@ -139,6 +169,7 @@ class ActionRow(Component):
 
 
 class Button(Component):
+    '''Selectable button or link for user interaction.'''
 
     BUTTON_STYLES = enumerations.BUTTON_STYLES
 
@@ -151,6 +182,7 @@ class Button(Component):
     url: str
 
     def to_dict(self) -> dict:
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         new_dict['type'] = self.type.value
         if hasattr(self, 'custom_id'):
@@ -200,6 +232,8 @@ class Button(Component):
 
 
 class SelectMenu(Component):
+    '''A drop down menu for user interaction.'''
+
     type = enumerations.COMPONENT_TYPES.SELECT_MENU
     custom_id: str
     disabled: bool
@@ -211,6 +245,7 @@ class SelectMenu(Component):
     add_option_typed = command.Command.add_option_typed
 
     def to_dict(self) -> dict:
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         new_dict['type'] = self.type.value
         if hasattr(self, 'custom_id'):

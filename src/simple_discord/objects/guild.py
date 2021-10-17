@@ -7,8 +7,13 @@ from . import snowflake, channel as ext_channel
 
 
 class Guild(BaseDiscordObject):
+    '''Commonly know as a server.'''
 
     class VerificationLevels(enum.IntEnum):
+        '''Level of verification required by the guild.
+
+        TODO: Move this to enumerations.
+        '''
         NONE = 0  # unrestricted
         LOW = 1  # must have verified email on account
         MEDIUM = 2  # must be registered on Discord for longer than 5 minutes
@@ -16,18 +21,30 @@ class Guild(BaseDiscordObject):
         VERY_HIGH = 4  # must have a verified phone number
 
     class NSFWLevels(enum.IntEnum):
+        '''NSFW level allowed in guild.
+
+        TODO: Move this to enumerations.
+        '''
         DEFAULT = 0
         EXPLICIT = 1
         SAFE = 2
         AGE_RESTRICTED = 3
 
     class PremiumTiers(enum.IntEnum):
+        '''Premium tier currently unlocked by guild.
+
+        TODO: Move this to enumerations.
+        '''
         NONE = 0  # guild has not unlocked any Server Boost perks
         TIER_1 = 1  # guild has unlocked Server Boost level 1 perks
         TIER_2 = 2  # guild has unlocked Server Boost level 2 perks
         TIER_3 = 3  # guild has unlocked Server Boost level 3 perks
 
     class FeatureFlags(enum.Flag):
+        '''Features of guild.
+
+        TODO: Move this to enumerations.
+        '''
         ANIMATED_ICON = enum.auto()  # guild has access to set an animated guild icon
         BANNER = enum.auto()  # guild has access to set a guild banner image
         COMMERCE = enum.auto()  # guild has access to use commerce features (i.e. create store channels)
@@ -104,6 +121,7 @@ class Guild(BaseDiscordObject):
     stickers: type  # array of sticker objects custom guild stickers
 
     def __str__(self):
+        '''Return string representation.'''
         fields = []
 
         if hasattr(self, 'id'):
@@ -115,16 +133,18 @@ class Guild(BaseDiscordObject):
         return f'Guild({", ".join(fields)})'
 
     def __repr__(self):
+        '''Return string representation.'''
         return self.__str__()
 
     def ingest_raw_dict(self, data) -> 'Guild':
+        '''Parse a Guild from an API compliant dict.'''
         self.from_dict(data)
 
         self.cache()
         return self
 
     def from_dict(self, data: dict) -> 'Guild':
-
+        '''Parse a Guild from an API compliant dict.'''
         self.id = snowflake.Snowflake(data.get('id'))
         self.name = data['name']
         self.icon = data['icon']
@@ -152,6 +172,7 @@ class Guild(BaseDiscordObject):
         return self
 
     def cache(self):
+        '''Deprecated caching function.'''
         # Preventing circular imports
         from ..utilities import Cache
 

@@ -271,11 +271,7 @@ class InteractionResponse(BaseDiscordObject):
         self.last_followup_message: Optional['ext_message.Message'] = None
 
     def to_dict(self) -> dict:
-        '''Return dict representation of object.
-
-        Returns:
-            dict
-        '''
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         new_dict['type'] = self.type.value
         new_dict['data'] = self.data.to_dict()
@@ -326,11 +322,7 @@ class InteractionFollowup(BaseDiscordObject):
         self.last_followup_message: Optional['ext_message.Message'] = None
 
     def to_dict(self) -> dict:
-        '''Return dict representation of object.
-
-        Returns:
-            dict
-        '''
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         new_dict['data'] = self.data.to_dict()
         return new_dict
@@ -431,11 +423,7 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_
         self.components = list()
 
     def to_dict(self) -> dict:
-        '''Return dict representation of object.
-
-        Returns:
-            dict
-        '''
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
         new_dict['flags'] = self.flags
         if hasattr(self, 'tts'):

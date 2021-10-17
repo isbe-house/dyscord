@@ -41,6 +41,7 @@ class Command(BaseDiscordObject):
     version: Optional['snowflake.Snowflake']         # autoincrementing version identifier updated during substantial record changes  all
 
     def __str__(self):
+        '''Return string representation.'''
         fields = list()
 
         if hasattr(self, 'id'):
@@ -63,9 +64,7 @@ class Command(BaseDiscordObject):
                  options: Optional[List['CommandOptionsBase']] = None,
                  default_permission: bool = True,
                  ):
-        '''
-        Helper function to generate a new command bound for registration.
-        '''
+        '''Helper function to generate a new command bound for registration.'''
         self.name = name
         self.description = description
         self.default_permission = default_permission
@@ -80,6 +79,7 @@ class Command(BaseDiscordObject):
                                name: str,
                                description: str,
                                ) -> 'CommandOptionSubCommand':
+        '''Add SubCommand to the command.'''
         new_option = CommandOptionSubCommand()
         new_option.type = enumerations.COMMAND_OPTION.SUB_COMMAND
         new_option.name = name
@@ -97,6 +97,7 @@ class Command(BaseDiscordObject):
                                      name: str,
                                      description: str,
                                      ) -> 'CommandOptionSubCommandGroup':
+        '''Add SubCommandGroup to the command.'''
         new_option = CommandOptionSubCommandGroup()
         new_option.type = enumerations.COMMAND_OPTION.SUB_COMMAND_GROUP
         new_option.name = name
@@ -117,7 +118,8 @@ class Command(BaseDiscordObject):
                          required: bool = True,
                          choices: Optional[List['CommandOptionChoiceStructure']] = None,
                          ) -> 'CommandOptions':
-        new_option = CommandOptions()
+        '''Add option to the command.'''
+        new_option = CommandOptions()  # type: ignore
         new_option.type = type
         new_option.name = name
         new_option.description = description
@@ -133,16 +135,26 @@ class Command(BaseDiscordObject):
         return new_option
 
     def clear_options(self):
+        '''Remove all options.'''
         if hasattr(self, 'options'):
             del self.options
 
     async def register_to_guild(self, guild: 'guild.Guild') -> dict:
+        '''Register a Command to a specific guild discord scope.
+
+        Note that discord will limit you to 200 of these calls per bot per guild per day.
+        '''
         return await api.API.create_guild_application_command(guild.id, self.to_dict())
 
     async def register_globally(self) -> dict:
+        '''Register a Command to the global discord scope.
+
+        Note that discord will limit you to 200 of these calls per bot per day.
+        '''
         return await api.API.create_global_application_command(self.to_dict())
 
     def from_dict(self, data: dict) -> 'Command':
+        '''Parse a Command from an API compliant dict.'''
         if 'id' in data:
             self.id = snowflake.Snowflake(data['id'])
         if 'type' in data:
@@ -165,6 +177,7 @@ class Command(BaseDiscordObject):
         return self
 
     def to_dict(self) -> dict:
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         ret_dict: Dict[str, Union[object, list]] = dict()
         if hasattr(self, 'id'):
             ret_dict['id'] = str(self.id)
@@ -245,7 +258,8 @@ class Command(BaseDiscordObject):
         return total_characters
 
 
-class CommandOptionsBase(abc.ABC, BaseDiscordObject):
+class CommandOptionsBase(BaseDiscordObject, abc.ABC):
+    '''Abstract base for options.'''
 
     # Handy shortcut
     COMMAND_OPTION = enumerations.COMMAND_OPTION
@@ -260,6 +274,7 @@ class CommandOptionsBase(abc.ABC, BaseDiscordObject):
     # this nested options will be the parameters
 
     def from_dict(self, data: dict) -> 'CommandOptionsBase':
+        '''Parse a CommandOptionsBase from an API compliant dict.'''
         if 'type' in data:
             self.type = enumerations.COMMAND_OPTION(data['type'])
         self.name = data['name']
@@ -278,6 +293,7 @@ class CommandOptionsBase(abc.ABC, BaseDiscordObject):
         return self
 
     def to_dict(self) -> dict:
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         ret_dict: Dict[str, Union[object, list]] = dict()
         if hasattr(self, 'type'):
             ret_dict['type'] = self.type.value
@@ -335,11 +351,13 @@ class CommandOptionsBase(abc.ABC, BaseDiscordObject):
 
 
 class CommandOptions(CommandOptionsBase):
+    '''Options for a Command.'''
 
     def add_choice(self,
                    name: str,
                    value: Union[str, int, float],
-                   ):
+                   ) -> 'CommandOptionChoiceStructure':
+        '''Append a choice to the given set of options and return it. Will start a list if needed.'''
         new_choice = CommandOptionChoiceStructure()
         new_choice.name = name
         new_choice.value = value
@@ -355,11 +373,13 @@ class CommandOptions(CommandOptionsBase):
 
 
 class CommandOptionSubCommandGroup(CommandOptionsBase):
+    '''Intermediate object to group SubCommands together.'''
     # Same thing, let's just take it!
     add_option_sub_command = Command.add_option_sub_command
 
 
 class CommandOptionSubCommand(CommandOptionsBase):
+    '''Commands which live under a Command, or a Sub Command Group.'''
 
     COMMAND_OPTION = enumerations.COMMAND_OPTION
 
@@ -367,12 +387,15 @@ class CommandOptionSubCommand(CommandOptionsBase):
 
 
 class CommandOptionChoiceStructure(BaseDiscordObject):
+    '''Specific option for a command.'''
 
     def __init__(self):
+        '''Initalize a CommandOptionChoiceStructure.'''
         self.name: str
         self.value: Union[str, int, float]
 
     def from_dict(self, data: dict) -> 'CommandOptionChoiceStructure':
+        '''Parse a CommandOptionChoiceStructure from an API compliant dict.'''
         self.name = data['name']
         self.value = data['value']
         if type(self.value) not in [str, int, float]:
@@ -381,6 +404,7 @@ class CommandOptionChoiceStructure(BaseDiscordObject):
         return self
 
     def to_dict(self) -> dict:
+        '''Convert object to dictionary suitable for API or other generic useage.'''
         ret_dict: Dict[str, object] = dict()
         ret_dict['name'] = self.name
         ret_dict['value'] = self.value

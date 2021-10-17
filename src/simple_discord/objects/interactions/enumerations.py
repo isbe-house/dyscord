@@ -3,6 +3,7 @@ import enum
 
 
 class CHANNEL_TYPE(enum.IntEnum):
+    '''Types of channels.'''
     GUILD_TEXT = 0  # a text channel within a server
     DM = 1  # a direct message between users
     GUILD_VOICE = 2  # a voice channel within a server
@@ -30,6 +31,7 @@ class COMMAND_TYPE(enum.IntEnum):
 
 
 class COMMAND_OPTION(enum.IntEnum):
+    '''Valid types or groupings of command options.'''
     SUB_COMMAND = 1
     SUB_COMMAND_GROUP = 2
     STRING = 3
@@ -43,12 +45,14 @@ class COMMAND_OPTION(enum.IntEnum):
 
 
 class COMPONENT_TYPES(enum.IntEnum):
+    '''Types of Components.'''
     ACTION_ROW = 1
     BUTTON = 2
     SELECT_MENU = 3
 
 
 class BUTTON_STYLES(enum.IntEnum):
+    '''Styles of Button objects.'''
     PRIMARY = 1
     SECONDARY = 2
     SUCCESS = 3
@@ -57,12 +61,14 @@ class BUTTON_STYLES(enum.IntEnum):
 
 
 class INTERACTION_TYPES(enum.IntEnum):
+    '''Types of interactions.'''
     PING = 1
     APPLICATION_COMMAND = 2
     MESSAGE_COMPONENT = 3
 
 
 class INTERACTION_RESPONSE_TYPES(enum.IntEnum):
+    '''Types of interaction responses.'''
     PONG = 1  # ACK a Ping
     CHANNEL_MESSAGE_WITH_SOURCE = 4  # respond to an interaction with a message
     DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5  # ACK an interaction and edit a response later, the user sees a loading state
@@ -71,4 +77,5 @@ class INTERACTION_RESPONSE_TYPES(enum.IntEnum):
 
 
 class INTERACTION_CALLBACK_FLAGS(enum.IntFlag):
+    '''Flags for callback methods.'''
     EPHEMERAL = (1 << 6)  # only the user receiving the message can see it
