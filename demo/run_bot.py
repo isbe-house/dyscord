@@ -3,7 +3,7 @@
 # Handle the weirdness of our docker env first
 import sys
 
-from src.simple_discord.objects.snowflake import Snowflake
+from src.dyscord.objects.snowflake import Snowflake
 
 sys.path.insert(0, '/usr/src/app/')
 
@@ -11,14 +11,14 @@ sys.path.insert(0, '/usr/src/app/')
 import logging
 import uuid
 
-from src.simple_discord import objects, utilities
-from src.simple_discord.client import DiscordClient, API
-from src.simple_discord.objects.interactions import Command
-from src.simple_discord.objects.message import Message
-from src.simple_discord.utilities import Log
-from src.simple_discord.objects.guild import Guild
+from src.dyscord import objects, utilities
+from src.dyscord.client import DiscordClient, API
+from src.dyscord.objects.interactions import Command
+from src.dyscord.objects.message import Message
+from src.dyscord.utilities import Log
+from src.dyscord.objects.guild import Guild
 
-from src import simple_discord
+from src import dyscord
 from demo import command_functions
 from demo.mongo import Mongo
 
@@ -71,7 +71,7 @@ async def purge_commands(client, message: Message):
         # await API.delete_guild_application_command(guild.id, command.id)
 
 
-async def register_commands(client: simple_discord.client.DiscordClient, message):
+async def register_commands(client: dyscord.client.DiscordClient, message):
     # Complex chat command
 
     guild = objects.Guild()
@@ -173,8 +173,7 @@ async def test(client, message: objects.Message):
     await API.get_user(Snowflake('185846097284038656'))
 
 @client.register_handler('ANY')
-async def handle_any(client: simple_discord.client.DiscordClient, object, raw_object):
-
+async def handle_any(client: dyscord.client.DiscordClient, object, raw_object):
     m_client = Mongo.client
     type = raw_object.get('t', 'NA')
     type = f'type_{type}'
@@ -205,9 +204,9 @@ async def parse_message(client, message: objects.Message, raw_message):
             assert type(message) is objects.Message
             await test(client, message)
 
-simple_discord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
-simple_discord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)
-simple_discord.helper.CommandHandler.register_guild_callback('hunt', command_functions.hunt)
+dyscord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
+dyscord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)
+dyscord.helper.CommandHandler.register_guild_callback('hunt', command_functions.hunt)
 
 Mongo.connect()
 client.run()

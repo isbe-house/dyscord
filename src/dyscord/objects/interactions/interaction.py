@@ -2,7 +2,7 @@ import asyncio
 from collections import defaultdict
 from typing import Any, Optional, Union, List, Dict
 
-from src.simple_discord.objects import channel
+from src.dyscord.objects import channel
 
 from ...client import api
 

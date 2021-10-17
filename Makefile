@@ -7,13 +7,13 @@ SHELL := /bin/bash
 # up: ## Start all containers
 # 	docker-compose \
 #         -f  docker-compose.yaml \
-#         up -d --build simple-discord
+#         up -d --build dyscord
 
 run: ## Run container connected
 	make down
 	docker-compose \
 		-f  docker-compose.yaml \
-		run --rm simple-discord
+		run --rm dyscord
 
 build:
 	docker-compose \
@@ -41,15 +41,15 @@ build-docs: build
 #         logs --follow --tail=20
 
 clean: ## Delete volumes
-	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site htmlcov src/simple_discord.egg-info
+	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site htmlcov src/dyscord.egg-info
 	find . | grep -E \(__pycache__\|\.pyc\|\.pyo\$\) | xargs rm -rf
-	rm -rf src/simple_discord_jmurrayufo.egg-info
+	rm -rf src/dyscord_jmurrayufo.egg-info
 
 debug: ## Start interactive python shell to debug with
 	docker-compose \
 		-f docker-compose.yaml \
-		run --rm simple-discord-tests /bin/bash
-		# run --rm simple-discord-tests /bin/bash
+		run --rm dyscord-tests /bin/bash
+		# run --rm dyscord-tests /bin/bash
 
 jupyter: ## Start a jupyter environment for debugging and such
 	docker-compose \
@@ -57,7 +57,7 @@ jupyter: ## Start a jupyter environment for debugging and such
 		build
 	docker-compose \
 		-f  tools/jupyter/docker-compose.yaml \
-		run --rm simple-discord-jupyter
+		run --rm dyscord-jupyter
 
 test: ## Run all tests
 	make build
@@ -71,35 +71,35 @@ test: ## Run all tests
 test-pytest:
 	docker-compose \
 		-f  docker-compose.yaml \
-		run --rm simple-discord-tests \
+		run --rm dyscord-tests \
 		python -m pytest --cov=src --durations=5 -vv --color=yes tests
 	docker-compose \
 		-f  docker-compose.yaml \
-		run --rm simple-discord-tests \
+		run --rm dyscord-tests \
 		coverage html
 
 test-mypy:
 	docker-compose \
 		-f  docker-compose.yaml \
-		run --rm simple-discord-tests \
-		mypy src/simple_discord
+		run --rm dyscord-tests \
+		mypy src/dyscord
 
 test-flake8:
 	docker-compose \
 		-f  docker-compose.yaml \
-		run --rm simple-discord-tests \
+		run --rm dyscord-tests \
 		flake8
 
 test-doc-strings:
 	docker-compose \
 		-f  docker-compose.yaml \
-		run --rm simple-discord-tests \
+		run --rm dyscord-tests \
 		pydocstyle --add-ignore=D407,D300,D203,D100,D104 --convention=google src
 
 test-review:
 	docker-compose \
 		-f  docker-compose.yaml \
-		run --rm simple-discord-tests \
+		run --rm dyscord-tests \
 		pip-review
 
 ######################################################################################################################################################

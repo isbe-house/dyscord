@@ -36,7 +36,7 @@ jobs:
           name: coverage-tars
           path: coverage-${{ matrix.python-version }}.tar.gz
       - name: "Test: mypy"
-        run: mypy src/simple_discord
+        run: mypy src/dyscord
       - name: "Test: flake8"
         run: flake8
       - name: Pydocsstyle

@@ -1,5 +1,5 @@
-from src.simple_discord.objects import ChannelImporter, Channel, TextChannel
-from src.simple_discord.utilities import Cache
+from src.dyscord.objects import ChannelImporter, Channel, TextChannel
+from src.dyscord.utilities import Cache
 
 from tests.objects.channel import samples
 

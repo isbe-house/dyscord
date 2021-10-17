@@ -1,4 +1,4 @@
-from src.simple_discord.utilities import Cache
+from src.dyscord.utilities import Cache
 
 
 def test_simple_cache():

@@ -1,4 +1,4 @@
-from src.simple_discord.objects import Channel
+from src.dyscord.objects import Channel
 
 
 def test_basic_channel():

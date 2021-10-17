@@ -1,9 +1,9 @@
 
 import orjson as json
 
-from src.simple_discord.objects.interactions import Command, CommandOptions, CommandOptionChoiceStructure
-from src.simple_discord.objects.interactions import COMMAND_TYPE, COMMAND_OPTION
-from src.simple_discord.objects import Snowflake
+from src.dyscord.objects.interactions import Command, CommandOptions, CommandOptionChoiceStructure
+from src.dyscord.objects.interactions import COMMAND_TYPE, COMMAND_OPTION
+from src.dyscord.objects import Snowflake
 
 
 def test_ACS():

@@ -1,7 +1,7 @@
 import pytest
 import datetime
 
-from src.simple_discord.objects import Embed, EmbedAdder
+from src.dyscord.objects import Embed, EmbedAdder
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 
-from src.simple_discord.objects import Guild, Channel, snowflake
+from src.dyscord.objects import Guild, Channel, snowflake
 
 from . import samples
 

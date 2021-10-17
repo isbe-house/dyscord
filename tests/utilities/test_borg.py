@@ -1,4 +1,4 @@
-from src.simple_discord.utilities import Borg
+from src.dyscord.utilities import Borg
 
 
 class foo(Borg):

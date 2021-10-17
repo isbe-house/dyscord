@@ -1,6 +1,6 @@
 import datetime
 
-from src.simple_discord.objects import Snowflake
+from src.dyscord.objects import Snowflake
 
 
 def test_create_snowflake():

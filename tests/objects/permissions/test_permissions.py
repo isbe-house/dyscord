@@ -1,6 +1,6 @@
 import random
 import pytest
-from src.simple_discord.objects import Permissions
+from src.dyscord.objects import Permissions
 
 
 def test_simple():

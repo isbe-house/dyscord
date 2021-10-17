@@ -1,4 +1,4 @@
-from src.simple_discord.objects import User, Snowflake
+from src.dyscord.objects import User, Snowflake
 
 
 def test_user():

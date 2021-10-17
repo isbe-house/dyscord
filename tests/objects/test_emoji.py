@@ -1,6 +1,6 @@
 
 import emoji
-from src.simple_discord.objects import Emoji
+from src.dyscord.objects import Emoji
 
 
 def test_basic_emoji():
