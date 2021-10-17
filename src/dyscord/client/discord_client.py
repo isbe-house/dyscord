@@ -331,16 +331,16 @@ class DiscordClient:
             return
 
         elif event_type == 'CHANNEL_CREATE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.ChannelImporter().from_dict(data['d'])
 
         elif event_type == 'CHANNEL_DELETE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.ChannelImporter().from_dict(data['d'])
 
         elif event_type == 'CHANNEL_PINS_UPDATE':
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'CHANNEL_UPDATE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.ChannelImporter().from_dict(data['d'])
 
         elif event_type == 'GUILD_BAN_ADD':
             warnings.warn(f'Encountered unhandled event {event_type}')
@@ -349,8 +349,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_CREATE':
-            obj = objects.Guild()
-            obj.from_dict(data['d'])
+            obj = objects.Guild().from_dict(data['d'])
 
         elif event_type == 'GUILD_DELETE':
             warnings.warn(f'Encountered unhandled event {event_type}')
@@ -401,8 +400,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_CREATE':
-            obj = objects.Message()
-            obj.from_dict(data['d'])
+            obj = objects.Message().from_dict(data['d'])
 
         elif event_type == 'MESSAGE_DELETE':
             warnings.warn(f'Encountered unhandled event {event_type}')
@@ -457,7 +455,6 @@ class DiscordClient:
 
         elif event_type == 'TYPING_START':
             obj = objects.events.typing_start.TypingStart().from_dict(data['d'])
-            warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'VOICE_STATE_UPDATE':
             warnings.warn(f'Encountered unhandled event {event_type}')
@@ -481,7 +478,7 @@ class DiscordClient:
         # Call own event handlers first.
         if hasattr(self, event_handler_name):
             self_function = getattr(self, event_handler_name)
-            await self_function(self, obj, data)
+            await self_function(obj, data)
 
         # Call user wrapped classes, functions and cotoutines.
         if obj is not None:
