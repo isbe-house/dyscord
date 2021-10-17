@@ -67,8 +67,8 @@ services:
         volumes:
             - ./:/usr/src/app/
         environment:
-            - TWINE_USERNAME=${TWINE_TEST_USERNAME}
-            - TWINE_PASSWORD=${TWINE_TEST_PASSWORD}
+            - TWINE_USERNAME=${TWINE_USERNAME}
+            - TWINE_PASSWORD=${TWINE_PASSWORD}
         user: "${UID}:${GID}"
 
     # For local development.
