@@ -65,7 +65,7 @@ test: ## Run all tests
 	make test-pytest
 	make test-mypy
 	make test-flake8
-#	make test-doc-strings
+	make test-doc-strings
 	make test-review
 
 test-pytest:

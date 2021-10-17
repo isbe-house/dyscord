@@ -90,14 +90,16 @@ class InteractionResponseHelper(ABC):
         return self.last_interaction.generate_response(type, ephemeral)
 
     def generate_followup(self, ephemeral: bool = True):
+        '''Generate a followup to the interaction.'''
         if self.cleanup:
             raise RuntimeError('You cannot respond to a message you asked us to cleanup.')
         return self.last_interaction.generate_followup(ephemeral)
 
 
 class Question(InteractionResponseHelper):
-    _log = Log()
     '''Ask a user a question, respond with the answer.'''
+
+    _log = Log()
 
     def __init__(self,
                  target: Union['ext_interaction.InteractionStructure', 'InteractionResponseHelper'],
@@ -107,12 +109,7 @@ class Question(InteractionResponseHelper):
                  cleanup: bool = False,
                  auto_respond: bool = False,
                  ):
-        '''Build a question.
-
-        Arguments:
-            question (str): Question to ask the user.
-            answers (List[str]): Responses the user can give.
-        '''
+        '''Build a question.'''
         super().__init__(target, question, timeout, cleanup, auto_respond)
         self.answers = copy(answers)
 
@@ -146,8 +143,9 @@ class CAPTCHA:
 
 
 class Confirmation(InteractionResponseHelper):
-    _log = Log()
     '''Ask a user for a YES/NO/CANCEL response.'''
+
+    _log = Log()
 
     def __init__(self,
                  target: Union['ext_interaction.InteractionStructure', 'InteractionResponseHelper'],
@@ -159,7 +157,11 @@ class Confirmation(InteractionResponseHelper):
         '''Build a question.
 
         Arguments:
+            target (InteractionStructure, InteractionResponseHelper): Target of this interaction.
             question (str): Question to ask the user.
+            timeout (timedelta): Time until the confirmation times out and returns None.
+            cleanup (bool): Delete the question after asking.
+            auto_respond (bool): Automatically respond to the user with a placeholder string.
         '''
         super().__init__(target, question, timeout, cleanup, auto_respond)
 

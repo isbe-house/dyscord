@@ -12,15 +12,21 @@ from ..utilities import Log
 
 @dataclass
 class CallbackData:
+    '''Callback dataclass.'''
     custom_id: str
     callback: Callable
     unlimited: bool
 
 
 class CommandHandler:
+    '''Manage commands for the user.'''
     _log = Log()
 
     registered_commands: Dict['snowflake.Snowflake', Callable] = dict()
+
+    global_lookup: Dict[str, Callable] = dict()
+
+    guild_lookup: Dict[str, Callable] = dict()
 
     registered_custom_ids: 'TTLCache[str, CallbackData]' = TTLCache(
         maxsize=float('inf'),
@@ -28,18 +34,16 @@ class CommandHandler:
         timer=datetime.now,  # type: ignore
     )
 
-    global_lookup: Dict[str, Callable] = dict()
-
-    guild_lookup: Dict[str, Callable] = dict()
-
     @classmethod
     def register_global_callback(cls, command_name, callback_function, command_id: Optional['snowflake.Snowflake'] = None) -> None:
+        '''Register name of a command to a given callback function globally.'''
         cls.global_lookup[command_name] = callback_function
         if command_id is not None:
             cls.registered_commands[command_id] = callback_function
 
     @classmethod
     def register_guild_callback(cls, command_name, callback_function, command_id: Optional['snowflake.Snowflake'] = None) -> None:
+        '''Register name of a command to a given callback function for guilds.'''
         cls.guild_lookup[command_name] = callback_function
         if command_id is not None:
             cls.registered_commands[command_id] = callback_function
@@ -47,19 +51,20 @@ class CommandHandler:
     @classmethod
     def register_interaction_custom_id(cls, custom_id: str, callback_function: Callable, unlimited: bool = False):
         '''Register a callback for an interaction.
+
         Arguments:
             custom_id (str): The custom id to trigger on.
             callback_function (Callable): Function to call when interaction is triggered. MUST be asnyc.
             unlimited (bool): Allows more than one interaction to be called. The user is expected to deregister this interaction later. If
-no cleanup occurs, the handler is cleaned after 15 minutes.
+                no cleanup occurs, the handler is cleaned after 15 minutes.
         '''
-
         # TODO: We can probably customize the duration of the cache at runtime?
         obj = CallbackData(custom_id, callback_function, unlimited)
         cls.registered_custom_ids[custom_id] = obj
 
     @classmethod
     def unregister_interaction_custom_id(cls, custom_id: str, not_exists_ok: bool = False):
+        '''Attempt to remove a custom_id from the interaction cache. Warn if already removed.'''
         if custom_id in cls.registered_custom_ids:
             del cls.registered_custom_ids[custom_id]
         elif not not_exists_ok:
@@ -67,7 +72,7 @@ no cleanup occurs, the handler is cleaned after 15 minutes.
 
     @classmethod
     async def command_handler(cls, client, interaction: 'interactions.InteractionStructure') -> None:  # noqa: C901
-
+        '''Handle incoming commands and dispatch them to the correct type handler.'''
         if interaction.data is None:
             return
 
@@ -78,7 +83,7 @@ no cleanup occurs, the handler is cleaned after 15 minutes.
 
     @classmethod
     async def handle_application_command(cls, client, interaction: 'interactions.InteractionStructure') -> None:
-
+        '''Handle interactions against Messages and Users.'''
         assert interaction.data is not None
 
         if interaction.data.id in cls.registered_commands:
@@ -112,6 +117,7 @@ no cleanup occurs, the handler is cleaned after 15 minutes.
 
     @classmethod
     async def handle_message_component(cls, client, interaction: 'interactions.InteractionStructure') -> None:
+        '''Handle slash-commands.'''
         assert interaction.data is not None
         cls._log.info(f'Saw id [{interaction.id}] with custom id [{interaction.data.custom_id}].')
         assert interaction.data is not None

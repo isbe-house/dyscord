@@ -3,6 +3,8 @@
 # Handle the weirdness of our docker env first
 import sys
 
+from src.simple_discord.objects.snowflake import Snowflake
+
 sys.path.insert(0, '/usr/src/app/')
 
 # Do normal imports and run!
@@ -59,6 +61,7 @@ async def purge_commands(client, message: Message):
         await API.delete_global_application_command(command.id)
 
     client._log.info('Get guild commands')
+    assert message.guild is not None
     guild: Guild = message.guild
     commands = await API.get_guild_application_commands(guild.id)
     for command in commands:
@@ -167,7 +170,7 @@ async def send_buttons(client, chan_id):
 
 
 async def test(client, message: objects.Message):
-    await API.get_user('185846097284038656')
+    await API.get_user(Snowflake('185846097284038656'))
 
 @client.register_handler('ANY')
 async def handle_any(client: simple_discord.client.DiscordClient, object, raw_object):

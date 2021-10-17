@@ -73,7 +73,7 @@ class DiscordClient:
                           guild_bans: bool = False,
                           guild_emoji_and_stickers: bool = False,
                           guild_integrations: bool = False,
-                          guild_wehooks: bool = False,
+                          guild_webhooks: bool = False,
                           guild_invites: bool = False,
                           guild_voice_states: bool = False,
                           guild_presences: bool = False,
@@ -92,7 +92,7 @@ class DiscordClient:
             guild_bans (bool): TBD
             guild_emoji_and_stickers (bool): TBD
             guild_integrations (bool): TBD
-            guild_wehooks (bool): TBD
+            guild_webhooks (bool): TBD
             guild_invites (bool): TBD
             guild_voice_states (bool): TBD
             guild_presences (bool): TBD
@@ -114,7 +114,7 @@ class DiscordClient:
             self.intent += Intents.GUILD_EMOJIS_AND_STICKERS
         if guild_integrations:
             self.intent += Intents.GUILD_INTEGRATIONS
-        if guild_wehooks:
+        if guild_webhooks:
             self.intent += Intents.GUILD_WEBHOOKS
         if guild_invites:
             self.intent += Intents.GUILD_INVITES
@@ -179,7 +179,6 @@ class DiscordClient:
 
     async def _connect(self):
         '''TODO: Implement connection to discord's servers.'''
-
         API.TOKEN = self.token
         if type(self.application_id) is str:
             API.APPLICATION_ID = self.application_id
@@ -500,7 +499,7 @@ class DiscordClient:
                     else:
                         user_function(user_class, self, obj, data)
 
-         # Handle the special case of the ANY event.
+        # Handle the special case of the ANY event.
         for user_function in DiscordClient._wrapper_registrations['ANY']:
             if asyncio.iscoroutinefunction(user_function):
                 await user_function(self, obj, data)
@@ -508,7 +507,7 @@ class DiscordClient:
                 user_function(self, obj, data)
 
         for user_class in DiscordClient._wrapper_class_registrations:
-            if hasattr(user_class, f'on_any'):
+            if hasattr(user_class, 'on_any'):
                 user_function = getattr(user_class, f'on_{event_type.lower()}')
 
                 if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
@@ -518,7 +517,6 @@ class DiscordClient:
                     await user_function(user_class, self, obj, data)
                 else:
                     user_function(user_class, self, obj, data)
-
 
     # Register all out events
     on_any = on_any

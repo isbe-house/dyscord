@@ -1,8 +1,8 @@
 # import requests
 
 
-def auth_loop():
-    pass
+# def auth_loop():
+#     pass
 
 # class auth_junk:
 #     OAUTH_AUTH_RUL = 'https://discord.com/api/oauth2/authorize'

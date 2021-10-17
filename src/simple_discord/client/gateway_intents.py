@@ -3,6 +3,7 @@ import enum
 
 
 class Intents(enum.IntFlag):
+    '''Intents of the user.'''
 
     GUILDS = (1 << 0)
     # GUILD_CREATE = (1 << 0)

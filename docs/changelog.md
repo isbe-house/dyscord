@@ -11,6 +11,9 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ### Changed
 - Started the process of documenting out most of the existing codebase.
 
+### Fixed
+- Corrected typo in webhook intents.
+
 ## [v0.1.0] 2021-10-09
 ### Added
 - Documentation!

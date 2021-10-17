@@ -2,7 +2,7 @@
 
 A simplistic implementation of the discord API.
 
-[![Python Testing](https://github.com/jmurrayufo/simple-discord/actions/workflows/python-testing.yml/badge.svg?branch=main)](https://github.com/jmurrayufo/simple-discord/actions/workflows/python-testing.yml)
+[![Python Testing](https://github.com/jmurrayufo/simple-discord/actions/workflows/python-testing.yml/badge.svg?branch=main)](https://github.com/jmurrayufo/simple-discord/actions/workflows/python-testing.yml) [![Python Testing (Dev)](https://github.com/jmurrayufo/simple-discord/actions/workflows/python-testing.yml/badge.svg?branch=dev)](https://github.com/jmurrayufo/simple-discord/actions/workflows/python-testing.yml)
 
 # Current Status
 

@@ -3,8 +3,10 @@ from typing import Optional, Union
 
 
 class Permissions:
+    '''Permissions for users and roles.'''
 
     class PermissionFlags(enum.IntFlag):
+        '''Various flags that can be set.'''
 
         CREATE_INSTANT_INVITE = (1 << 0)        # Allows creation of instant invites	T, V, S
         KICK_MEMBERS = (1 << 1)                 # Allows kicking members
@@ -47,6 +49,7 @@ class Permissions:
         START_EMBEDDED_ACTIVITIES = (1 << 39)   # Allows for launching activities (applications with the EMBEDDED flag) in a voice channel	V
 
     def __init__(self, data: Optional[Union[int, str, 'Permissions']] = None):
+        '''Init.'''
         self.permissions: set
 
         if type(data) in [str, int]:
@@ -59,17 +62,13 @@ class Permissions:
             raise TypeError(f'Cannot parse in a {type(data)}!')
 
     def set(self, flag):
-        '''
-        Set a specific flag.
-        '''
+        '''Set a specific flag.'''
 
     def clear(self, flag):
-        '''
-        Clear a specific flag.
-        '''
+        '''Clear a specific flag.'''
 
     def parse_str(self, data):
-
+        '''Parse a string as a permission.'''
         data = int(data)
         self.permissions = set()
         for permission in self.PermissionFlags:
@@ -77,6 +76,7 @@ class Permissions:
                 self.permissions.add(permission)
 
     def __and__(self, other):
+        '''Logically AND two Permissions together.'''
         if type(other) is Permissions:
             new_permissions = Permissions()
 
@@ -98,8 +98,10 @@ class Permissions:
         raise TypeError(f'Cannot AND a Permission against a {type(other)}!')
 
     def __rand__(self, other):
+        '''See __and__().'''
         return self.__and__(other)
 
     def __eq__(self, other):
+        '''Determine if two permission objects are equivalent.'''
         assert type(other) is Permissions
         return self.permissions == other.permissions

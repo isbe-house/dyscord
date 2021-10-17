@@ -8,9 +8,11 @@ from .. import utilities
 
 
 class User(BaseDiscordObject):
+    '''Discord User.'''
 
     @enum.unique
     class UserFlag(enum.IntFlag):
+        '''Flags on a User.'''
         NONE = 0
         DISCORD_EMPLOYEE = 1 << 0
         PARTNERED_SERVER_OWNER = 1 << 1
@@ -28,6 +30,7 @@ class User(BaseDiscordObject):
 
     @enum.unique
     class PremiumType(enum.IntFlag):
+        '''Type of Premium subscription the User has.'''
         NONE = 0
         NITRO_CLASSIC = 1 << 0
         NITRO = 1 << 1
@@ -49,6 +52,7 @@ class User(BaseDiscordObject):
     public_flags: int
 
     def __str__(self):
+        '''Return string representation.'''
         fields = []
 
         if 'id' in self.__dict__:
@@ -60,9 +64,11 @@ class User(BaseDiscordObject):
         return f'User({", ".join(fields)})'
 
     def __repr__(self):
+        '''Return string representation.'''
         return self.__str__()
 
     def __eq__(self, other):
+        '''Determine if other User and self are the same User.'''
         if not isinstance(other, User):
             return NotImplemented
         return self.id == other.id
@@ -71,16 +77,16 @@ class User(BaseDiscordObject):
 
     @property
     def mention(self):
+        '''Generate a valid name mention for use in Discord.'''
         return f'<@{self.id}>'
 
     @property
     def mention_nickname(self):
+        '''Generate a valid nickname mention for use in Discord.'''
         return f'<@!{self.id}>'
 
     def ingest_raw_dict(self, data: dict) -> 'User':
-        '''
-        Ingest and cache a given object for future use.
-        '''
+        '''Parse a User from an API compliant dict.'''
         self.from_dict(data)
 
         self.cache()
@@ -88,6 +94,7 @@ class User(BaseDiscordObject):
         return self
 
     def from_dict(self, data: dict) -> 'User':
+        '''Parse a User from an API compliant dict.'''
         # Required fields
         self.id = snowflake.Snowflake(data['id'])
         self.username = data['username']
@@ -103,10 +110,13 @@ class User(BaseDiscordObject):
         return self
 
     def cache(self):
+        '''Deprecated caching method.'''
         utilities.Cache().add(self)
 
 
 class Member(User):
+    '''User within a guild.'''
+
     nick: str
     avatar: str
     roles: List[role.Role]
@@ -118,6 +128,7 @@ class Member(User):
     permissions: str
 
     def __str__(self):
+        '''Return string representation.'''
         fields = []
 
         if hasattr(self, 'id'):
@@ -132,6 +143,7 @@ class Member(User):
         return f'Member({", ".join(fields)})'
 
     def from_dict(self, data: dict) -> 'Member':
+        '''Parse a Member from an API compliant dict.'''
         if 'nick' in data:
             self.nick = data['nick']
         if 'avatar' in data:
@@ -151,6 +163,7 @@ class Member(User):
         return self
 
     def update_from_user(self, user: User) -> 'Member':  # noqa: C901
+        '''Update Member properties from associated user.'''
         if hasattr(user, 'id'):
             self.id = user.id
         if hasattr(user, 'username'):
@@ -184,9 +197,7 @@ class Member(User):
         return self
 
     def ingest_raw_dict(self, data: dict) -> 'User':
-        '''
-        Ingest and cache a given object for future use.
-        '''
+        '''Ingest and cache a given object for future use.'''
         self.from_dict(data)
 
         self.cache()
@@ -194,4 +205,5 @@ class Member(User):
         return self
 
     def cache(self):
+        '''Deprecated caching function.'''
         utilities.Cache().add(self)

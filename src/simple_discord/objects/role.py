@@ -21,9 +21,7 @@ class Role(BaseDiscordObject):
     tags: Optional['RoleTags']   # tags object	the tags this role has
 
     def from_dict(self, data: dict) -> 'Role':
-        '''
-        Parse an object from a dictionary and return it.
-        '''
+        '''Parse a Role from an API compliant dict.'''
         self.id = snowflake.Snowflake(data['id'])
         self.name = data['name']
         self.color = data['color']
@@ -46,16 +44,14 @@ class Role(BaseDiscordObject):
 
 
 class RoleTags(BaseDiscordObject):
+    '''RoleTags.'''
 
     bot_id: snowflake.Snowflake
     integration_id: snowflake.Snowflake
     premium_subscriber: Any
 
     def from_dict(self, data: dict) -> 'RoleTags':
-        '''
-        Parse an object from a dictionary and return it.
-        '''
-
+        '''Parse a RoleRags from an API compliant dict.'''
         if 'bot_id' in data:
             self.bot_id = data['bot_id']
 
