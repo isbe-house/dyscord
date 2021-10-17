@@ -26,8 +26,6 @@ jobs:
         run: python3 -m pytest --cov=src --durations=5 -vv --color=yes tests
       - name: "Produce coverage HTML"
         run: coverage html
-      - name: "LS again"
-        run: ls -larth
       - name: "Tarball coverage"
         run: tar zcvf coverage-${{ matrix.python-version }}.tar.gz htmlcov
       - name: "Save: Coverage"
