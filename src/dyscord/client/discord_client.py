@@ -326,8 +326,6 @@ class DiscordClient:
             self._log.info('Discord connection complete, we are ready!')
             self._log.info(f'We are now {self.me}')
 
-            await self.on_ready(obj, data['d'])
-
         elif not DiscordClient.ready:
             self._log.info(f'Got event of type [{event_type}] before we were ready!')
             return
@@ -351,10 +349,8 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_CREATE':
-            # Cache in guild
             obj = objects.Guild()
-            obj.ingest_raw_dict(data['d'])
-            # pprint(data['d'])
+            obj.from_dict(data['d'])
 
         elif event_type == 'GUILD_DELETE':
             warnings.warn(f'Encountered unhandled event {event_type}')
@@ -406,8 +402,7 @@ class DiscordClient:
 
         elif event_type == 'MESSAGE_CREATE':
             obj = objects.Message()
-            obj.ingest_raw_dict(data['d'])
-            await self.on_message_create(obj, data['d'])
+            obj.from_dict(data['d'])
 
         elif event_type == 'MESSAGE_DELETE':
             warnings.warn(f'Encountered unhandled event {event_type}')
@@ -461,6 +456,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'TYPING_START':
+            obj = objects.events.typing_start.TypingStart().from_dict(data['d'])
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'VOICE_STATE_UPDATE':
@@ -478,8 +474,16 @@ class DiscordClient:
             # We have an unknown event on our hands, PANIC!!!
             self._log.critical(f'Encountered unknown event \'{data["t"]}\'!!!')
             pprint(data)
+            return
 
-        # Call user wrapped cotoutines
+        event_handler_name = f'on_{event_type.lower()}'
+
+        # Call own event handlers first.
+        if hasattr(self, event_handler_name):
+            self_function = getattr(self, event_handler_name)
+            await self_function(self, obj, data)
+
+        # Call user wrapped classes, functions and cotoutines.
         if obj is not None:
             for user_function in DiscordClient._wrapper_registrations[event_type]:
                 if asyncio.iscoroutinefunction(user_function):
@@ -488,8 +492,8 @@ class DiscordClient:
                     user_function(self, obj, data)
 
             for user_class in DiscordClient._wrapper_class_registrations:
-                if hasattr(user_class, f'on_{event_type.lower()}'):
-                    user_function = getattr(user_class, f'on_{event_type.lower()}')
+                if hasattr(user_class, event_handler_name):
+                    user_function = getattr(user_class, event_handler_name)
 
                     if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
                         warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
@@ -505,10 +509,9 @@ class DiscordClient:
                 await user_function(self, obj, data)
             else:
                 user_function(self, obj, data)
-
         for user_class in DiscordClient._wrapper_class_registrations:
             if hasattr(user_class, 'on_any'):
-                user_function = getattr(user_class, f'on_{event_type.lower()}')
+                user_function = getattr(user_class, event_handler_name)
 
                 if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
                     warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
