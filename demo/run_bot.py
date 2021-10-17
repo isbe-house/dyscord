@@ -59,6 +59,7 @@ async def purge_commands(client, message: Message):
         await API.delete_global_application_command(command.id)
 
     client._log.info('Get guild commands')
+    assert message.guild is not None
     guild: Guild = message.guild
     commands = await API.get_guild_application_commands(guild.id)
     for command in commands:
