@@ -382,7 +382,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_UPDATE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.Guild().from_dict(data['d'])
 
         elif event_type == 'INTEGRATION_CREATE':
             warnings.warn(f'Encountered unhandled event {event_type}')
@@ -403,7 +403,7 @@ class DiscordClient:
             obj = objects.Message().from_dict(data['d'])
 
         elif event_type == 'MESSAGE_DELETE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.Message().from_dict(data['d'])
 
         elif event_type == 'MESSAGE_DELETE_BULK':
             warnings.warn(f'Encountered unhandled event {event_type}')
@@ -421,6 +421,8 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_UPDATE':
+            # BUG: Message object assumes that we have all the normal attachments and such.
+            # obj = objects.Message().from_dict(data['d'])
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'PRESENCE_UPDATE':
@@ -436,10 +438,11 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_CREATE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            pprint(data)
+            obj = objects.ChannelImporter().from_dict(data['d'])
 
         elif event_type == 'THREAD_DELETE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.ChannelImporter().from_dict(data['d'])
 
         elif event_type == 'THREAD_LIST_SYNC':
             warnings.warn(f'Encountered unhandled event {event_type}')
@@ -451,7 +454,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_UPDATE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.ChannelImporter().from_dict(data['d'])
 
         elif event_type == 'TYPING_START':
             obj = objects.events.typing_start.TypingStart().from_dict(data['d'])
