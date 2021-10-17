@@ -9,7 +9,7 @@ plugins:
   - mkdocstrings:
       default_handler: python
       watch:
-        - src/simple_discord
+        - src/dyscord
   - search:
   - autorefs:
 theme:

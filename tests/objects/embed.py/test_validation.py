@@ -1,6 +1,6 @@
 import pytest
 
-from src.simple_discord.objects import Embed
+from src.dyscord.objects import Embed
 
 
 @pytest.fixture

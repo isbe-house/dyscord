@@ -1,6 +1,6 @@
 import pytest
 
-from src.simple_discord.objects.interactions import Command, COMMAND_TYPE, COMMAND_OPTION
+from src.dyscord.objects.interactions import Command, COMMAND_TYPE, COMMAND_OPTION
 
 
 def test_bad_validations_bad_name():

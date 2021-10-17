@@ -304,8 +304,8 @@ class DiscordClient:
                 'intents': self.intent,
                 "properties": {
                     "$os": "linux",
-                    "$browser": "simple_discord",
-                    "$device": "simple_discord"
+                    "$browser": "dyscord",
+                    "$device": "dyscord"
                 }
             }
         }

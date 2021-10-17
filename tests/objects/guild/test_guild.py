@@ -1,7 +1,7 @@
 import uuid
 import random
 
-from src.simple_discord.objects import Guild
+from src.dyscord.objects import Guild
 
 
 def test_simple_guild():

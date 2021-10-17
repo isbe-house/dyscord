@@ -1,4 +1,4 @@
-from src.simple_discord.objects import Ready
+from src.dyscord.objects import Ready
 from tests.objects.ready import samples
 
 

@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-    simple-discord-jupyter:
+    dyscord-jupyter:
         build:
           context: ../../
           dockerfile: tools/jupyter/Dockerfile
@@ -12,7 +12,7 @@ services:
         user: "${UID}:${GID}"
         volumes:
           - ./examples/:/home/jovyan/examples/
-          - ../../src/simple_discord:/opt/conda/lib/python3.9/site-packages/simple_discord:ro
+          - ../../src/dyscord:/opt/conda/lib/python3.9/site-packages/dyscord:ro
         command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password='' --ip=${HOST_ADDRESS} --ServerApp.root_dir='/home/jovyan/examples/'"
         network_mode: host
         environment:

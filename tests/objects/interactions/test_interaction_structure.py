@@ -1,5 +1,5 @@
-from src.simple_discord.objects.snowflake import Snowflake
-from src.simple_discord.objects.interactions import InteractionStructure, Command, enumerations
+from src.dyscord.objects.snowflake import Snowflake
+from src.dyscord.objects.interactions import InteractionStructure, Command, enumerations
 from . import samples
 
 from unittest.mock import AsyncMock, patch
@@ -12,7 +12,7 @@ def test_button_interaction():
     assert hasattr(obj, 'data')
 
 
-@patch('src.simple_discord.client.api.API')
+@patch('src.dyscord.client.api.API')
 def test_text_interaction(api_mock):
     api_mock.get_user = AsyncMock(return_value=samples.trigger_chat['data']['resolved']['users']['185846097284038656'])
 
@@ -40,7 +40,7 @@ def test_message():
     assert hasattr(obj, 'data')
 
 
-@patch('src.simple_discord.client.api.api_v9.API_V9.get_user')
+@patch('src.dyscord.client.api.api_v9.API_V9.get_user')
 def test_complex_chat(get_user_func):
 
     get_user_func.return_value = {'avatar': 'b437e9bd4b0e487a097c4538c6cdce3f',

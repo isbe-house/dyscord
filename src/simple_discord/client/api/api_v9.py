@@ -3,7 +3,7 @@ import datetime
 from pprint import pprint
 
 import httpx
-from src.simple_discord.objects.snowflake import Snowflake
+from src.dyscord.objects.snowflake import Snowflake
 
 from ...utilities import Log
 

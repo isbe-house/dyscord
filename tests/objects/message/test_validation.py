@@ -1,8 +1,8 @@
 import pytest
 import uuid
 
-from src.simple_discord.objects import Message
-from src.simple_discord.objects.interactions import BUTTON_STYLES
+from src.dyscord.objects import Message
+from src.dyscord.objects.interactions import BUTTON_STYLES
 
 
 def test_bad_validation():

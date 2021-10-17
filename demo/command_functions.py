@@ -1,6 +1,6 @@
-from src.simple_discord.helper.questions import Question, Confirmation
-from src.simple_discord.objects.interactions.interaction import InteractionStructure
-from src.simple_discord.utilities.log import Log
+from src.dyscord.helper.questions import Question, Confirmation
+from src.dyscord.objects.interactions.interaction import InteractionStructure
+from src.dyscord.utilities.log import Log
 
 
 async def test(client, interaction: InteractionStructure):

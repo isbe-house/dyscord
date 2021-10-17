@@ -5,21 +5,21 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 main_ns = {}
-ver_path = convert_path('src/simple_discord/version.py')
+ver_path = convert_path('src/dyscord/version.py')
 with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 
 setuptools.setup(
-    name="simple_discord",
+    name="dyscord",
     version=main_ns['__version__'],
     author="John Murray",
     author_email="jmurrayufo@gmail.com",
     description="A simple implementation of the discord API",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jmurrayufo/simple-discord",
+    url="https://github.com/jmurrayufo/dyscord",
     project_urls={
-        "Bug Tracker": "https://github.com/jmurrayufo/simple-discord/issues",
+        "Bug Tracker": "https://github.com/jmurrayufo/dyscord/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3.9",

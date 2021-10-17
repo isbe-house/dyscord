@@ -9,7 +9,7 @@ secrets:
         file: ./discord_client_secret
 
 services:
-    simple-discord:
+    dyscord:
         build:
             context: .
             dockerfile: Dockerfile
@@ -32,7 +32,7 @@ services:
             - mongo
             - mongo-express
 
-    simple-discord-tests:
+    dyscord-tests:
         build:
             context: .
             dockerfile: Dockerfile

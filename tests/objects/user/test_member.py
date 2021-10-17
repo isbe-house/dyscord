@@ -1,5 +1,5 @@
 
-from src.simple_discord.objects import Member, User
+from src.dyscord.objects import Member, User
 
 from . import samples
 
