@@ -160,6 +160,9 @@ class Member(User):
             self.pending = data['pending']
         if 'permissions' in data:
             self.permissions = data['permissions']
+        if 'user' in data:
+            tmp_user = User().from_dict(data['user'])
+            self.update_from_user(tmp_user)
         return self
 
     def update_from_user(self, user: User) -> 'Member':  # noqa: C901

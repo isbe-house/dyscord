@@ -25,4 +25,3 @@ def test_samples():
         assert hasattr(x, 'member')
         assert isinstance(x.member, Member)
         assert isinstance(x.member, User)
-        assert hasattr(x.member, 'nick')
