@@ -1,7 +1,7 @@
 name: Tagging
 on:
   workflow_run:
-    workflows: [Python Testing"]
+    workflows: ["Python Testing"]
     branches: [main]
     types:
       - completed
