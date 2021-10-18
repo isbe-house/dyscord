@@ -421,9 +421,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_UPDATE':
-            # BUG: Message object assumes that we have all the normal attachments and such.
-            # obj = objects.Message().from_dict(data['d'])
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.Message().from_dict(data['d'])
 
         elif event_type == 'PRESENCE_UPDATE':
             warnings.warn(f'Encountered unhandled event {event_type}')

@@ -63,7 +63,7 @@ def test_bad_validation():
         x.validate()
 
     x = Message()
-    with pytest.raises(AssertionError, match=r'must have a content, embeds, or file'):
+    with pytest.raises(AssertionError, match=r'must have a content, embeds, or attachments'):
         x.validate()
 
     x = Message()

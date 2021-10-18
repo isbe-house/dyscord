@@ -18,37 +18,37 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
 
     MESSAGE_TYPE = enumerations.MESSAGE_TYPE
 
-    id: 'snowflake.Snowflake'
-    channel_id: 'snowflake.Snowflake'
-    guild_id: Optional['snowflake.Snowflake']
-    guild: Optional['ext_guild.Guild']
-    author: 'user.User'
-    member: Optional['user.Member']
-    content: str
-    timestamp: datetime.datetime
-    edited_timestamp: Optional[datetime.datetime]
-    tts: bool
-    mention_everyone: bool
-    mentions: List['user.User']
-    mention_roles: List['ext_role.Role']  # Roles are TBD
-    mention_channels: List['ext_channel.Channel']
-    # attachments: list[attachment.Attachment]  # Attachments are TBD
-    embeds: Optional[List[ext_embed.Embed]]
-    # reactions: list[reaction.Reaction]  # Reactions are TBD
-    nonce: Optional[Union[int, str]]
-    pinned: bool
-    webhook_id: Optional['snowflake.Snowflake']
-    type: 'enumerations.MESSAGE_TYPE'
-    # activity = None  # Activity TBD
-    # application: application.Application = None  # Application TBD
-    application_id: 'snowflake.Snowflake'
-    # message_reference: = None  # Message Reference TBD
-    flags: int  # Message Flags
-    referenced_message: 'Message'
-    # interaction = None  # Interactions TBD
-    thread: 'ext_channel.Channel'
-    components: List['ext_components.Component']  # Message components TBD
-    # sticker_items: List[Sticker] = []  # Stickers TBD
+    id: 'snowflake.Snowflake' = None  # type: ignore
+    channel_id: 'snowflake.Snowflake' = None  # type: ignore
+    guild_id: Optional['snowflake.Snowflake'] = None  # type: ignore
+    guild: Optional['ext_guild.Guild'] = None  # type: ignore
+    author: 'user.User' = None  # type: ignore
+    member: Optional['user.Member'] = None  # type: ignore
+    content: str = None  # type: ignore
+    timestamp: datetime.datetime = None  # type: ignore
+    edited_timestamp: Optional[datetime.datetime] = None  # type: ignore
+    tts: bool = None  # type: ignore
+    mention_everyone: bool = None  # type: ignore
+    mentions: List['user.User'] = None  # type: ignore
+    mention_roles: List['ext_role.Role'] = None  # type: ignore # Roles are TBD
+    mention_channels: List['ext_channel.Channel'] = None  # type: ignore
+    attachments: 'List' = None  # type: ignore # attachment.Attachment TDB
+    embeds: Optional[List[ext_embed.Embed]] = None  # type: ignore
+    # reactions: 'List[reaction.Reaction]'  = None  # type: ignore
+    nonce: Optional[Union[int, str]] = None  # type: ignore
+    pinned: bool = None  # type: ignore
+    webhook_id: Optional['snowflake.Snowflake'] = None  # type: ignore
+    type: 'enumerations.MESSAGE_TYPE' = None  # type: ignore
+    # activity = None  # Activity TBD = None  # type: ignore
+    # application: application.Application = None  # Application TBD = None  # type: ignore
+    application_id: 'snowflake.Snowflake' = None  # type: ignore
+    # message_reference: = None  # Message Reference TBD = None  # type: ignore
+    flags: int  # Message Flags = None  # type: ignore
+    referenced_message: 'Message' = None  # type: ignore
+    # interaction = None  # Interactions TBD = None  # type: ignore
+    thread: 'ext_channel.Channel' = None  # type: ignore
+    components: List['ext_components.Component']  # Message components TBD = None  # type: ignore
+    # sticker_items: List[Sticker] = []  # Stickers TBD = None  # type: ignore
 
     def __init__(self,
                  content: str = None
@@ -97,8 +97,9 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         '''Parse a Message from an API compliant dict.'''
         # Mandatory Fields
         self.attachments = list()
-        for attachment in data['attachments']:
-            self.attachments.append(attachment)
+        if 'attachments' in data:
+            for attachment in data['attachments']:
+                self.attachments.append(attachment)
         self.author = user.User().from_dict(data['author'])  # TODO: Update after we can parse in users.
         self.channel_id = snowflake.Snowflake(data['channel_id'])
         self.components = list()
@@ -141,11 +142,11 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     def to_sendable_dict(self) -> dict:
         '''Sending a message only allows a subset of attributes. Ignore anything else about this message when producing that dict.'''
         new_dict: Dict[str, object] = dict()
-        if hasattr(self, 'content'):
+        if self.content is not None:
             new_dict['content'] = self.content
         new_dict['tts'] = self.tts if hasattr(self, 'tts') else False
         # new_dict['file'] = None  # TODO: Handle a file upload.
-        if hasattr(self, 'embeds'):
+        if self.embeds is not None:
             new_dict['embeds'] = list()  # TODO: Handle embeds.
             assert type(new_dict['embeds']) is list
             assert type(self.embeds) is list
@@ -155,7 +156,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         # new_dict['message_reference'] = None
         # new_dict['sticker_ids'] = None
 
-        if hasattr(self, 'components') and type(self.components) is list and len(self.components):
+        if isinstance(self.components, list) and len(self.components):
             new_dict['components'] = list()
             assert type(new_dict['components']) is list
             for component in self.components:
@@ -165,17 +166,17 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
 
     def validate(self):
         '''Validate object is prepared for dispatch to discord.'''
-        assert hasattr(self, 'content') or hasattr(self, 'embeds') or hasattr(self, 'file'),\
-            'Message must have a content, embeds, or file to be valid for sending.'
+        assert (self.content is not None) or (self.embeds is not None) or (self.attachments is not None),\
+            'Message must have a content, embeds, or attachments to be valid for sending.'
 
-        if hasattr(self, 'content'):
+        if self.content is not None:
             assert type(self.content) is str,\
                 f'Got invalid type {type(self.content)} in Message.content, must be str.'
 
             assert len(self.content) <= 2000,\
                 f'Invalid length of {len(self.content):,} in Message.content, must be <= 2000 characters.'
 
-        if hasattr(self, 'components'):
+        if self.components is not None:
             assert type(self.components) is list,\
                 f'Got invalid type {type(self.components)} in Message.components, must be list.'
 
@@ -188,12 +189,12 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
                     f'Got invalid type {type(component)} in Message.components, must be ActionRow.'
                 component.validate()
                 for sub_component in component.components:
-                    if hasattr(sub_component, 'custom_id'):
+                    if sub_component.custom_id is not None:
                         assert sub_component.custom_id not in custom_ids,\
                             f'Found duplicate custom_id [{sub_component.custom_id}]'
                         custom_ids.append(sub_component.custom_id)
 
-        if hasattr(self, 'embeds'):
+        if self.embeds is not None:
             assert type(self.embeds) is list,\
                 f'Got invalid type {type(self.embeds)} in Message.embeds, must be list.'
 
