@@ -1,5 +1,13 @@
 name: Python Testing
-on: [push]
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
 jobs:
   Test-Python:
     runs-on: self-hosted
