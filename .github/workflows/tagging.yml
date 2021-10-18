@@ -3,6 +3,7 @@ on:
   workflow_run:
     workflows: ["Python Testing"]
     branches: [main]
+    push:
     types:
       - completed
 jobs:
