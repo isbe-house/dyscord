@@ -24,4 +24,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Just sleep a bit
+<<<<<<< HEAD
         run: sleep 120
+=======
+        run: sleep 120
+>>>>>>> cicd: experimental service.
