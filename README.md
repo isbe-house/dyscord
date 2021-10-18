@@ -18,7 +18,7 @@ Actual published documentation is still very much a WIP.
 
 # Community
 
-Come talk on the [Dyscord subreddit](https://www.reddit.com/r/dyscord/), or the [discord](https://discord.gg/Q9NFzgZx)!
+Come talk on the [Dyscord subreddit](https://www.reddit.com/r/dyscord/), or the [Dyscord discord](https://discord.gg/Q9NFzgZx)!
 
 # Changelog
 
