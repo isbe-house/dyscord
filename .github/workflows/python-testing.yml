@@ -57,6 +57,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - run: echo "Lets tag!"
+      - uses: actions/checkout@v2
       - name: Tag On Main
         # if: github.ref == ‘refs/heads/integration’ && github.event_name == ‘push’
         uses: butlerlogic/action-autotag@stable
