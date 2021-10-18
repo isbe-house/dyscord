@@ -13,6 +13,7 @@ from .embed import Embed, EmbedAdder
 from .channel import Channel, ChannelImporter, CategoryChannel, NewsChannel, TextChannel, StoreChannel, VoiceChannel
 
 from . import interactions
+from . import events
 
 __all__ = [
     'CategoryChannel',
@@ -22,6 +23,7 @@ __all__ = [
     'Embed',
     'EmbedAdder',
     'Emoji',
+    'events',
     'Guild',
     'interactions',
     'Member',
