@@ -2,9 +2,9 @@
 
 A simplistic implementation of the discord API.
 
-Main: [![Python Testing](https://github.com/jmurrayufo/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=main)](https://github.com/jmurrayufo/dyscord/actions/workflows/python-testing.yml)
+Main: [![Python Testing](https://github.com/isbe.house/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=main)](https://github.com/isbe.house/dyscord/actions/workflows/python-testing.yml)
 
-Dev: [![Python Testing](https://github.com/jmurrayufo/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=dev)](https://github.com/jmurrayufo/dyscord/actions/workflows/python-testing.yml)
+Dev: [![Python Testing](https://github.com/isbe.house/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=dev)](https://github.com/isbe.house/dyscord/actions/workflows/python-testing.yml)
 
 # Current Status
 
@@ -14,11 +14,11 @@ Very much an active WIP. The API to this library is not at all locked down. User
 
 We are following [Google Style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) docstring patterns.
 
+Actual published documentation is still very much a WIP.
+
 # Community
 
-[Subreddit](https://www.reddit.com/r/dyscord/)
-
-[Discord](https://discord.gg/Q9NFzgZx)
+Come talk on the [Dyscord subreddit](https://www.reddit.com/r/dyscord/), or the [discord](https://discord.gg/Q9NFzgZx)!
 
 # Changelog
 

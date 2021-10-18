@@ -46,7 +46,6 @@ build-docs: build
 clean: ## Delete volumes
 	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site htmlcov src/dyscord.egg-info
 	find . | grep -E \(__pycache__\|\.pyc\|\.pyo\$\) | xargs rm -rf
-	rm -rf src/dyscord_jmurrayufo.egg-info
 
 debug: ## Start interactive python shell to debug with
 	docker-compose \
