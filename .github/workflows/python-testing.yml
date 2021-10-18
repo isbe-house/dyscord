@@ -32,7 +32,7 @@ jobs:
       - run: python3 -m pip install -r requirements.txt
       - run: python -c "print('hello')"
       - name: "Code Version"
-        run: python -c "import src.dyscord.version; print(f'::set-output name=version::{src.dyscord.version.__version__}')"
+        run: python -c "import src.dyscord.version; print(f'name=version::{src.dyscord.version.__version__}')"
       - name: Get Version
         run: echo "The selected version is ${{ steps.code-version.outputs.version }}"
       - name: "Test: pytest"
