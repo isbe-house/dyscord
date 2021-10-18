@@ -53,10 +53,15 @@ jobs:
       - name: Pydocsstyle
         run: pydocstyle --add-ignore=D407,D300,D203,D100,D104 --convention=google src
       - name: Tag On Main
+        # if: github.ref == ‘refs/heads/integration’ && github.event_name == ‘push’
         uses: butlerlogic/action-autotag@1.0.0
         with:
-          # if: github.ref == ‘refs/heads/integration’ && github.event_name == ‘push’
-          uses: butlerlogic/action-autotag@1.0.0
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           strategy: regex # Optional since regex_pattern is defined
           root: "src/dyscord/version.py"
           regex_pattern: "__version__ = ([.*])\n"
+  Tag-Release:
+    needs: Test-Python
+    runs-on: self-hosted
+    steps:
+      - run: echo "Lets tag!"
