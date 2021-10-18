@@ -31,9 +31,10 @@ jobs:
       - run: python3 -m pip install -r requirements_test.txt
       - run: python3 -m pip install -r requirements.txt
       - name: "Code Version"
-        run: python -c "import src.dyscord.version; print(f'::set-output name=py_version::{src.dyscord.version.__version__}')"
+        id: "version"
+        run: python -c "import src.dyscord.version; print(f'::set-output name=version::{src.dyscord.version.__version__}')"
       - name: "Get Version"
-        run: echo "The selected version is ${{ steps.code-version.outputs.py_version }}"
+        run: echo "The selected version is ${{ steps.version.outputs.version }}"
       - name: "Test: pytest"
         run: python3 -m pytest --cov=src --durations=5 -vv --color=yes tests
       - name: "Produce coverage HTML"
