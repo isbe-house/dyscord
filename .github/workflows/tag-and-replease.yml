@@ -14,7 +14,7 @@ jobs:
       - run: echo "Lets tag!"
       - uses: actions/checkout@v2
       - name: Tag On Main
-        uses: Isbe-house/action-autotag
+        uses: Isbe-house/action-autotag@master
         with:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           strategy: regex # Optional since regex_pattern is defined
