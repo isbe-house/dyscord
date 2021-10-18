@@ -2,7 +2,9 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
-## [v0.2.0] WIP
+## [v0.3.0] WIP
+
+## [v0.2.0] 2021-10-18
 ### Added
 - cachetools>=4.2.4 now required.
 - validators>=0.18.2 now required.
