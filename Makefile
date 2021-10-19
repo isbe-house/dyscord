@@ -23,6 +23,11 @@ build:
 		-f docker-compose.yaml \
 		build
 
+rebuild:
+	docker-compose \
+		-f docker-compose.yaml \
+		build --no-cache
+
 down: ## Stop all containers
 	docker-compose \
 		-f  docker-compose.yaml \
