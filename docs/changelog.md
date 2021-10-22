@@ -5,6 +5,10 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ## [v0.4.0] WIP
 ### Added
 - Handle invalid session events.
+- Support for ReadTheDocs.
+
+### Fixed
+- Importing actually works again.
 
 ## [v0.3.0] 2021-10-22
 ### Added
