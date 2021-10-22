@@ -33,7 +33,7 @@ down: ## Stop all containers
 		-f  docker-compose.yaml \
 		down
 
-docs: build build-docs ## Stop all containers
+docs: ## Stop all containers
 	docker-compose \
 		-f  docker-compose.yaml \
 		run --rm --service-ports documentation
@@ -145,5 +145,5 @@ help:
 
 .DEFAULT_GOAL := help
 
-.PHONY: up down clean populate test build debug run doc-strings build-docs dist release
+.PHONY: up down clean populate test build debug run build-docs dist release docs
 # .SILENT: test up down up clean

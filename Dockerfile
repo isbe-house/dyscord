@@ -23,7 +23,6 @@ FROM python:3.9 as DOCS
 COPY requirements.txt ./
 COPY requirements_docs.txt ./
 RUN pip install --no-cache-dir -r requirements_docs.txt
-ENV PYTHONPATH=src
 WORKDIR /usr/src/app
 
 FROM python:3.9 as RELEASE

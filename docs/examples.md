@@ -27,3 +27,7 @@ client.run()
 ```
 
 You should now be connected to the discord API and any `MESSAGE_CREATE` events your bot sees will trigger a call to the `parse_message` function.
+
+[test](../reference/#dyscord.client.discord_client.DiscordClient)
+
+[Reference Test](../reference/#dyscord.client.discord_client.DiscordClient)

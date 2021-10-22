@@ -10,8 +10,13 @@ plugins:
       default_handler: python
       watch:
         - src/dyscord
+      handlers:
+          python:
+              setup_commands:
+                  - import sys
+                  - sys.path.append('src')
   - search:
   - autorefs:
 theme:
-  name: "readthedocs"
-  # name: "material"
+  # name: "readthedocs"
+  name: "material"

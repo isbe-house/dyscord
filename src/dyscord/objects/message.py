@@ -42,7 +42,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     # activity = None  # Activity TBD = None  # type: ignore
     # application: application.Application = None  # Application TBD = None  # type: ignore
     application_id: 'snowflake.Snowflake' = None  # type: ignore
-    message_reference: 'MessageReference' = None  # Message Reference TBD = None  # type: ignore
+    # message_reference: 'MessageReference' = None  # Message Reference TBD = None  # type: ignore
     flags: int  # Message Flags = None  # type: ignore
     referenced_message: 'Message' = None  # type: ignore
     # interaction = None  # Interactions TBD = None  # type: ignore

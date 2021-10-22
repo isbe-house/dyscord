@@ -45,7 +45,6 @@ class DiscordClient:
     intent: int
     ready: bool
     cache: 'utilities.Cache'
-    API = API
 
     def __init__(self, token: str, application_id: Optional[str] = None):
         '''Instantiate a DiscordClient.
