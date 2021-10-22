@@ -154,7 +154,15 @@ class DiscordClient:
 
         loop.run_forever()
 
-    async def _run(self):
+        loop = loop if loop is not None else asyncio.get_event_loop()
+
+        nest_asyncio.apply(loop)
+
+        loop.create_task(self._run())
+
+        loop.run_forever()
+
+    async def _run(self, ):
 
         if self._intents_defined is False:
             warnings.warn('Started without defining intents. Client will likely get ZERO input. Consider calling the \'configure_intents\' function.', UserWarning)
