@@ -2,7 +2,14 @@
 
 A simplistic implementation of the discord API.
 
-[![Testing Main](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=main)](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml) [![Testing Dev](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=dev)](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml) [![Downloads](https://static.pepy.tech/personalized-badge/dyscord?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=Downloads)](https://pepy.tech/project/dyscord)
+## Main
+
+[![Testing](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=main)](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml) [![Downloads](https://static.pepy.tech/personalized-badge/dyscord?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=Downloads)](https://pepy.tech/project/dyscord) [![Documentation Status](https://readthedocs.org/projects/dyscord/badge/?version=main)](https://dyscord.readthedocs.io/en/main/?badge=main)
+
+## Dev
+
+[![Testing](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=dev)](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml) [![Documentation Status](https://readthedocs.org/projects/dyscord/badge/?version=dev)](https://dyscord.readthedocs.io/en/dev/?badge=dev)
+
 
 # Current Status
 
