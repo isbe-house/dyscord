@@ -5,6 +5,7 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ## [v0.3.0] WIP
 ### Added
 - Built in reconnect support.
+- Support giving an event loop to DiscordClient.run()
 
 ## [v0.2.0] 2021-10-18
 ### Added
