@@ -208,7 +208,7 @@ class DiscordClient:
 
         await self._identify()
 
-    async def _web_socket_listener(self, uri):
+    async def _web_socket_listener(self, uri):  # noqa
 
         def _handle_completed_tasks(task: asyncio.Task):
             exception = task.exception()
@@ -290,8 +290,6 @@ class DiscordClient:
 
     async def _handle_op_7(self, data):
 
-        self._log.critical(f'Try to connect to {gateway_uri}')
-
         await self._reconnect()
 
         self._log.critical('Opcode 7 handled.')
@@ -307,8 +305,8 @@ class DiscordClient:
 
     async def _reconnect(self):
         '''Send a reconnect message.'''
-
         gateway_uri = (await API.get_gateway_bot(self.token))['url']
+        self._log.critical(f'Try to connect to {gateway_uri}')
 
         if self._listener_task is not None:
             self._listener_task.cancel()
