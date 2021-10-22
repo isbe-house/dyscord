@@ -136,10 +136,11 @@ class DiscordClient:
             self.intent += Intents.DIRECT_MESSAGE_TYPING
         self._intents_defined = True
 
-    def run(self, loop = None):
+    def run(self, loop: asyncio.AbstractEventLoop = None):
         '''Start the async loop and run forever.
+
         Arguments:
-            loop: If desired, use a given asyncio compatible loop. One will be created if not given.
+            loop (asyncio.AbstractEventLoop): If desired, use a given asyncio compatible loop. One will be created if not given.
         '''
         self._log.info('Starting...')
         self._log.info(f'Application ID: [{self.application_id}]')
@@ -153,7 +154,7 @@ class DiscordClient:
 
         loop.run_forever()
 
-    async def _run(self, ):
+    async def _run(self):
 
         if self._intents_defined is False:
             warnings.warn('Started without defining intents. Client will likely get ZERO input. Consider calling the \'configure_intents\' function.', UserWarning)
