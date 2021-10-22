@@ -73,7 +73,7 @@ services:
 
     # For local development.
     mongo:
-        image: mongo:4.4.3
+        image: mongo:5.0.3
         restart: always
         command: --wiredTigerCacheSizeGB 0.25
         environment:

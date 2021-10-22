@@ -17,9 +17,9 @@ setuptools.setup(
     description="A simple implementation of the discord API.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jmurrayufo/dyscord",
+    url="https://github.com/isbe-house/dyscord",
     project_urls={
-        "Bug Tracker": "https://github.com/jmurrayufo/dyscord/issues",
+        "Bug Tracker": "https://github.com/isbe-house/dyscord/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3.9",

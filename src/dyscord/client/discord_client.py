@@ -136,13 +136,23 @@ class DiscordClient:
             self.intent += Intents.DIRECT_MESSAGE_TYPING
         self._intents_defined = True
 
-    def run(self):
-        '''Start the async loop and run forever.'''
+    def run(self, loop: asyncio.AbstractEventLoop = None):
+        '''Start the async loop and run forever.
+
+        Arguments:
+            loop (asyncio.AbstractEventLoop): If desired, use a given asyncio compatible loop. One will be created if not given.
+        '''
         self._log.info('Starting...')
         self._log.info(f'Application ID: [{self.application_id}]')
         self._log.info(f'Version: [{__version__}]')
-        nest_asyncio.apply()
-        asyncio.run(self._run())
+
+        loop = loop if loop is not None else asyncio.get_event_loop()
+
+        nest_asyncio.apply(loop)
+
+        loop.create_task(self._run())
+
+        loop.run_forever()
 
     async def _run(self):
 
@@ -208,7 +218,7 @@ class DiscordClient:
 
         await self._identify()
 
-    async def _web_socket_listener(self, uri):
+    async def _web_socket_listener(self, uri):  # noqa
 
         def _handle_completed_tasks(task: asyncio.Task):
             exception = task.exception()
@@ -246,8 +256,9 @@ class DiscordClient:
                 #     # Heartbeat
                 #     pass
 
-                # elif opcode == 7:
-                #     # Reconnect
+                elif opcode == 7:
+                    self._log.debug('OPCODE: RECONNECT')
+                    await self._handle_op_7(data)
                 #     pass
 
                 # elif opcode == 9:
@@ -287,6 +298,12 @@ class DiscordClient:
 
             await self._gateway_ws.send(json.dumps(data))
 
+    async def _handle_op_7(self, data):
+
+        await self._reconnect()
+
+        self._log.critical('Opcode 7 handled.')
+
     async def _handle_op_10(self, data):
 
         if self._heartbeat_task is not None:
@@ -295,6 +312,37 @@ class DiscordClient:
         self._heartbeat_task = asyncio.create_task(self._heartbeat(data['d']['heartbeat_interval']))
 
         self._log.debug('Opcode 10 handled.')
+
+    async def _reconnect(self):
+        '''Send a reconnect message.'''
+        gateway_uri = (await API.get_gateway_bot(self.token))['url']
+        self._log.critical(f'Try to connect to {gateway_uri}')
+
+        if self._listener_task is not None:
+            self._listener_task.cancel()
+            self._listener_task = None
+
+        if self._heartbeat_task is not None:
+            self._heartbeat_task.cancel()
+            self._heartbeat_task = None
+            self._last_heartbeat_ack = None
+            self._gateway_ws = None
+
+        self._listener_task = asyncio.create_task(self._web_socket_listener(gateway_uri))
+
+        while self._gateway_ws is None:
+            await asyncio.sleep(1)
+
+        data = {
+            'op': 6,
+            'd': {
+                'token': self.token,
+                'session_id': self.session_id,
+                'seq': self._sequence_number,
+            }
+        }
+        self._log.info('Sending reconnect.')
+        await self._gateway_ws.send(json.dumps(data))
 
     async def _identify(self):
         data = {
