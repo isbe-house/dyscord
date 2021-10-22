@@ -3,6 +3,7 @@ import inspect
 import nest_asyncio  # type: ignore
 import time
 import warnings
+import random
 
 from collections import defaultdict
 import functools
@@ -267,11 +268,10 @@ class DiscordClient:
                 elif opcode == 7:
                     self._log.debug('OPCODE: RECONNECT')
                     await self._handle_op_7(data)
-                #     pass
 
-                # elif opcode == 9:
-                #     # Invalid Session
-                #     pass
+                elif opcode == 9:
+                    self._log.debug('OPCODE: INVALID SESSION')
+                    await self._handle_op_9(data)
 
                 elif opcode == 10:
                     # Hello
@@ -311,6 +311,25 @@ class DiscordClient:
         await self._reconnect()
 
         self._log.critical('Opcode 7 handled.')
+
+    async def _handle_op_9(self, data):
+
+        if self._listener_task is not None:
+            self._listener_task.cancel()
+            self._listener_task = None
+
+        if self._heartbeat_task is not None:
+            self._heartbeat_task.cancel()
+            self._heartbeat_task = None
+            self._last_heartbeat_ack = None
+            self._gateway_ws = None
+
+        # Wait 1-5 seconds then try to connect.
+        await asyncio.sleep(random.random() * 4 + 1)
+
+        await self._reconnect()
+
+        self._log.critical('Opcode 9 handled.')
 
     async def _handle_op_10(self, data):
 
