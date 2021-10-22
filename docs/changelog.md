@@ -2,7 +2,7 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
-## [v0.4.0] WIP
+## [v0.3.1] WIP
 ### Added
 - Handle invalid session events.
 - Support for ReadTheDocs.
