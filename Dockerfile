@@ -20,7 +20,8 @@ RUN pip install --no-cache-dir -r requirements_test.txt
 
 FROM TEST as DOCS
 
-RUN pip install --no-cache-dir mkdocs mkdocstrings mkdocs-autorefs mkdocs-material
+COPY requirements_docs.txt ./
+RUN pip install --no-cache-dir -r requirements_docs.txt
 ENV PYTHONPATH=src
 
 FROM python:3.9 as RELEASE

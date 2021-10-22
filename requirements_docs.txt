@@ -1,0 +1,4 @@
+mkdocs
+mkdocstrings
+mkdocs-autorefs
+mkdocs-material
