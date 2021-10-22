@@ -7,10 +7,10 @@ SHELL := /bin/bash
 export TWINE_USERNAME=${TWINE_USERNAME:-"UNDEFINED"}
 export TWINE_PASSWORD=${TWINE_PASSWORD:-"UNDEFINED"}
 
-# up: ## Start all containers
-# 	docker-compose \
-#         -f  docker-compose.yaml \
-#         up -d --build dyscord
+up: ## Start all containers
+	docker-compose \
+        -f  docker-compose.yaml \
+        up -d --build dyscord
 
 run: ## Run container connected
 	make down
@@ -43,10 +43,10 @@ build-docs: build
 		-f  docker-compose.yaml \
 		run --rm documentation mkdocs build
 
-# logs: ## Display logs (follow)
-# 	docker-compose \
-#         -f  docker-compose.yaml \
-#         logs --follow --tail=20
+logs: ## Display logs (follow)
+	docker-compose \
+        -f  docker-compose.yaml \
+        logs --follow --tail=20 dyscord
 
 clean: ## Delete volumes
 	rm -rf .cache .ipynb_checkpoints .mypy_cache .pytest_cache dist .coverage .ipython .jupyter .local .coverage .python_history .bash_history site htmlcov src/dyscord.egg-info
