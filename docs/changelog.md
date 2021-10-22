@@ -2,6 +2,10 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.3.2] WIP
+### Fixed
+- Exposed the `__version__` string at the top module level.
+
 ## [v0.3.1] 2021-10-22
 ### Added
 - Handle invalid session events.
