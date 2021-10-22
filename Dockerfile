@@ -18,10 +18,12 @@ COPY requirements_test.txt ./
 RUN pip install --no-cache-dir -r requirements_test.txt
 # Handle testing modules, not needed for deployment
 
-FROM TEST as DOCS
+FROM python:3.9 as DOCS
 
-RUN pip install --no-cache-dir mkdocs mkdocstrings mkdocs-autorefs mkdocs-material
-ENV PYTHONPATH=src
+COPY requirements.txt ./
+COPY requirements_docs.txt ./
+RUN pip install --no-cache-dir -r requirements_docs.txt
+WORKDIR /usr/src/app
 
 FROM python:3.9 as RELEASE
 

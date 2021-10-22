@@ -2,7 +2,15 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
-## [v0.3.0] WIP
+## [v0.3.1] 2021-10-22
+### Added
+- Handle invalid session events.
+- Support for ReadTheDocs.
+
+### Fixed
+- Importing actually works again.
+
+## [v0.3.0] 2021-10-22
 ### Added
 - Built in reconnect support.
 - Support giving an event loop to DiscordClient.run()
