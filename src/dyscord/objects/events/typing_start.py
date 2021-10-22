@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from src.dyscord.objects import snowflake
-
 from ..base_object import BaseDiscordObject
+from .. import snowflake
 from ... import objects
 
 

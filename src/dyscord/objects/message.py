@@ -42,7 +42,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     # activity = None  # Activity TBD = None  # type: ignore
     # application: application.Application = None  # Application TBD = None  # type: ignore
     application_id: 'snowflake.Snowflake' = None  # type: ignore
-    # message_reference: = None  # Message Reference TBD = None  # type: ignore
+    message_reference: 'MessageReference' = None  # Message Reference TBD = None  # type: ignore
     flags: int  # Message Flags = None  # type: ignore
     referenced_message: 'Message' = None  # type: ignore
     # interaction = None  # Interactions TBD = None  # type: ignore
@@ -233,3 +233,12 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         def user_nickname(cls, user_id: snowflake.Snowflake):
             '''Return valid mention string for the user's nickname.'''
             return f'<@!{user_id}>'
+
+
+class MessageReference(BaseDiscordObject):
+    '''Slim data holding class.'''
+
+    message_id: Optional[snowflake.Snowflake] = None  # id of the originating message
+    channel_id: Optional[snowflake.Snowflake] = None  # id of the originating message's channel
+    guild_id: Optional[snowflake.Snowflake] = None  # id of the originating message's guild
+    fail_if_not_exists: Optional[bool] = None  # when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true

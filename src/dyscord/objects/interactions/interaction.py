@@ -2,12 +2,11 @@ import asyncio
 from collections import defaultdict
 from typing import Any, Optional, Union, List, Dict
 
-from src.dyscord.objects import channel
-
 from ...client import api
 
 from ..base_object import BaseDiscordObject
 
+from .. import channel
 from .. import snowflake
 
 from .. import user as ext_user, message as ext_message, embed as ext_embed, role
