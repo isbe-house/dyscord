@@ -5,6 +5,7 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ## [v0.3.2] WIP
 ### Added
 - New set_all_intents() function in DiscordClient. Sets all intents to True.
+- Better example code.
 
 ### Fixed
 - Exposed the `__version__` string at the top module level.

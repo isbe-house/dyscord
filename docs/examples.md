@@ -14,9 +14,10 @@ TODO: Link to instructions on getting a discord client token setup.
 import dyscord
 
 token = "YOUR TOKEN GOES HERE"
-application_id = "YOUR APPLICATION ID GOES HERE"
 
-client = dyscord.client.DiscordClient(token=token, application_id=application_id)
+client = dyscord.DiscordClient(token=token)
+
+client.set_all_intents()
 
 @client.register_handler('MESSAGE_CREATE')
 async def parse_message(client, message, raw_message):
