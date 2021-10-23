@@ -51,3 +51,16 @@ jobs:
         run: flake8
       - name: Pydocsstyle
         run: pydocstyle --add-ignore=D407,D300,D203,D100,D104 --convention=google src
+
+  Build-Docs:
+    runs-on: self-hosted
+    name: "Documentation"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - run: python3 -m pip install --upgrade pip
+      - run: python3 -m pip install -r docs/requirements_docs.txt
+      - run: python3 -m pip install -r requirements.txt
+      - run: mkdocs build
