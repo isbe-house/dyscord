@@ -147,6 +147,7 @@ async def send_buttons(client, chan_id):
 async def test(client, message: objects.Message):
     await API.get_user(Snowflake('185846097284038656'))
 
+
 @client.register_handler('ANY')
 async def handle_any(client: dyscord.client.DiscordClient, object, raw_object):
     m_client = Mongo.client

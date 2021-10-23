@@ -5,7 +5,7 @@ USER root
 RUN apt update
 RUN apt install -y vim
 
-COPY requirements_test.txt ./
+COPY tests/requirements_test.txt ./
 RUN pip install --no-cache-dir -r requirements_test.txt
 RUN rm requirements_test.txt
 
