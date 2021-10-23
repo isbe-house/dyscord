@@ -14,7 +14,7 @@ class InteractionResponseHelper(ABC):
     _log = Log()
 
     def __init__(self,
-                 target: Union['ext_interaction.InteractionStructure', 'InteractionResponseHelper'],
+                 target: Union['ext_interaction.Interaction', 'InteractionResponseHelper'],
                  question: str,
                  timeout: timedelta = timedelta(minutes=15),
                  cleanup: bool = False,
@@ -25,7 +25,7 @@ class InteractionResponseHelper(ABC):
         self.question = question
         self.timeout = timeout
         self.cleanup = cleanup
-        self.last_interaction: 'ext_interaction.InteractionStructure'
+        self.last_interaction: 'ext_interaction.Interaction'
         self.answer: Any = None
         self.auto_respond: bool = auto_respond
 
@@ -62,7 +62,7 @@ class InteractionResponseHelper(ABC):
             if self._answered is True:
                 break
 
-    async def _call_back(self, client, interaction: 'ext_interaction.InteractionStructure'):
+    async def _call_back(self, client, interaction: 'ext_interaction.Interaction'):
         self._answered = True
         self.last_interaction = interaction
         assert interaction.data is not None
@@ -102,14 +102,23 @@ class Question(InteractionResponseHelper):
     _log = Log()
 
     def __init__(self,
-                 target: Union['ext_interaction.InteractionStructure', 'InteractionResponseHelper'],
+                 target: Union['ext_interaction.Interaction', 'InteractionResponseHelper'],
                  question: str,
                  answers: List['str'],
                  timeout: timedelta = timedelta(minutes=15),
                  cleanup: bool = False,
                  auto_respond: bool = False,
                  ):
-        '''Build a question.'''
+        '''Prompt user with a question to be answered by one of a list of specific answers.
+
+        Arguments:
+            target (Interaction|InteractionResponseHelper): Object to be responded to. Commonly an interaction, but you can chain InteractionResponseHelpers together.
+            question (str): Actual text of the question to prompt the user with.
+            answers (str): List of valid answers the user can give.
+            timeout (timedelta): Time before the response helper gives up.
+            cleanup (bool): Should we delete this when an answer is received? Mutually exclusive with `auto_response`.
+            auto_respond (bool): Should we give feedback to the user when an answer is received? Mutually exclusive with `clean_up`.
+        '''
         super().__init__(target, question, timeout, cleanup, auto_respond)
         self.answers = copy(answers)
 
@@ -119,10 +128,10 @@ class Question(InteractionResponseHelper):
     async def ask(self) -> str:
         '''Ask a question.
 
-        Arguments:
-            target: Channel to target, or interaction to respond to.
+        Returns:
+            bool: Result from user. Will be `None` if user selected Cancel, or a timeout occurs.
         '''
-        assert type(self.target) is ext_interaction.InteractionStructure
+        assert type(self.target) is ext_interaction.Interaction
         base = self.target.generate_response(type=self.target.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE)
         base.generate(content=self.question)
         ar = base.add_components()
@@ -148,28 +157,28 @@ class Confirmation(InteractionResponseHelper):
     _log = Log()
 
     def __init__(self,
-                 target: Union['ext_interaction.InteractionStructure', 'InteractionResponseHelper'],
+                 target: Union['ext_interaction.Interaction', 'InteractionResponseHelper'],
                  question: str,
                  timeout: timedelta = timedelta(minutes=15),
                  cleanup: bool = False,
                  auto_respond: bool = False,
                  ):
-        '''Build a question.
+        '''Ask the user to confirm, deny, or cancel.
 
         Arguments:
-            target (InteractionStructure, InteractionResponseHelper): Target of this interaction.
-            question (str): Question to ask the user.
-            timeout (timedelta): Time until the confirmation times out and returns None.
-            cleanup (bool): Delete the question after asking.
-            auto_respond (bool): Automatically respond to the user with a placeholder string.
+            target (Interaction, InteractionResponseHelper): Target of this interaction.
+            question (str): Actual text of the question to prompt the user with.
+            timeout (timedelta): Time before the response helper gives up.
+            cleanup (bool): Should we delete this when an answer is received? Mutually exclusive with `auto_response`.
+            auto_respond (bool): Should we give feedback to the user when an answer is received? Mutually exclusive with `clean_up`.
         '''
         super().__init__(target, question, timeout, cleanup, auto_respond)
 
     async def ask(self) -> bool:
         '''Ask a question.
 
-        Arguments:
-            target: Channel to target, or interaction to respond to.
+        Returns:
+            bool: Result from user. Will be `None` if user selected Cancel, or a timeout occurs.
         '''
         base = self._ask_base_generation()
         base.generate(content=self.question)

@@ -72,7 +72,7 @@ class CommandHandler:
             cls._log.warning(f'Observed improper attempt to remove interaction_id [{custom_id}].')
 
     @classmethod
-    async def command_handler(cls, client, interaction: 'interactions.InteractionStructure') -> None:  # noqa: C901
+    async def command_handler(cls, client, interaction: 'interactions.Interaction') -> None:  # noqa: C901
         '''Handle incoming commands and dispatch them to the correct type handler.'''
         if interaction.data is None:
             return
@@ -83,7 +83,7 @@ class CommandHandler:
             await cls.handle_application_command(client, interaction)
 
     @classmethod
-    async def handle_application_command(cls, client, interaction: 'interactions.InteractionStructure') -> None:
+    async def handle_application_command(cls, client, interaction: 'interactions.Interaction') -> None:
         '''Handle interactions against Messages and Users.'''
         assert interaction.data is not None
 
@@ -117,7 +117,7 @@ class CommandHandler:
             raise LookupError(f'Unable to find interaction {interaction.data.id} in Global or Guild!')
 
     @classmethod
-    async def handle_message_component(cls, client, interaction: 'interactions.InteractionStructure') -> None:
+    async def handle_message_component(cls, client, interaction: 'interactions.Interaction') -> None:
         '''Handle slash-commands.'''
         assert interaction.data is not None
         cls._log.info(f'Saw id [{interaction.id}] with custom id [{interaction.data.custom_id}].')

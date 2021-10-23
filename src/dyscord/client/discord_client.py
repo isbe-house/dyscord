@@ -545,7 +545,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTERACTION_CREATE':
-            obj = objects.interactions.InteractionStructure().from_dict(data['d'])
+            obj = objects.interactions.Interaction().from_dict(data['d'])
             self._log.info('Saw INTERACTION_CREATE event.')
             await helper.CommandHandler.command_handler(self, obj)
 

@@ -1,11 +1,14 @@
 # DiscordClient Event Methods
 
-For non-event handlers, see [DiscordClient](./client).
+For non-event handlers, see [DiscordClient](../client).
 
-::: dyscord.client.DiscordClient
+::: dyscord.client.discord_client
     rendering:
-        show_source: false
-        sort_members: source
+        show_root_toc_entry: false
+        group_by_category: false
     selection:
+        members:
+            - DiscordClient
         filters:
+            - "!.*"
             - "^on.*"

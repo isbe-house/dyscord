@@ -1,5 +1,5 @@
 from src.dyscord.objects.snowflake import Snowflake
-from src.dyscord.objects.interactions import InteractionStructure, Command, enumerations
+from src.dyscord.objects.interactions import Interaction, Command, enumerations
 from . import samples
 from ..channel import samples as channel_samples
 from ..user import samples as user_samples
@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, patch
 
 def test_button_interaction():
     data = samples.button_press_interaction
-    obj = InteractionStructure().from_dict(data)
+    obj = Interaction().from_dict(data)
     assert obj.application_id == Snowflake(data['application_id'])
     assert hasattr(obj, 'data')
 
@@ -20,7 +20,7 @@ def test_text_interaction(api_mock):
     api_mock.get_user = AsyncMock(return_value=samples.trigger_chat['data']['resolved']['users']['185846097284038656'])
 
     data = samples.trigger_chat
-    obj = InteractionStructure().from_dict(data)
+    obj = Interaction().from_dict(data)
     assert obj.application_id == Snowflake(data['application_id'])
     assert hasattr(obj, 'data')
     api_mock.get_user.assert_called()
@@ -43,7 +43,7 @@ def test_text_interaction(api_mock):
 
 def test_message():
     data = samples.message_trigger_interaction
-    obj = InteractionStructure().from_dict(data)
+    obj = Interaction().from_dict(data)
     assert obj.application_id == Snowflake(data['application_id'])
     assert hasattr(obj, 'data')
 
@@ -58,7 +58,7 @@ def test_complex_chat(get_user_func):
                                   'username': 'Soton'}
 
     data = samples.nested_groups
-    obj = InteractionStructure().from_dict(data)
+    obj = Interaction().from_dict(data)
     assert obj.application_id == Snowflake(data['application_id'])
     assert hasattr(obj, 'data')
 
@@ -105,7 +105,7 @@ def test_all_types(api_mock):
     api_mock.get_user = AsyncMock(return_value=user_samples.raw_get_user_response)
     api_mock.get_guild_roles = AsyncMock(return_value=[role_samples.dev_role])
 
-    obj = InteractionStructure().from_dict(samples.all_types)
+    obj = Interaction().from_dict(samples.all_types)
     assert obj is not None
     api_mock.get_channel.assert_called()
     api_mock.get_user.assert_called()

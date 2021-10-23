@@ -114,7 +114,6 @@ async def register_commands(client: dyscord.client.DiscordClient, message):
     log.info(f'Registration: {registration}')
 
 
-
 async def list_commands(client):
     client._log.info('Get global commands')
     commands = await API.get_global_application_commands()
