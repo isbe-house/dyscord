@@ -64,7 +64,6 @@ jupyter: ## Start a jupyter environment for debugging and such
 		run --rm jupyter
 
 test: ## Run all tests
-	make build
 	make test-pytest
 	make test-mypy
 	make test-flake8
