@@ -11,4 +11,5 @@ __all__ = [
     'helper',
     'objects',
     'utilities',
+    '__version__',
 ]
