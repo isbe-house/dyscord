@@ -5,14 +5,21 @@ from typing import Union, Optional, List, Dict
 
 from .base_object import BaseDiscordObject
 from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed, guild as ext_guild, role as ext_role
-from ..utilities import cache, log
+from ..utilities import log
 from .interactions import components as ext_components
 
 from ..client import api
 
 
 class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder):
-    '''Message containing infomation about it's content, origin, authors, etc.'''
+    '''Message containing infomation about it's content, origin, authors, etc.
+
+    Attributes:
+        id (Snowflake): Unique ID of the message.
+        channel_id (Snowflake): Unique ID of the channel the message came from.
+        guild_id (Optional[Snowflake]): Unique ID of the channel the message came from. Defaults to None.
+        guild (Optional[Guild]): Actual guild object item is from. This will autopopulate from the API if it is not present.
+    '''
 
     _log = log.Log()
 
@@ -21,7 +28,6 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     id: 'snowflake.Snowflake' = None  # type: ignore
     channel_id: 'snowflake.Snowflake' = None  # type: ignore
     guild_id: Optional['snowflake.Snowflake'] = None  # type: ignore
-    guild: Optional['ext_guild.Guild'] = None  # type: ignore
     author: 'user.User' = None  # type: ignore
     member: Optional['user.Member'] = None  # type: ignore
     content: str = None  # type: ignore
@@ -30,9 +36,9 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     tts: bool = None  # type: ignore
     mention_everyone: bool = None  # type: ignore
     mentions: List['user.User'] = None  # type: ignore
-    mention_roles: List['ext_role.Role'] = None  # type: ignore # Roles are TBD
+    mention_roles: List['ext_role.Role'] = None  # type: ignore
     mention_channels: List['ext_channel.Channel'] = None  # type: ignore
-    attachments: 'List' = None  # type: ignore # attachment.Attachment TDB
+    attachments: 'List' = None  # type: ignore
     embeds: Optional[List[ext_embed.Embed]] = None  # type: ignore
     # reactions: 'List[reaction.Reaction]'  = None  # type: ignore
     nonce: Optional[Union[int, str]] = None  # type: ignore
@@ -42,9 +48,9 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     # activity = None  # Activity TBD = None  # type: ignore
     # application: application.Application = None  # Application TBD = None  # type: ignore
     application_id: 'snowflake.Snowflake' = None  # type: ignore
-    # message_reference: 'MessageReference' = None  # Message Reference TBD = None  # type: ignore
-    flags: int  # Message Flags = None  # type: ignore
-    referenced_message: 'Message' = None  # type: ignore
+    message_reference: 'Optional[MessageReference]' = None  # Message Reference TBD = None  # type: ignore
+    flags: Optional[int]  # Message Flags = None  # type: ignore
+    referenced_message: 'Optional[Message]' = None  # type: ignore
     # interaction = None  # Interactions TBD = None  # type: ignore
     thread: 'ext_channel.Channel' = None  # type: ignore
     components: List['ext_components.Component']  # Message components TBD = None  # type: ignore
@@ -57,33 +63,27 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         if content is not None:
             self.content = content
 
-    def __getattr__(self, name):
-        '''Do dynamic lookup on various fields that may not be populated, but have valid representations in the API.'''
-        if name == 'channel' and 'channel_id' in self.__dict__:
-            try:
-                channel = cache.Cache().get(self.channel_id)
-                self._log.info('Got channel from the cache.')
-            except LookupError:
-                loop = asyncio.get_event_loop()
-                channel_dict = loop.run_until_complete(api.API.get_channel(self.channel_id))
-                channel = ext_channel.ChannelImporter().ingest_raw_dict(channel_dict)
-                self._log.info('Got channel from the API.')
-            self.channel = channel
-            return channel
+    @property
+    def channel(self):
+        '''Attempt to grab channel from the API.'''
+        if self.channel_id is None:
+            return None
+        loop = asyncio.get_event_loop()
+        channel_dict = loop.run_until_complete(api.API.get_channel(self.channel_id))
+        channel = ext_channel.ChannelImporter().from_dict(channel_dict)
+        self._log.info('Got channel from the API.')
+        return channel
 
-        if name == 'guild' and 'guild_id' in self.__dict__:
-            assert type(self.guild_id) is snowflake.Snowflake
-            try:
-                guild = cache.Cache().get(self.guild_id)
-                self._log.info('Got guild from the cache.')
-            except LookupError:
-                loop = asyncio.get_event_loop()
-                guild_dict = loop.run_until_complete(api.API.get_guild(self.guild_id))
-                guild = ext_guild.Guild().from_dict(guild_dict)
-                self._log.info('Got guild from the API.')
-            self.guild = guild
-            return guild
-        raise AttributeError(f'Failed to find \'{name}\'')
+    @property
+    def guild(self):
+        '''Attempt to grab guild from the API.'''
+        if self.guild_id is None:
+            return None
+        loop = asyncio.get_event_loop()
+        guild_dict = loop.run_until_complete(api.API.get_guild(self.guild_id))
+        guild = ext_guild.Guild().from_dict(guild_dict)
+        self._log.info('Got guild from the API.')
+        return guild
 
     def ingest_raw_dict(self, data) -> 'Message':
         '''Ingest and cache a given object for future use.'''
@@ -132,6 +132,8 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
             self.member.update_from_user(self.author)
         self.nonce = data['nonce'] if 'nonce' in data else None
         self.webhook_id = snowflake.Snowflake(data['webhook_id']) if (data.get('webhook_id', None) is not None) else None
+        self.message_reference = MessageReference().from_dict(data['message_reference']) if ('message_reference' in data) and (data['message_reference'] is not None) else None
+        self.referenced_message = Message().from_dict(data['referenced_message']) if ('referenced_message' in data) and (data['referenced_message'] is not None) else None
 
         return self
 
@@ -242,3 +244,16 @@ class MessageReference(BaseDiscordObject):
     channel_id: Optional[snowflake.Snowflake] = None  # id of the originating message's channel
     guild_id: Optional[snowflake.Snowflake] = None  # id of the originating message's guild
     fail_if_not_exists: Optional[bool] = None  # when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
+
+    def from_dict(self, data: dict) -> 'MessageReference':
+        '''Parse a MessageReference from an API compliant dict.'''
+        if 'message_id' in data:
+            self.message_id = snowflake.Snowflake(data['message_id'])
+        if 'channel_id' in data:
+            self.channel_id = snowflake.Snowflake(data['channel_id'])
+        if 'guild_id' in data:
+            self.guild_id = snowflake.Snowflake(data['guild_id'])
+        if 'fail_if_not_exists' in data:
+            self.fail_if_not_exists = data['fail_if_not_exists']
+
+        return self

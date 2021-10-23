@@ -474,7 +474,7 @@ class API_V9:
     # Channel methods
 
     @classmethod
-    async def get_channel(cls, channel_id: 'objects.Snowflake'):
+    async def get_channel(cls, channel_id: 'objects.Snowflake') -> dict:
         '''Get channel by ID.'''
         url = f'{cls.BASE_URL}/channels/{channel_id}'
 

@@ -145,3 +145,17 @@ message_from_a_thread = {'attachments': [],
                          'timestamp': '2021-09-24T19:36:34.867000+00:00',
                          'tts': False,
                          'type': 0}
+
+raw_get_user_response = {
+    "id": "80351110224678912",
+    "username": "Nelly",
+    "discriminator": "1337",
+    "avatar": "8342729096ea3675442027381ff50dfe",
+    "verified": True,
+    "email": "nelly@discord.com",
+    "flags": 64,
+    "banner": "06c16474723fe537c283b8efa61a30c8",
+    "accent_color": 16711680,
+    "premium_type": 1,
+    "public_flags": 64
+}

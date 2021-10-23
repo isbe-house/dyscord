@@ -60,6 +60,8 @@ async def purge_commands(client, message: Message):
         await API.delete_global_application_command(command.id)
 
     client._log.info('Get guild commands')
+    print(message.guild)
+    print(message.guild_id)
     assert message.guild is not None
     guild: Guild = message.guild
     commands = await API.get_guild_application_commands(guild.id)
@@ -101,42 +103,16 @@ async def register_commands(client: dyscord.client.DiscordClient, message):
     new_command.add_option_typed(new_command.COMMAND_OPTION.INTEGER, 'int', 'A simple number', required=False)
     new_command.add_option_typed(new_command.COMMAND_OPTION.MENTIONABLE, 'mention', 'Mention someone', required=False)
     new_command.add_option_typed(new_command.COMMAND_OPTION.NUMBER, 'float', 'Float something BIG', required=False)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.STRING, 'string', 'String of something', required=False)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.BOOLEAN, 'bool', 'True or false', required=False)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.ROLE, 'role', 'Some Role.', required=False)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.MENTIONABLE, 'mentionable', 'Something you can mention Role.', required=False)
 
     new_command.validate()
 
     registration = await new_command.register_to_guild(guild)
     log.info(f'Registration: {registration}')
 
-    new_command = Command()
-    new_command.generate(
-        'hunt',
-        'Hunt Showdown.',
-        new_command.COMMAND_TYPE.CHAT_INPUT,
-    )
-
-    scg = new_command.add_option_sub_command_group(
-        'stats',
-        'Statistics about hunt.',
-    )
-    sc = scg.add_option_sub_command(
-        'game',
-        'Stats from a game',
-    )
-
-    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'p1-stars', 'Stars from player 1', required=True)
-    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'p2-stars', 'Stars from player 1', required=False)
-    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'p3-stars', 'Stars from player 1', required=False)
-
-    sc.add_option_typed(sc.COMMAND_OPTION.BOOLEAN, 'survived', 'Did you survive?', required=False)
-    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'bounties', 'How many bounties did the team extract?', required=False)
-    sc.add_option_typed(sc.COMMAND_OPTION.INTEGER, 'kills', 'How many kills by the team?', required=False)
-    co = sc.add_option_typed(sc.COMMAND_OPTION.STRING, 'map', 'Which map?', required=False)
-    co.add_choice('lawson-delta', 'Lawson Delta')
-    co.add_choice('stillwater-bayouu', 'Stillwater Bayouu')
-    co.add_choice('desalle', 'DeSalle')
-
-    new_command.validate()
-    registration = await new_command.register_to_guild(guild)
 
 
 async def list_commands(client):
@@ -205,7 +181,6 @@ async def parse_message(client, message: objects.Message, raw_message):
 
 dyscord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
 dyscord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)
-dyscord.helper.CommandHandler.register_guild_callback('hunt', command_functions.hunt)
 
 Mongo.connect()
 client.run()

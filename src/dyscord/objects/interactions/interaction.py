@@ -63,7 +63,7 @@ class InteractionStructure(BaseDiscordObject):
         if 'guild_id' in data:
             self.guild_id = snowflake.Snowflake(data['guild_id'])
         if 'data' in data:
-            guild_id = data['guild_id'] if 'guild_id' in data else None
+            guild_id = snowflake.Snowflake(data['guild_id']) if 'guild_id' in data else None
             self.data = InteractionDataStructure().from_dict(data['data'], guild_id)
         if 'channel_id' in data:
             self.channel_id = snowflake.Snowflake(data['channel_id'])

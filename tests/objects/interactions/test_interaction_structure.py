@@ -1,6 +1,9 @@
 from src.dyscord.objects.snowflake import Snowflake
 from src.dyscord.objects.interactions import InteractionStructure, Command, enumerations
 from . import samples
+from ..channel import samples as channel_samples
+from ..user import samples as user_samples
+from ..role import samples as role_samples
 
 from unittest.mock import AsyncMock, patch
 
@@ -22,6 +25,9 @@ def test_text_interaction(api_mock):
     assert hasattr(obj, 'data')
     api_mock.get_user.assert_called()
 
+    assert obj.can_respond
+    assert not obj.can_followup
+
     response = obj.generate_response()
     ar = response.add_components()
     ar.add_button(ar.BUTTON_STYLES.PRIMARY, 'foo', 'My Button')
@@ -31,6 +37,8 @@ def test_text_interaction(api_mock):
     followup.generate('This is a followup message!', tts=True)
 
     assert followup
+    assert not obj.can_respond
+    assert obj.can_followup
 
 
 def test_message():
@@ -89,3 +97,16 @@ def test_build_sub_commands_groups():
     sc.add_option_typed(sc.COMMAND_OPTION.USER, 'target', 'Target to hit', required=False)
 
     new_command.validate()
+
+
+@patch('src.dyscord.client.api.API')
+def test_all_types(api_mock):
+    api_mock.get_channel = AsyncMock(return_value=channel_samples.dev_guild_text)
+    api_mock.get_user = AsyncMock(return_value=user_samples.raw_get_user_response)
+    api_mock.get_guild_roles = AsyncMock(return_value=[role_samples.dev_role])
+
+    obj = InteractionStructure().from_dict(samples.all_types)
+    assert obj is not None
+    api_mock.get_channel.assert_called()
+    api_mock.get_user.assert_called()
+    api_mock.get_guild_roles.assert_called()

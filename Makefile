@@ -89,7 +89,7 @@ test-mypy:
 	docker-compose \
 		-f  docker-compose.yaml \
 		run --rm dyscord-tests \
-		mypy src/dyscord
+		mypy --pretty src/dyscord
 
 test-flake8:
 	docker-compose \

@@ -4,6 +4,8 @@ import nest_asyncio  # type: ignore
 import time
 import warnings
 import random
+import sys
+import platform
 
 from collections import defaultdict
 import functools
@@ -51,7 +53,7 @@ class DiscordClient:
 
         Args:
             token (str): Valid token to access discord. Only `Bot` token's currently supported.
-            application_id (str): The application id. Will be auto-fetched at connection.
+            application_id (str): The application id. Can be left to None if client will not use Interactions.
         '''
         # Discord attributes
         DiscordClient.token = token
@@ -86,22 +88,24 @@ class DiscordClient:
                           ):
         '''Configure intents before connecting.
 
-        Args:
-            guilds (bool): TBD
-            guild_members (bool): TBD
-            guild_bans (bool): TBD
-            guild_emoji_and_stickers (bool): TBD
-            guild_integrations (bool): TBD
-            guild_webhooks (bool): TBD
-            guild_invites (bool): TBD
-            guild_voice_states (bool): TBD
-            guild_presences (bool): TBD
-            guild_messages (bool): TBD
-            guild_message_reactions (bool): TBD
-            guild_message_typeing (bool): TBD
-            direct_messages (bool): TBD
-            direct_message_reactions (bool): TBD
-            direct_messages_typeing (bool): TBD
+        For more details, read the [official docs](https://discord.com/developers/docs/topics/gateway#gateway-intents).
+
+        Arguments:
+            guilds (bool): Receive events related to guilds the client is a part of.
+            guild_members (bool): Receive events related to guild members.
+            guild_bans (bool): Receive events related to guild bans.
+            guild_emoji_and_stickers (bool): Receive events related to guild emoji and stickers.
+            guild_integrations (bool): Receive events related to guild Interactions.
+            guild_webhooks (bool): Receive events related to guild Webhooks.
+            guild_invites (bool): Receive events related to guild invites
+            guild_voice_states (bool): Receive events related to guild voice states.
+            guild_presences (bool): Receive events related to guild presences.
+            guild_messages (bool): Receive events related to guild messages.
+            guild_message_reactions (bool): Receive events related to guild reactions.
+            guild_message_typeing (bool): Receive events related to guild members starting to type.
+            direct_messages (bool): Receive events related to direct messages.
+            direct_message_reactions (bool): Receive events related to direct message reactions.
+            direct_messages_typeing (bool): Receive events related to users typing in direct messages.
         '''
         self.intent = 0
         if guilds:
@@ -136,6 +140,13 @@ class DiscordClient:
             self.intent += Intents.DIRECT_MESSAGE_TYPING
         self._intents_defined = True
 
+    def set_all_intents(self):
+        '''Set all intents to True. For more information see the configure_intents() function.'''
+        self.intent = 0
+        for intent in Intents:
+            self.intent += intent
+        self._intents_defined = True
+
     def run(self, loop: asyncio.AbstractEventLoop = None):
         '''Start the async loop and run forever.
 
@@ -143,16 +154,10 @@ class DiscordClient:
             loop (asyncio.AbstractEventLoop): If desired, use a given asyncio compatible loop. One will be created if not given.
         '''
         self._log.info('Starting...')
-        self._log.info(f'Application ID: [{self.application_id}]')
-        self._log.info(f'Version: [{__version__}]')
-
-        loop = loop if loop is not None else asyncio.get_event_loop()
-
-        nest_asyncio.apply(loop)
-
-        loop.create_task(self._run())
-
-        loop.run_forever()
+        self._log.info(f'Platform: [{platform.platform()}]')
+        self._log.info(f'Python Version: [{sys.version}]')
+        self._log.info(f'Python Version Info: [{sys.version_info}]')
+        self._log.info(f'Dyscord Version: [v{__version__}]')
 
         loop = loop if loop is not None else asyncio.get_event_loop()
 
@@ -391,6 +396,8 @@ class DiscordClient:
         event_type = data['t']
         self._log.info(f'Got a {event_type}')
         obj = None
+
+        # pprint(data)
 
         if event_type == 'READY':
             obj = objects.Ready().from_dict(data['d'])
