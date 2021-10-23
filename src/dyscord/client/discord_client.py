@@ -1,14 +1,14 @@
 import asyncio
+import functools
 import inspect
 import nest_asyncio  # type: ignore
-import time
-import warnings
+import platform
 import random
 import sys
-import platform
+import time
+import warnings
 
 from collections import defaultdict
-import functools
 from pprint import pprint
 from typing import Optional
 
@@ -563,42 +563,50 @@ class DiscordClient:
             await self_function(obj, data)
 
         # Call user wrapped classes, functions and cotoutines.
+        # TODO: Should we invoke a create_task when able to avoid blocking calls?
+        arguments = (obj, data, self)
         if obj is not None:
             for user_function in DiscordClient._wrapper_registrations[event_type]:
+                arg_len = len(inspect.signature(user_function).parameters)
+                assert arg_len >= 0 and arg_len <= 3
                 if asyncio.iscoroutinefunction(user_function):
-                    await user_function(self, obj, data)
+                    await user_function(*arguments[:arg_len])
                 else:
-                    user_function(self, obj, data)
+                    user_function(*arguments[:arg_len])
 
             for user_class in DiscordClient._wrapper_class_registrations:
                 if hasattr(user_class, event_handler_name):
                     user_function = getattr(user_class, event_handler_name)
-
+                    arg_len = len(inspect.signature(user_function).parameters)
+                    assert arg_len >= 0 and arg_len <= 4
                     if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
                         warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
-
                     if asyncio.iscoroutinefunction(user_function):
-                        await user_function(user_class, self, obj, data)
+                        await user_function(user_class, *arguments[:arg_len])
                     else:
-                        user_function(user_class, self, obj, data)
+                        user_function(user_class, *arguments[:arg_len])
 
         # Handle the special case of the ANY event.
         for user_function in DiscordClient._wrapper_registrations['ANY']:
+            arg_len = len(inspect.signature(user_function).parameters)
+            assert arg_len >= 0 and arg_len <= 3
             if asyncio.iscoroutinefunction(user_function):
-                await user_function(self, obj, data)
+                await user_function(*arguments[:arg_len])
             else:
-                user_function(self, obj, data)
+                user_function(*arguments[:arg_len])
+
         for user_class in DiscordClient._wrapper_class_registrations:
             if hasattr(user_class, 'on_any'):
                 user_function = getattr(user_class, event_handler_name)
-
+                arg_len = len(inspect.signature(user_function).parameters)
+                assert arg_len >= 0 and arg_len <= 4
                 if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
                     warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
 
                 if asyncio.iscoroutinefunction(user_function):
-                    await user_function(user_class, self, obj, data)
+                    await user_function(user_class, *arguments[:arg_len])
                 else:
-                    user_function(user_class, self, obj, data)
+                    user_function(user_class, *arguments[:arg_len])
 
     # Register all out events
     on_any = on_any
@@ -651,11 +659,31 @@ class DiscordClient:
 
     @classmethod
     def register_handler(cls, event: str):
-        '''Register a given function to a given event string.'''
+        '''Register a given function to a given event string.
+
+        This function should be used as a decorator around a function to map that function to a given event. The decorator takes one argument, a string which maps to the type of event we should map
+        to. See the definition of DISCORD_EVENTS for names to map against.
+
+        The decorated mapped should by an `async` function, although synchronous functions are allowed (and highly discouraged).
+
+        The arguments of the decorated decide which python objects are given to the function when the given event is called. The mapping is as follows:
+
+        - 1 Argument -> (discord_object)
+        - 2 Argument -> (discord_object, raw_dict)
+        - 3 Argument -> (discord_object, raw_dict, client)
+
+        The `discord_object` will be a python representation of the event object.
+
+        The `raw_dict` is a raw dictionary the API emitted.
+
+        The `client` is the DiscordClient instance.
+        '''
         if not hasattr(objects.DISCORD_EVENTS, event) and event != 'ANY':
             raise ValueError(f'Attempted to bind to unknown event \'{event}\', must be exact match for existing {objects.DISCORD_EVENTS} entry.')
 
         def func_wrapper(func):
+            arg_len = len(inspect.signature(func).parameters)
+            assert arg_len >= 0 and arg_len <= 3
             if asyncio.iscoroutinefunction(func):
                 @functools.wraps(func)
                 async def wrapped_func(*args, **kwargs):  # type: ignore

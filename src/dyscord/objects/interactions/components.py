@@ -23,7 +23,7 @@ class ComponentAdder(abc.ABC):
 
     def add_components(self) -> 'ActionRow':
         '''Start adding components by starting an ACTION_ROW.'''
-        if not hasattr(self, 'components'):
+        if not hasattr(self, 'components') or self.components is None:
             self.components: Optional[List['Component']] = list()
         assert type(self.components) is list
         new_action_row = ActionRow()

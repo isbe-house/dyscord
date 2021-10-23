@@ -149,7 +149,7 @@ async def test(client, message: objects.Message):
 
 
 @client.register_handler('ANY')
-async def handle_any(client: dyscord.client.DiscordClient, object, raw_object):
+async def handle_any(object, raw_object):
     m_client = Mongo.client
     type = raw_object.get('t', 'NA')
     type = f'type_{type}'
@@ -158,7 +158,7 @@ async def handle_any(client: dyscord.client.DiscordClient, object, raw_object):
 
 
 @client.register_handler('MESSAGE_CREATE')
-async def parse_message(client, message: objects.Message, raw_message):
+async def parse_message(message: objects.Message, raw_message, client):
     if client.me in message.mentions:
         log.info(f'Saw message: {message.content} from {message.author}')
         if 'PURGE' in message.content:

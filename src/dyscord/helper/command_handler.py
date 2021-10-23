@@ -8,6 +8,7 @@ from typing import Callable, Dict, Optional
 
 from ..objects import interactions, snowflake
 from ..utilities import Log
+from ..client import api
 
 
 @dataclass
@@ -94,7 +95,7 @@ class CommandHandler:
             # Lookup command in global
             results = None
             try:
-                results = await client.API.get_global_application_command(interaction.data.id)
+                results = await api.API.get_global_application_command(interaction.data.id)
             except Exception:
                 pass
             if (results is not None) and (results['name'] in cls.global_lookup):
@@ -106,7 +107,7 @@ class CommandHandler:
                 return
             try:
                 assert type(interaction.guild_id) is snowflake.Snowflake
-                results = await client.API.get_guild_application_command(interaction.guild_id, interaction.data.id)
+                results = await api.API.get_guild_application_command(interaction.guild_id, interaction.data.id)
             except Exception:
                 pass
             if (results is not None) and (results['name'] in cls.guild_lookup):

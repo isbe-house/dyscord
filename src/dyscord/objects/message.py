@@ -53,7 +53,7 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     referenced_message: 'Optional[Message]' = None  # type: ignore
     # interaction = None  # Interactions TBD = None  # type: ignore
     thread: 'ext_channel.Channel' = None  # type: ignore
-    components: List['ext_components.Component']  # Message components TBD = None  # type: ignore
+    components: List['ext_components.Component'] = None  # type: ignore
     # sticker_items: List[Sticker] = []  # Stickers TBD = None  # type: ignore
 
     def __init__(self,
