@@ -17,9 +17,9 @@ Very much an active WIP. The API to this library is not at all locked down. User
 
 # Documentation
 
-We are following [Google Style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) docstring patterns.
+Documentation can be found over at [Read The Docs](https://dyscord.readthedocs.io/).
 
-Actual published documentation is still very much a WIP.
+We are following [Google Style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) docstring patterns.
 
 # Community
 
