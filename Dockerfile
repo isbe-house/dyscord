@@ -14,15 +14,15 @@ FROM PROD as TEST
 # We want to detect out of date build envs too!
 RUN pip install --no-cache-dir --upgrade twine build setuptools
 
-COPY requirements_test.txt ./
+COPY tests/requirements_test.txt ./
 RUN pip install --no-cache-dir -r requirements_test.txt
 # Handle testing modules, not needed for deployment
 
 FROM python:3.9 as DOCS
 
 COPY requirements.txt ./
-COPY requirements_docs.txt ./
-RUN pip install --no-cache-dir -r requirements_docs.txt
+COPY docs/requirements_docs.txt ./docs/
+RUN pip install --no-cache-dir -r ./docs/requirements_docs.txt
 WORKDIR /usr/src/app
 
 FROM python:3.9 as RELEASE
