@@ -1,6 +1,6 @@
 -r ../requirements.txt
 
-mkdocs
-mkdocstrings
-mkdocs-autorefs
-mkdocs-material
+mkdocs==1.2.3
+mkdocstrings==0.16.2
+mkdocs-autorefs==0.3.0
+mkdocs-material==7.3.4

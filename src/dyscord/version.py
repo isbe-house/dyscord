@@ -1,5 +1,3 @@
-'''Version of the software.'''
-
 __version__ = '0.3.1'
 
 # [N!]N(.N)*[{a|b|rc}N][.postN][.devN]

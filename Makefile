@@ -68,7 +68,6 @@ jupyter: ## Start a jupyter environment for debugging and such
 
 test: ## Run all tests
 	make build
-	docker system prune -f
 	make test-pytest
 	make test-mypy
 	make test-flake8

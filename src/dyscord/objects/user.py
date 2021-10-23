@@ -8,7 +8,17 @@ from .. import utilities
 
 
 class User(BaseDiscordObject):
-    '''Discord User.'''
+    '''Discord User.
+
+    .
+
+    Attributes:
+        id (Snowflake): Unique ID of User. Is a [Snowflake][dyscord.objects.snowflake.Snowflake].
+        username (str): Global name of the User.
+        discriminator (int): Random set of 4 numbers to discriminate user from others.
+        avatar (str): TODO: Look this up.
+        bot (bool): User is a bot or not.
+    '''
 
     @enum.unique
     class UserFlag(enum.IntFlag):
@@ -55,10 +65,10 @@ class User(BaseDiscordObject):
         '''Return string representation.'''
         fields = []
 
-        if 'id' in self.__dict__:
+        if self.id is not None:
             fields.append(f'id={self.id}')
 
-        if ('username' in self.__dict__) and ('discriminator' in self.__dict__):
+        if (self.username is not None) and (self.discriminator is not None):
             fields.append(f'username=\'{self.username}#{self.discriminator}\'')
 
         return f'User({", ".join(fields)})'

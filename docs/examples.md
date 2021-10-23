@@ -8,7 +8,7 @@ Run `pip install --upgrade dsycord` to get the latest version.
 
 ### Basic Bot
 
-TODO: Link to instructions on getting a discord client token setup.
+First things first, you need to go create a bot on discords app system. You can read the [intro](https://discord.com/developers/docs/intro) to start getting an idea of how to do that.
 
 ```python
 import dyscord
@@ -20,7 +20,7 @@ client = dyscord.DiscordClient(token=token)
 client.set_all_intents()
 
 @client.register_handler('MESSAGE_CREATE')
-async def parse_message(client, message, raw_message):
+async def parse_message(message):
     # Logic to handle the event goes here.
     print(f"I got a {message} from the client!")
 

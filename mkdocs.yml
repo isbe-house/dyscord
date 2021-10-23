@@ -4,17 +4,29 @@ nav:
   - Index: index.md
   - Examples: examples.md
   - Changelog: changelog.md
-  - Reference: reference.md
+  - Reference:
+    - references/client.md
+    - Objects:
+      - references/objects/message.md
+      - references/objects/user.md
+    - reference.md
 plugins:
   - mkdocstrings:
       default_handler: python
       watch:
         - src/dyscord
       handlers:
-          python:
-              setup_commands:
-                  - import sys
-                  - sys.path.append('src')
+        python:
+          rendering:
+            show_source: false
+            members_order: source
+            show_signature_annotations: false
+          setup_commands:
+            - import sys
+            - sys.path.append('src')
+          selection:
+            filters:
+              - "!^_[^_]"
   - search:
   - autorefs:
 theme:

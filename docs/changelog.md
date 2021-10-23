@@ -6,6 +6,9 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ### Added
 - New set_all_intents() function in DiscordClient. Sets all intents to True.
 - Better example code.
+- User and Member now have all attributes set to `None` by default.
+- Role now has all attributes set to `None` by default.
+- Begin restructure of documentation to make some sense.
 
 ### Fixed
 - Exposed the `__version__` string at the top module level.
