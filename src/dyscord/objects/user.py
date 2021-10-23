@@ -35,21 +35,21 @@ class User(BaseDiscordObject):
         NITRO_CLASSIC = 1 << 0
         NITRO = 1 << 1
 
-    id: snowflake.Snowflake
-    username: str
-    discriminator: str
-    avatar: str
-    bot: bool
-    system: bool
-    mfa_enabled: bool
-    banner: str
-    accent_color: int  # TODO: This is actually a color object!
-    locale: str
-    verified: bool
-    email: str
-    flags: int
-    premium_type: int
-    public_flags: int
+    id: snowflake.Snowflake = None  # type: ignore
+    username: str = None  # type: ignore
+    discriminator: str = None  # type: ignore
+    avatar: str = None  # type: ignore
+    bot: bool = None  # type: ignore
+    system: bool = None  # type: ignore
+    mfa_enabled: bool = None  # type: ignore
+    banner: str = None  # type: ignore
+    accent_color: int = None  # type: ignore
+    locale: str = None  # type: ignore
+    verified: bool = None  # type: ignore
+    email: str = None  # type: ignore
+    flags: int = None  # type: ignore
+    premium_type: int = None  # type: ignore
+    public_flags: int = None  # type: ignore
 
     def __str__(self):
         '''Return string representation.'''
@@ -117,27 +117,27 @@ class User(BaseDiscordObject):
 class Member(User):
     '''User within a guild.'''
 
-    nick: str
-    avatar: str
-    roles: List[role.Role]
-    joined_at: datetime.datetime
-    premium_since: datetime.datetime
-    deaf: bool
-    mute: bool
-    pending: bool
-    permissions: str
+    nick: str = None  # type: ignore
+    avatar: str = None  # type: ignore
+    roles: List[role.Role] = None  # type: ignore
+    joined_at: datetime.datetime = None  # type: ignore
+    premium_since: datetime.datetime = None  # type: ignore
+    deaf: bool = None  # type: ignore
+    mute: bool = None  # type: ignore
+    pending: bool = None  # type: ignore
+    permissions: str = None  # type: ignore
 
     def __str__(self):
         '''Return string representation.'''
         fields = []
 
-        if hasattr(self, 'id'):
+        if self.id is not None:
             fields.append(f'id={self.id}')
 
-        if hasattr(self, 'username') and hasattr(self, 'discriminator'):
+        if (self.username is not None) and (self.discriminator is not None):
             fields.append(f'username=\'{self.username}#{self.discriminator}\'')
 
-        if hasattr(self, 'nick'):
+        if self.nick is not None:
             fields.append(f'nick=\'{self.nick}\'')
 
         return f'Member({", ".join(fields)})'
@@ -167,35 +167,35 @@ class Member(User):
 
     def update_from_user(self, user: User) -> 'Member':  # noqa: C901
         '''Update Member properties from associated user.'''
-        if hasattr(user, 'id'):
+        if user.id is not None:
             self.id = user.id
-        if hasattr(user, 'username'):
+        if user.username is not None:
             self.username = user.username
-        if hasattr(user, 'discriminator'):
+        if user.discriminator is not None:
             self.discriminator = user.discriminator
-        if hasattr(user, 'avatar'):
+        if user.avatar is not None:
             self.avatar = user.avatar
-        if hasattr(user, 'bot'):
+        if user.bot is not None:
             self.bot = user.bot
-        if hasattr(user, 'system'):
+        if user.system is not None:
             self.system = user.system
-        if hasattr(user, 'mfa_enabled'):
+        if user.mfa_enabled is not None:
             self.mfa_enabled = user.mfa_enabled
-        if hasattr(user, 'banner'):
+        if user.banner is not None:
             self.banner = user.banner
-        if hasattr(user, 'accent_color'):
+        if user.accent_color is not None:
             self.accent_color = user.accent_color
-        if hasattr(user, 'locale'):
+        if user.locale is not None:
             self.locale = user.locale
-        if hasattr(user, 'verified'):
+        if user.verified is not None:
             self.verified = user.verified
-        if hasattr(user, 'email'):
+        if user.email is not None:
             self.email = user.email
-        if hasattr(user, 'flags'):
+        if user.flags is not None:
             self.flags = user.flags
-        if hasattr(user, 'premium_type'):
+        if user.premium_type is not None:
             self.premium_type = user.premium_type
-        if hasattr(user, 'public_flags'):
+        if user.public_flags is not None:
             self.public_flags = user.public_flags
         return self
 
