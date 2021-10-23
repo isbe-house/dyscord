@@ -4,6 +4,8 @@ import nest_asyncio  # type: ignore
 import time
 import warnings
 import random
+import sys
+import platform
 
 from collections import defaultdict
 import functools
@@ -152,8 +154,10 @@ class DiscordClient:
             loop (asyncio.AbstractEventLoop): If desired, use a given asyncio compatible loop. One will be created if not given.
         '''
         self._log.info('Starting...')
-        self._log.info(f'Application ID: [{self.application_id}]')
-        self._log.info(f'Version: [{__version__}]')
+        self._log.info(f'Platform: [{platform.platform()}]')
+        self._log.info(f'Python Version: [{sys.version}]')
+        self._log.info(f'Python Version Info: [{sys.version_info}]')
+        self._log.info(f'Dyscord Version: [v{__version__}]')
 
         loop = loop if loop is not None else asyncio.get_event_loop()
 
@@ -392,6 +396,8 @@ class DiscordClient:
         event_type = data['t']
         self._log.info(f'Got a {event_type}')
         obj = None
+
+        # pprint(data)
 
         if event_type == 'READY':
             obj = objects.Ready().from_dict(data['d'])

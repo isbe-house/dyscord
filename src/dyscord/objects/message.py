@@ -5,7 +5,7 @@ from typing import Union, Optional, List, Dict
 
 from .base_object import BaseDiscordObject
 from . import user, channel as ext_channel, snowflake, enumerations, embed as ext_embed, guild as ext_guild, role as ext_role
-from ..utilities import cache, log
+from ..utilities import log
 from .interactions import components as ext_components
 
 from ..client import api
@@ -28,7 +28,6 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
     id: 'snowflake.Snowflake' = None  # type: ignore
     channel_id: 'snowflake.Snowflake' = None  # type: ignore
     guild_id: Optional['snowflake.Snowflake'] = None  # type: ignore
-    guild: 'Optional[ext_guild.Guild]' = None  # type: ignore
     author: 'user.User' = None  # type: ignore
     member: Optional['user.Member'] = None  # type: ignore
     content: str = None  # type: ignore
@@ -64,33 +63,27 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         if content is not None:
             self.content = content
 
-    def __getattr__(self, name):
-        '''Do dynamic lookup on various fields that may not be populated, but have valid representations in the API.'''
-        if name == 'channel' and 'channel_id' in self.__dict__:
-            try:
-                channel = cache.Cache().get(self.channel_id)
-                self._log.info('Got channel from the cache.')
-            except LookupError:
-                loop = asyncio.get_event_loop()
-                channel_dict = loop.run_until_complete(api.API.get_channel(self.channel_id))
-                channel = ext_channel.ChannelImporter().ingest_raw_dict(channel_dict)
-                self._log.info('Got channel from the API.')
-            self.channel = channel
-            return channel
+    @property
+    def channel(self):
+        '''Attempt to grab channel from the API.'''
+        if self.channel_id is None:
+            return None
+        loop = asyncio.get_event_loop()
+        channel_dict = loop.run_until_complete(api.API.get_channel(self.channel_id))
+        channel = ext_channel.ChannelImporter().from_dict(channel_dict)
+        self._log.info('Got channel from the API.')
+        return channel
 
-        if name == 'guild' and 'guild_id' in self.__dict__:
-            assert type(self.guild_id) is snowflake.Snowflake
-            try:
-                guild = cache.Cache().get(self.guild_id)
-                self._log.info('Got guild from the cache.')
-            except LookupError:
-                loop = asyncio.get_event_loop()
-                guild_dict = loop.run_until_complete(api.API.get_guild(self.guild_id))
-                guild = ext_guild.Guild().from_dict(guild_dict)
-                self._log.info('Got guild from the API.')
-            self.guild = guild
-            return guild
-        raise AttributeError(f'Failed to find \'{name}\'')
+    @property
+    def guild(self):
+        '''Attempt to grab guild from the API.'''
+        if self.guild_id is None:
+            return None
+        loop = asyncio.get_event_loop()
+        guild_dict = loop.run_until_complete(api.API.get_guild(self.guild_id))
+        guild = ext_guild.Guild().from_dict(guild_dict)
+        self._log.info('Got guild from the API.')
+        return guild
 
     def ingest_raw_dict(self, data) -> 'Message':
         '''Ingest and cache a given object for future use.'''
