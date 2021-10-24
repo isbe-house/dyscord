@@ -147,13 +147,12 @@ async def test(client, message: objects.Message):
     await API.get_user(Snowflake('185846097284038656'))
 
 
-@client.decorate_handler('ANY')
-async def handle_any(object, raw_object):
+async def handle_any(data: dict):
     m_client = Mongo.client
-    type = raw_object.get('t', 'NA')
+    type = data.get('t', 'NA')
     type = f'type_{type}'
-    m_client.dev.raw_events.insert_one(raw_object)
-    m_client.dev[type].insert_one(raw_object)
+    m_client.dev.raw_events.insert_one(data)
+    m_client.dev[type].insert_one(data)
 
 
 @client.decorate_handler('MESSAGE_CREATE')
@@ -181,6 +180,8 @@ async def parse_message(message: objects.Message, raw_message, client):
 
 dyscord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
 dyscord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)
+
+client._register_raw_callback(handle_any)
 
 Mongo.connect()
 client.run()

@@ -10,7 +10,7 @@ import warnings
 
 from collections import defaultdict
 from pprint import pprint
-from typing import Optional
+from typing import Any, Callable, Optional, List
 
 import websockets
 import orjson as json
@@ -37,6 +37,7 @@ class DiscordClient:
     '''Client for interaction with Discord.'''
 
     _log = utilities.Log()
+    _raw_callbacks: List[Callable] = list()
     _wrapper_registrations: dict = defaultdict(lambda: list())
     _wrapper_class_registrations: list = list()
     _version = __version__
@@ -249,10 +250,10 @@ class DiscordClient:
             while True:
 
                 data = await websocket.recv()
-                # Dispatch to handler.
                 data = json.loads(data)
-                # from pprint import pprint
-                # print(data)
+
+                for callback in self._raw_callbacks:
+                    await callback(data)
 
                 if 's' in data and data['s'] is not None:
                     self._sequence_number = data['s']
@@ -715,3 +716,8 @@ class DiscordClient:
         cls._wrapper_class_registrations.append(class_wrapper)
 
         return class_wrapper
+
+    @classmethod
+    def _register_raw_callback(cls, callback: Callable[[dict], Any]):
+        '''Register a raw callback that will receive pure dicts from the API.'''
+        cls._raw_callbacks.append(callback)
