@@ -1,17 +1,15 @@
-import asyncio
 import logging
-from unittest import mock
 import pytest
 from importlib import reload
 
 from src.dyscord.client import discord_client
 from src.dyscord.client import enumerations
-from src.dyscord.client import api
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import patch
 
-from tests.fixtures.fixtures import mock_api, mock_websocket
+from tests.fixtures.fixtures import mock_api, mock_websocket  # noqa
 
 # from ..objects.ready import samples as ready_samples
+
 
 def test_basics():
 
@@ -67,9 +65,10 @@ async def test_bad_event(caplog):
     assert 'ILLEGAL TYPE' in caplog.text
     assert 'Encountered unknown event' in caplog.text
 
+
+@pytest.mark.skip(reason='Need more data.')
 @patch('websockets.connect')
 @pytest.mark.asyncio
-@pytest.mark.skip(reason='Need more data.')
 async def test_mock_connection(mock_websockets_connect):
 
     class foo:
@@ -96,8 +95,9 @@ async def test_mock_connection(mock_websockets_connect):
     raise RuntimeError
 
 
+@pytest.mark.skip(reason='Need more data.')
 @pytest.mark.asyncio
-async def test_new_fixture(mock_websocket, mock_api):
+async def test_new_fixture(mock_websocket, mock_api):  # noqa
 
     mock_websocket.connect.return_value.__aenter__.return_value.recv.side_effect = ['Hello', RuntimeError]
 
