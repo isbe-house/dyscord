@@ -2,7 +2,7 @@
 import enum
 
 
-class Intents(enum.IntFlag):
+class INTENTS(enum.IntFlag):
     '''Intents of the user.'''
 
     GUILDS = (1 << 0)

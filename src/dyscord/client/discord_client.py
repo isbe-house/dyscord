@@ -16,7 +16,7 @@ import websockets
 import orjson as json
 
 from .api import API
-from .gateway_intents import Intents
+from . import INTENTS
 
 from .. import utilities
 from .. import objects
@@ -109,41 +109,41 @@ class DiscordClient:
         '''
         self.intent = 0
         if guilds:
-            self.intent += Intents.GUILDS
+            self.intent += INTENTS.GUILDS
         if guild_members:
-            self.intent += Intents.GUILD_MEMBERS
+            self.intent += INTENTS.GUILD_MEMBERS
         if guild_bans:
-            self.intent += Intents.GUILD_BANS
+            self.intent += INTENTS.GUILD_BANS
         if guild_emoji_and_stickers:
-            self.intent += Intents.GUILD_EMOJIS_AND_STICKERS
+            self.intent += INTENTS.GUILD_EMOJIS_AND_STICKERS
         if guild_integrations:
-            self.intent += Intents.GUILD_INTEGRATIONS
+            self.intent += INTENTS.GUILD_INTEGRATIONS
         if guild_webhooks:
-            self.intent += Intents.GUILD_WEBHOOKS
+            self.intent += INTENTS.GUILD_WEBHOOKS
         if guild_invites:
-            self.intent += Intents.GUILD_INVITES
+            self.intent += INTENTS.GUILD_INVITES
         if guild_voice_states:
-            self.intent += Intents.GUILD_VOICE_STATES
+            self.intent += INTENTS.GUILD_VOICE_STATES
         if guild_presences:
-            self.intent += Intents.GUILD_PRESENCES
+            self.intent += INTENTS.GUILD_PRESENCES
         if guild_messages:
-            self.intent += Intents.GUILD_MESSAGES
+            self.intent += INTENTS.GUILD_MESSAGES
         if guild_message_reactions:
-            self.intent += Intents.GUILD_MESSAGE_REACTIONS
+            self.intent += INTENTS.GUILD_MESSAGE_REACTIONS
         if guild_message_typeing:
-            self.intent += Intents.GUILD_MESSAGE_TYPING
+            self.intent += INTENTS.GUILD_MESSAGE_TYPING
         if direct_messages:
-            self.intent += Intents.DIRECT_MESSAGES
+            self.intent += INTENTS.DIRECT_MESSAGES
         if direct_message_reactions:
-            self.intent += Intents.DIRECT_MESSAGE_REACTIONS
+            self.intent += INTENTS.DIRECT_MESSAGE_REACTIONS
         if direct_messages_typeing:
-            self.intent += Intents.DIRECT_MESSAGE_TYPING
+            self.intent += INTENTS.DIRECT_MESSAGE_TYPING
         self._intents_defined = True
 
     def set_all_intents(self):
         '''Set all intents to True. For more information see the configure_intents() function.'''
         self.intent = 0
-        for intent in Intents:
+        for intent in INTENTS:
             self.intent += intent
         self._intents_defined = True
 
@@ -658,7 +658,7 @@ class DiscordClient:
     on_interaction_create = on_interaction_create
 
     @classmethod
-    def register_handler(cls, event: str):
+    def decorate_handler(cls, event: str):
         '''Register a given function to a given event string.
 
         This function should be used as a decorator around a function to map that function to a given event. The decorator takes one argument, a string which maps to the type of event we should map
@@ -702,7 +702,7 @@ class DiscordClient:
         return func_wrapper
 
     @classmethod
-    def register_class(cls, target_class):
+    def decorate_class(cls, target_class):
         '''Register a given class and attempt to call any valid on_<event> functions.
 
         By convention functions of the class should be async.

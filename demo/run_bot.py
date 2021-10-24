@@ -147,7 +147,7 @@ async def test(client, message: objects.Message):
     await API.get_user(Snowflake('185846097284038656'))
 
 
-@client.register_handler('ANY')
+@client.decorate_handler('ANY')
 async def handle_any(object, raw_object):
     m_client = Mongo.client
     type = raw_object.get('t', 'NA')
@@ -156,7 +156,7 @@ async def handle_any(object, raw_object):
     m_client.dev[type].insert_one(raw_object)
 
 
-@client.register_handler('MESSAGE_CREATE')
+@client.decorate_handler('MESSAGE_CREATE')
 async def parse_message(message: objects.Message, raw_message, client):
     if client.me in message.mentions:
         log.info(f'Saw message: {message.content} from {message.author}')

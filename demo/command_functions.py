@@ -1,9 +1,9 @@
-from src.dyscord.helper.questions import Question, Confirmation
+from src.dyscord.helper.interactions import Question, Confirmation
 from src.dyscord.objects.interactions.interaction import Interaction
 from src.dyscord.utilities.log import Log
 
 
-async def test(client, interaction: Interaction):
+async def test(interaction: Interaction):
     log = Log()
 
     try:
@@ -25,5 +25,5 @@ async def test(client, interaction: Interaction):
     print(a)
 
 
-async def complex(client, interaction: Interaction):
+async def complex(interaction: Interaction, client):
     raise RuntimeError

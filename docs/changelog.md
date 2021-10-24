@@ -9,10 +9,13 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 - User and Member now have all attributes set to `None` by default.
 - Role now has all attributes set to `None` by default.
 - Begin restructure of documentation to make some sense.
+- Registering to a guild allows you to register different commands to different guilds.
 
 ### Changed
 - `InteractionStructure` renamed to `Interaction`.
 - `InteractionDataStructure` renamed to `InteractionData`.
+- Reworked the repo to be a bit cleaner.
+- Moved Dockerfiles to their own folder, with a 4x speedup on initial build times.
 
 ### Fixed
 - Exposed the `__version__` string at the top module level.
