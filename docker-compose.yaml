@@ -97,7 +97,8 @@ services:
         user: "${UID}:${GID}"
         volumes:
             - ./src/dyscord:/opt/conda/lib/python3.9/site-packages/dyscord:ro
-        command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password='' --ip=0.0.0.0 --ServerApp.root_dir='/home/jovyan/examples/'"
+            - ./:/home/jovyan/dyscord/
+        command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password='' --ip=0.0.0.0 --ServerApp.root_dir='/home/jovyan/'"
         network_mode: host
         environment:
             - JUPYTER_ENABLE_LAB=yes
