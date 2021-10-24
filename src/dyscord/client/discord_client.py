@@ -15,8 +15,7 @@ from typing import Any, Callable, Optional, List
 import websockets
 import orjson as json
 
-from .api import API
-from . import INTENTS
+from . import api, INTENTS
 
 from .. import utilities
 from .. import objects
@@ -203,11 +202,11 @@ class DiscordClient:
 
     async def _connect(self):
         '''TODO: Implement connection to discord's servers.'''
-        API.TOKEN = self.token
+        api.API.TOKEN = self.token
         if type(self.application_id) is str:
-            API.APPLICATION_ID = self.application_id
+            api.API.APPLICATION_ID = self.application_id
 
-        gateway_uri = (await API.get_gateway_bot(self.token))['url']
+        gateway_uri = (await api.API.get_gateway_bot(self.token))['url']
         self._log.debug(f'Try to connect to {gateway_uri}')
 
         if self._listener_task is not None:
@@ -257,7 +256,7 @@ class DiscordClient:
 
                 if 's' in data and data['s'] is not None:
                     self._sequence_number = data['s']
-                    self._log.debug('Updated seq count.')
+                    self._log.debug('Updated seq count to [{self._sequence_number}].')
 
                 opcode = data['op']
 
@@ -266,9 +265,10 @@ class DiscordClient:
                     task = asyncio.create_task(self._event_dispatcher(data))
                     task.add_done_callback(_handle_completed_tasks)
 
-                # elif opcode == 1:
-                #     # Heartbeat
-                #     pass
+                elif opcode == 1:
+                    self._log.debug('OPCODE: HEARTBEAT')
+                    data = {'op': 1, 'd': self._sequence_number}
+                    await self._gateway_ws.send(json.dumps(data))
 
                 elif opcode == 7:
                     self._log.debug('OPCODE: RECONNECT')
@@ -284,10 +284,8 @@ class DiscordClient:
                     await self._handle_op_10(data)
 
                 elif opcode == 11:
-                    # Heartbeat ACK
                     self._log.debug('Saw a heartbeat ACK')
                     self._last_heartbeat_ack = time.time()
-                    pass
 
                 else:
                     self._log.error('Unknown opcode')
@@ -347,7 +345,7 @@ class DiscordClient:
 
     async def _reconnect(self):
         '''Send a reconnect message.'''
-        gateway_uri = (await API.get_gateway_bot(self.token))['url']
+        gateway_uri = (await api.API.get_gateway_bot(self.token))['url']
         self._log.critical(f'Try to connect to {gateway_uri}')
 
         if self._listener_task is not None:
