@@ -81,7 +81,7 @@ class CommandHandler:
 
         Arguments:
             custom_id (str): The custom id to trigger on.
-            callback_function (Callable): Function to call when interaction is triggered. MUST be asnyc.
+            callback_function (Callable): Function to call when interaction is triggered.
             unlimited (bool): Allows more than one interaction to be called. The user is expected to deregister this interaction later. If
                 no cleanup occurs, the handler is cleaned after 15 minutes.
         '''
