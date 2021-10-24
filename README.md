@@ -29,4 +29,4 @@ Come talk on the [Dyscord subreddit](https://www.reddit.com/r/dyscord/), or the 
 
 # Changelog
 
-See the [Changelog](docs/changelog.md).
+See the [Changelog](https://dyscord.readthedocs.io/en/main/changelog/).
