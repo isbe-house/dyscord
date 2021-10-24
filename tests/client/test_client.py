@@ -1,8 +1,12 @@
+import asyncio
 import logging
 import pytest
+from importlib import reload
 
-from src.dyscord.client import DiscordClient
+from src.dyscord.client import discord_client
 from src.dyscord.client import enumerations
+
+from unittest.mock import AsyncMock, patch
 
 # from ..objects.ready import samples as ready_samples
 
@@ -13,14 +17,14 @@ def test_basics():
 
     application_id = 'APPLICATION ID'
 
-    x = DiscordClient(token, application_id)
+    x = discord_client.DiscordClient(token, application_id)
 
-    assert isinstance(x, DiscordClient)
+    assert isinstance(x, discord_client.DiscordClient)
 
 
 def test_intents():
 
-    x = DiscordClient('1234', '1234')
+    x = discord_client.DiscordClient('1234', '1234')
 
     x.set_all_intents()
 
@@ -33,12 +37,17 @@ def test_intents():
         assert x.intent & intent
 
 
-def test_new_class():
+def test_reloading():
 
-    x = DiscordClient('foo')
+    reload(discord_client)
+    assert not hasattr(discord_client.DiscordClient, 'token')
 
-    assert hasattr(DiscordClient, 'token')
+    x = discord_client.DiscordClient('foo')
+    assert hasattr(discord_client.DiscordClient, 'token')
     assert hasattr(x, 'token')
+
+    reload(discord_client)
+    assert not hasattr(discord_client.DiscordClient, 'token')
 
 
 @pytest.mark.asyncio
@@ -46,8 +55,8 @@ async def test_bad_event(caplog):
 
     caplog.set_level(logging.DEBUG)
 
-    x = DiscordClient('foo')
-    DiscordClient.ready = True
+    x = discord_client.DiscordClient('foo')
+    discord_client.DiscordClient.ready = True
 
     await x._event_dispatcher({'d': None, 't': 'ILLEGAL TYPE'})
 
@@ -55,3 +64,31 @@ async def test_bad_event(caplog):
 
     assert 'ILLEGAL TYPE' in caplog.text
     assert 'Encountered unknown event' in caplog.text
+
+@patch('websockets.connect')
+@pytest.mark.asyncio
+@pytest.mark.skip(reason='Need more data.')
+async def test_mock_connection(mock_websockets_connect):
+
+    class foo:
+        def __init__(self):
+            self.n = 0
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            self.n += 1
+            return self.n
+
+    mock_websockets_connect.return_value.__aenter__.return_value.recv.side_effect = foo()
+
+    x = discord_client.DiscordClient('1234', '5678')
+    try:
+        await x._web_socket_listener('foo')
+    except RuntimeError:
+        pass
+
+    print(mock_websockets_connect.call_args)
+
+    raise RuntimeError
