@@ -45,3 +45,11 @@ def test_dict_parsing():
     g2 = Guild().from_dict(g2)
 
     assert g1 != g2
+
+
+def test_str():
+
+    obj = Guild()
+
+    assert str(obj) == 'Guild()'
+    assert obj.__str__() == obj.__repr__()

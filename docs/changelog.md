@@ -18,8 +18,10 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 - Moved Dockerfiles to their own folder, with a 4x speedup on initial build times.
 - Attributes of classes updated to be `None` by default.
     - Channel (and subclasses).
+    - Guild
 - Removed `ingest_raw_dict()` from classes.
     - Channel (and subclasses).
+    - Guild
 
 ### Fixed
 - Exposed the `__version__` string at the top module level.
