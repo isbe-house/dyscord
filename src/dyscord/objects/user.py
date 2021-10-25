@@ -10,8 +10,6 @@ from .. import utilities
 class User(BaseDiscordObject):
     '''Discord User.
 
-    .
-
     Attributes:
         id (Snowflake): Unique ID of User. Is a [Snowflake][dyscord.objects.snowflake.Snowflake].
         username (str): Global name of the User.
