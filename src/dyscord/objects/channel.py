@@ -36,7 +36,7 @@ class Channel(ABC):
     @classmethod
     async def get_channel(cls, channel_id: snowflake.Snowflake):
         '''Invoke cache or API to get a channel of given channel_id.'''
-        return ChannelImporter().ingest_raw_dict(await api.API.get_channel(channel_id))
+        return ChannelImporter().from_dict(await api.API.get_channel(channel_id))
 
 
 class TextChannel(Channel):
@@ -122,6 +122,7 @@ class GuildPrivateThread(Channel):
 class CategoryChannel(Channel):
     '''Not a text channel, used for grouping servers in discord's GUI.'''
     pass
+
 
 class StoreChannel(Channel):
     '''Channel to sell things in.'''
