@@ -15,7 +15,7 @@ from typing import Any, Callable, Optional, List
 import websockets
 import orjson as json
 
-from . import api, INTENTS
+from . import api, INTENTS, DISCORD_EVENTS
 
 from .. import utilities
 from .. import objects
@@ -679,8 +679,8 @@ class DiscordClient:
 
         The `client` is the DiscordClient instance.
         '''
-        if not hasattr(objects.DISCORD_EVENTS, event) and event != 'ANY':
-            raise ValueError(f'Attempted to bind to unknown event \'{event}\', must be exact match for existing {objects.DISCORD_EVENTS} entry.')
+        if not hasattr(DISCORD_EVENTS, event) and event != 'ANY':
+            raise ValueError(f'Attempted to bind to unknown event \'{event}\', must be exact match for existing {DISCORD_EVENTS} entry.')
 
         def func_wrapper(func):
             arg_len = len(inspect.signature(func).parameters)

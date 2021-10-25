@@ -1,5 +1,3 @@
-from .enumerations import DISCORD_EVENTS
-
 from .emoji import Emoji
 from .guild import Guild
 from .message import Message
@@ -19,7 +17,6 @@ __all__ = [
     'CategoryChannel',
     'Channel',
     'ChannelImporter',
-    'DISCORD_EVENTS',
     'Embed',
     'EmbedAdder',
     'Emoji',
