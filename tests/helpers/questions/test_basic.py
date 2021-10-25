@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 from src.dyscord.helper import Confirmation
 # from src.dyscord.helper import Question
 
-from src.dyscord.objects.interactions import InteractionStructure
+from src.dyscord.objects.interactions import Interaction
 # from src.dyscord.objects import User
 
 from ...objects.interactions import samples as interaction_samples
@@ -15,7 +15,7 @@ from ...objects.user import samples as user_samples
 @patch('src.dyscord.client.api.API')
 def an_interaction(api_mock):
     api_mock.get_user = AsyncMock(return_value=user_samples.raw_get_user_response)
-    x = InteractionStructure()
+    x = Interaction()
     x.from_dict(interaction_samples.trigger_chat)
     return x
 

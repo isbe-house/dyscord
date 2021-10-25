@@ -8,17 +8,17 @@ from . import snowflake
 class Role(BaseDiscordObject):
     '''Roles represent a set of permissions attached to a group of users.'''
 
-    id: snowflake.Snowflake
-    name: str
-    color: int  # integer representation of hexadecimal color code
-    hoist: bool  # if this role is pinned in the user listing
-    icon: str   # role icon hash
-    unicode_emoji: str  # role unicode emoji
-    position: int   # position of this role
-    permissions: str    # permission bit set
-    managed: bool    # whether this role is managed by an integration
-    mentionable: bool    # whether this role is mentionable
-    tags: Optional['RoleTags']   # tags object	the tags this role has
+    id: snowflake.Snowflake = None  # type: ignore
+    name: str = None  # type: ignore
+    color: int = None  # type: ignore
+    hoist: bool = None  # type: ignore
+    icon: str = None  # type: ignore
+    unicode_emoji: str = None  # type: ignore
+    position: int = None  # type: ignore
+    permissions: str = None  # type: ignore
+    managed: bool = None  # type: ignore
+    mentionable: bool = None  # type: ignore
+    tags: Optional['RoleTags'] = None  # type: ignore
 
     def from_dict(self, data: dict) -> 'Role':
         '''Parse a Role from an API compliant dict.'''
@@ -46,9 +46,9 @@ class Role(BaseDiscordObject):
 class RoleTags(BaseDiscordObject):
     '''RoleTags.'''
 
-    bot_id: snowflake.Snowflake
-    integration_id: snowflake.Snowflake
-    premium_subscriber: Any
+    bot_id: snowflake.Snowflake = None  # type: ignore
+    integration_id: snowflake.Snowflake = None  # type: ignore
+    premium_subscriber: Any = None  # type: ignore
 
     def from_dict(self, data: dict) -> 'RoleTags':
         '''Parse a RoleRags from an API compliant dict.'''

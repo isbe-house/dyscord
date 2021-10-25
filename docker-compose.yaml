@@ -12,8 +12,7 @@ services:
     dyscord:
         build:
             context: .
-            dockerfile: Dockerfile
-            target: PROD
+            dockerfile: Dockerfiles/demo.Dockerfile
         restart: "unless-stopped"
         container_name: "SimpleDiscord"
         volumes:
@@ -35,8 +34,7 @@ services:
     dyscord-tests:
         build:
             context: .
-            dockerfile: Dockerfile
-            target: TEST
+            dockerfile: Dockerfiles/test.Dockerfile
         restart: "no"
         container_name: "TESTSimpleDiscord"
         volumes:
@@ -48,8 +46,7 @@ services:
     documentation:
         build:
             context: .
-            dockerfile: Dockerfile
-            target: DOCS
+            dockerfile: Dockerfiles/docs.Dockerfile
         restart: "no"
         volumes:
             - ./:/usr/src/app/
@@ -61,8 +58,7 @@ services:
     releaser:
         build:
             context: .
-            dockerfile: Dockerfile
-            target: RELEASE
+            dockerfile: Dockerfiles/release.Dockerfile
         restart: "no"
         volumes:
             - ./:/usr/src/app/
@@ -89,3 +85,20 @@ services:
         environment:
             ME_CONFIG_MONGODB_ADMINUSERNAME: root
             ME_CONFIG_MONGODB_ADMINPASSWORD: root
+
+    jupyter:
+        build:
+            context: .
+            dockerfile: Dockerfiles/jupyter.Dockerfile
+            network: host
+        ports:
+            - 8888:8888
+            - 8000:8000
+        user: "${UID}:${GID}"
+        volumes:
+            - ./src/dyscord:/opt/conda/lib/python3.9/site-packages/dyscord:ro
+            - ./:/home/jovyan/dyscord/
+        command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password='' --ip=0.0.0.0 --ServerApp.root_dir='/home/jovyan/'"
+        network_mode: host
+        environment:
+            - JUPYTER_ENABLE_LAB=yes

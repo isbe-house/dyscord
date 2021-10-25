@@ -114,7 +114,6 @@ async def register_commands(client: dyscord.client.DiscordClient, message):
     log.info(f'Registration: {registration}')
 
 
-
 async def list_commands(client):
     client._log.info('Get global commands')
     commands = await API.get_global_application_commands()
@@ -147,17 +146,17 @@ async def send_buttons(client, chan_id):
 async def test(client, message: objects.Message):
     await API.get_user(Snowflake('185846097284038656'))
 
-@client.register_handler('ANY')
-async def handle_any(client: dyscord.client.DiscordClient, object, raw_object):
+
+async def handle_any(data: dict):
     m_client = Mongo.client
-    type = raw_object.get('t', 'NA')
+    type = data.get('t', 'NA')
     type = f'type_{type}'
-    m_client.dev.raw_events.insert_one(raw_object)
-    m_client.dev[type].insert_one(raw_object)
+    m_client.dev.raw_events.insert_one(data)
+    m_client.dev[type].insert_one(data)
 
 
-@client.register_handler('MESSAGE_CREATE')
-async def parse_message(client, message: objects.Message, raw_message):
+@client.decorate_handler('MESSAGE_CREATE')
+async def parse_message(message: objects.Message, raw_message, client):
     if client.me in message.mentions:
         log.info(f'Saw message: {message.content} from {message.author}')
         if 'PURGE' in message.content:
@@ -181,6 +180,8 @@ async def parse_message(client, message: objects.Message, raw_message):
 
 dyscord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
 dyscord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)
+
+client._register_raw_callback(handle_any)
 
 Mongo.connect()
 client.run()

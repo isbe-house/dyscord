@@ -10,7 +10,7 @@ from ...client import api
 
 from ..base_object import BaseDiscordObject
 
-from .. import snowflake, guild
+from .. import snowflake, guild as ext_guild
 
 from . import enumerations
 
@@ -139,12 +139,16 @@ class Command(BaseDiscordObject):
         if hasattr(self, 'options'):
             del self.options
 
-    async def register_to_guild(self, guild: 'guild.Guild') -> dict:
+    async def register_to_guild(self, guild: 'Union[ext_guild.Guild, snowflake.Snowflake]') -> dict:
         '''Register a Command to a specific guild discord scope.
 
         Note that discord will limit you to 200 of these calls per bot per guild per day.
         '''
-        return await api.API.create_guild_application_command(guild.id, self.to_dict())
+        if isinstance(guild, snowflake.Snowflake):
+            guild_id = guild
+        elif isinstance(guild, ext_guild.Guild):
+            guild_id = guild.id
+        return await api.API.create_guild_application_command(guild_id, self.to_dict())
 
     async def register_globally(self) -> dict:
         '''Register a Command to the global discord scope.

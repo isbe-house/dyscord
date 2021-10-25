@@ -13,10 +13,10 @@ class Channel(ABC):
 
     CHANNEL_TYPES = enumerations.CHANNEL_TYPES
 
-    id: 'snowflake.Snowflake'
-    name: str
-    position: int
-    type: 'enumerations.CHANNEL_TYPES'
+    id: 'snowflake.Snowflake' = None  # type: ignore
+    name: str = None  # type: ignore
+    position: int = None  # type: ignore
+    type: 'enumerations.CHANNEL_TYPES' = None  # type: ignore
 
     def __str__(self):
         '''Return string representation.'''
@@ -25,14 +25,6 @@ class Channel(ABC):
     def __repr__(self):
         '''Return string representation.'''
         return self.__str__()
-
-    def cache(self):
-        '''Deprecated caching function.'''
-        utilities.Cache().add(self)
-
-    def ingest_raw_dict(self, data, parent_guild=None):
-        '''Parse a Channel from an API compliant dict.'''
-        raise NotImplementedError()
 
     def from_dict(self, data, parent_guild=None) -> 'Channel':
         '''Parse a Channel from an API compliant dict.'''
@@ -44,28 +36,20 @@ class Channel(ABC):
     @classmethod
     async def get_channel(cls, channel_id: snowflake.Snowflake):
         '''Invoke cache or API to get a channel of given channel_id.'''
-        return ChannelImporter().ingest_raw_dict(await api.API.get_channel(channel_id))
+        return ChannelImporter().from_dict(await api.API.get_channel(channel_id))
 
 
 class TextChannel(Channel):
     '''Text channel. May be public or private depending on privacy settings.'''
 
-    guild_id: 'snowflake.Snowflake'
+    guild_id: 'snowflake.Snowflake' = None  # type: ignore
     # permission_overwrites: list
-    rate_limit_per_user: int
-    nsfw: Optional[bool]
-    topic: str
-    last_message_id: 'snowflake.Snowflake'
-    parent_id: 'snowflake.Snowflake'
-    default_auto_archive_duration: int
-
-    def ingest_raw_dict(self, data, parent_guild=None) -> "TextChannel":
-        '''Parse a TextChannel from an API compliant dict.'''
-        super().from_dict(data, parent_guild)
-        self.from_dict(data, parent_guild=None)
-
-        self.cache()
-        return self
+    rate_limit_per_user: int = None  # type: ignore
+    nsfw: Optional[bool] = None  # type: ignore
+    topic: str = None  # type: ignore
+    last_message_id: 'snowflake.Snowflake' = None  # type: ignore
+    parent_id: 'snowflake.Snowflake' = None  # type: ignore
+    default_auto_archive_duration: int = None  # type: ignore
 
     def from_dict(self, data, parent_guild=None):
         '''Parse a TextChannel from an API compliant dict.'''
@@ -107,107 +91,46 @@ class TextChannel(Channel):
 
 class NewsChannel(Channel):
     '''News channel.'''
-
-    def ingest_raw_dict(self, data, parent_guild=None) -> "NewsChannel":
-        '''Parse a NewsChannel from an API compliant dict.'''
-        super().from_dict(data, parent_guild)
-
-        self._log.debug("Ingest called.")
-        self.cache()
-        return self
+    pass
 
 
 class VoiceChannel(Channel):
     '''Voice channel.'''
-
-    def ingest_raw_dict(self, data, parent_guild=None) -> "VoiceChannel":
-        '''Parse a VoiceChannel from an API compliant dict.'''
-        super().from_dict(data, parent_guild)
-
-        self._log.debug("Ingest called.")
-        self.cache()
-        return self
+    pass
 
 
 class DMChannel(Channel):
     '''Direct Message with a specific user.'''
-
-    def ingest_raw_dict(self, data, parent_guild=None) -> "DMChannel":
-        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
-        super().from_dict(data, parent_guild)
-
-        self._log.debug("Ingest called.")
-        self.cache()
-        return self
+    pass
 
 
 class GroupDMChannel(Channel):
     '''DM with several users.'''
-
-    def ingest_raw_dict(self, data, parent_guild=None) -> "GroupDMChannel":
-        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
-        super().from_dict(data, parent_guild)
-
-        self._log.debug("Ingest called.")
-        self.cache()
-        return self
+    pass
 
 
 class GuildPublicThread(Channel):
     '''Public thread.'''
-
-    def ingest_raw_dict(self, data, parent_guild=None) -> "GuildPublicThread":
-        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
-        super().from_dict(data, parent_guild)
-
-        self._log.debug("Ingest called.")
-        self.cache()
-        return self
+    pass
 
 
 class GuildPrivateThread(Channel):
     '''Private thread.'''
-
-    def ingest_raw_dict(self, data, parent_guild=None) -> "GuildPrivateThread":
-        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
-        super().from_dict(data, parent_guild)
-
-        self._log.debug("Ingest called.")
-        self.cache()
-        return self
+    pass
 
 
 class CategoryChannel(Channel):
     '''Not a text channel, used for grouping servers in discord's GUI.'''
-
-    def ingest_raw_dict(self, data, parent_guild=None) -> "CategoryChannel":
-        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
-        super().from_dict(data, parent_guild)
-
-        self._log.debug("Ingest called.")
-        self.cache()
-        return self
+    pass
 
 
 class StoreChannel(Channel):
     '''Channel to sell things in.'''
-
-    def ingest_raw_dict(self, data, parent_guild=None) -> "StoreChannel":
-        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
-        super().from_dict(data, parent_guild)
-
-        self._log.debug("Ingest called.")
-        self.cache()
-        return self
+    pass
 
 
 class ChannelImporter:
     '''Dynamic Channel identifier and parser.'''
-
-    @classmethod
-    def ingest_raw_dict(cls, data, parent_guild=None) -> 'Channel':
-        '''Parse a Channel from an API compliant dict, then return the appropriate subclass object.'''
-        return cls.from_dict(data, parent_guild)
 
     @classmethod
     def from_dict(cls, data, parent_guild=None) -> 'Union[TextChannel, DMChannel, VoiceChannel, GroupDMChannel, GuildPublicThread, GuildPrivateThread, CategoryChannel, NewsChannel, StoreChannel]':

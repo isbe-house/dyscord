@@ -4,7 +4,9 @@ A simplistic implementation of the discord API.
 
 ## Main
 
-[![Testing](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=main)](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml) [![Downloads](https://static.pepy.tech/personalized-badge/dyscord?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=Downloads)](https://pepy.tech/project/dyscord) [![Documentation Status](https://readthedocs.org/projects/dyscord/badge/?version=main)](https://dyscord.readthedocs.io/en/main/?badge=main)
+[![Testing](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml/badge.svg?branch=main)](https://github.com/isbe-house/dyscord/actions/workflows/python-testing.yml) [![Documentation Status](https://readthedocs.org/projects/dyscord/badge/?version=main)](https://dyscord.readthedocs.io/en/main/?badge=main)
+
+[![Downloads](https://static.pepy.tech/personalized-badge/dyscord?period=month&units=international_system&left_color=grey&right_color=brightgreen&left_text=Downloads)](https://pepy.tech/project/dyscord)
 
 ## Dev
 
@@ -27,4 +29,4 @@ Come talk on the [Dyscord subreddit](https://www.reddit.com/r/dyscord/), or the 
 
 # Changelog
 
-See the [Changelog](docs/changelog.md).
+See the [Changelog](https://dyscord.readthedocs.io/en/main/changelog/).

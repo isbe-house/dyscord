@@ -21,12 +21,12 @@ run: ## Run container connected
 build:
 	docker-compose \
 		-f docker-compose.yaml \
-		build
+		build --parallel
 
 rebuild:
 	docker-compose \
 		-f docker-compose.yaml \
-		build --no-cache
+		build --no-cache --parallel
 
 down: ## Stop all containers
 	docker-compose \
@@ -60,15 +60,10 @@ debug: ## Start interactive python shell to debug with
 
 jupyter: ## Start a jupyter environment for debugging and such
 	docker-compose \
-		-f tools/jupyter/docker-compose.yaml \
-		build
-	docker-compose \
-		-f  tools/jupyter/docker-compose.yaml \
-		run --rm dyscord-jupyter
+		-f  docker-compose.yaml \
+		run --rm jupyter
 
 test: ## Run all tests
-	make build
-	docker system prune -f
 	make test-pytest
 	make test-mypy
 	make test-flake8

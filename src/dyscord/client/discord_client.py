@@ -1,22 +1,21 @@
 import asyncio
+import functools
 import inspect
 import nest_asyncio  # type: ignore
-import time
-import warnings
+import platform
 import random
 import sys
-import platform
+import time
+import warnings
 
 from collections import defaultdict
-import functools
 from pprint import pprint
-from typing import Optional
+from typing import Any, Callable, Optional, List
 
 import websockets
 import orjson as json
 
-from .api import API
-from .gateway_intents import Intents
+from . import api, INTENTS
 
 from .. import utilities
 from .. import objects
@@ -37,6 +36,7 @@ class DiscordClient:
     '''Client for interaction with Discord.'''
 
     _log = utilities.Log()
+    _raw_callbacks: List[Callable] = list()
     _wrapper_registrations: dict = defaultdict(lambda: list())
     _wrapper_class_registrations: list = list()
     _version = __version__
@@ -109,41 +109,41 @@ class DiscordClient:
         '''
         self.intent = 0
         if guilds:
-            self.intent += Intents.GUILDS
+            self.intent += INTENTS.GUILDS
         if guild_members:
-            self.intent += Intents.GUILD_MEMBERS
+            self.intent += INTENTS.GUILD_MEMBERS
         if guild_bans:
-            self.intent += Intents.GUILD_BANS
+            self.intent += INTENTS.GUILD_BANS
         if guild_emoji_and_stickers:
-            self.intent += Intents.GUILD_EMOJIS_AND_STICKERS
+            self.intent += INTENTS.GUILD_EMOJIS_AND_STICKERS
         if guild_integrations:
-            self.intent += Intents.GUILD_INTEGRATIONS
+            self.intent += INTENTS.GUILD_INTEGRATIONS
         if guild_webhooks:
-            self.intent += Intents.GUILD_WEBHOOKS
+            self.intent += INTENTS.GUILD_WEBHOOKS
         if guild_invites:
-            self.intent += Intents.GUILD_INVITES
+            self.intent += INTENTS.GUILD_INVITES
         if guild_voice_states:
-            self.intent += Intents.GUILD_VOICE_STATES
+            self.intent += INTENTS.GUILD_VOICE_STATES
         if guild_presences:
-            self.intent += Intents.GUILD_PRESENCES
+            self.intent += INTENTS.GUILD_PRESENCES
         if guild_messages:
-            self.intent += Intents.GUILD_MESSAGES
+            self.intent += INTENTS.GUILD_MESSAGES
         if guild_message_reactions:
-            self.intent += Intents.GUILD_MESSAGE_REACTIONS
+            self.intent += INTENTS.GUILD_MESSAGE_REACTIONS
         if guild_message_typeing:
-            self.intent += Intents.GUILD_MESSAGE_TYPING
+            self.intent += INTENTS.GUILD_MESSAGE_TYPING
         if direct_messages:
-            self.intent += Intents.DIRECT_MESSAGES
+            self.intent += INTENTS.DIRECT_MESSAGES
         if direct_message_reactions:
-            self.intent += Intents.DIRECT_MESSAGE_REACTIONS
+            self.intent += INTENTS.DIRECT_MESSAGE_REACTIONS
         if direct_messages_typeing:
-            self.intent += Intents.DIRECT_MESSAGE_TYPING
+            self.intent += INTENTS.DIRECT_MESSAGE_TYPING
         self._intents_defined = True
 
     def set_all_intents(self):
         '''Set all intents to True. For more information see the configure_intents() function.'''
         self.intent = 0
-        for intent in Intents:
+        for intent in INTENTS:
             self.intent += intent
         self._intents_defined = True
 
@@ -202,11 +202,11 @@ class DiscordClient:
 
     async def _connect(self):
         '''TODO: Implement connection to discord's servers.'''
-        API.TOKEN = self.token
+        api.API.TOKEN = self.token
         if type(self.application_id) is str:
-            API.APPLICATION_ID = self.application_id
+            api.API.APPLICATION_ID = self.application_id
 
-        gateway_uri = (await API.get_gateway_bot(self.token))['url']
+        gateway_uri = (await api.API.get_gateway_bot(self.token))['url']
         self._log.debug(f'Try to connect to {gateway_uri}')
 
         if self._listener_task is not None:
@@ -249,14 +249,14 @@ class DiscordClient:
             while True:
 
                 data = await websocket.recv()
-                # Dispatch to handler.
                 data = json.loads(data)
-                # from pprint import pprint
-                # print(data)
+
+                for callback in self._raw_callbacks:
+                    await callback(data)
 
                 if 's' in data and data['s'] is not None:
                     self._sequence_number = data['s']
-                    self._log.debug('Updated seq count.')
+                    self._log.debug('Updated seq count to [{self._sequence_number}].')
 
                 opcode = data['op']
 
@@ -265,9 +265,10 @@ class DiscordClient:
                     task = asyncio.create_task(self._event_dispatcher(data))
                     task.add_done_callback(_handle_completed_tasks)
 
-                # elif opcode == 1:
-                #     # Heartbeat
-                #     pass
+                elif opcode == 1:
+                    self._log.debug('OPCODE: HEARTBEAT')
+                    data = {'op': 1, 'd': self._sequence_number}
+                    await self._gateway_ws.send(json.dumps(data))
 
                 elif opcode == 7:
                     self._log.debug('OPCODE: RECONNECT')
@@ -283,10 +284,8 @@ class DiscordClient:
                     await self._handle_op_10(data)
 
                 elif opcode == 11:
-                    # Heartbeat ACK
                     self._log.debug('Saw a heartbeat ACK')
                     self._last_heartbeat_ack = time.time()
-                    pass
 
                 else:
                     self._log.error('Unknown opcode')
@@ -346,7 +345,7 @@ class DiscordClient:
 
     async def _reconnect(self):
         '''Send a reconnect message.'''
-        gateway_uri = (await API.get_gateway_bot(self.token))['url']
+        gateway_uri = (await api.API.get_gateway_bot(self.token))['url']
         self._log.critical(f'Try to connect to {gateway_uri}')
 
         if self._listener_task is not None:
@@ -545,7 +544,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'INTERACTION_CREATE':
-            obj = objects.interactions.InteractionStructure().from_dict(data['d'])
+            obj = objects.interactions.Interaction().from_dict(data['d'])
             self._log.info('Saw INTERACTION_CREATE event.')
             await helper.CommandHandler.command_handler(self, obj)
 
@@ -563,42 +562,50 @@ class DiscordClient:
             await self_function(obj, data)
 
         # Call user wrapped classes, functions and cotoutines.
+        # TODO: Should we invoke a create_task when able to avoid blocking calls?
+        arguments = (obj, data, self)
         if obj is not None:
             for user_function in DiscordClient._wrapper_registrations[event_type]:
+                arg_len = len(inspect.signature(user_function).parameters)
+                assert arg_len >= 0 and arg_len <= 3
                 if asyncio.iscoroutinefunction(user_function):
-                    await user_function(self, obj, data)
+                    await user_function(*arguments[:arg_len])
                 else:
-                    user_function(self, obj, data)
+                    user_function(*arguments[:arg_len])
 
             for user_class in DiscordClient._wrapper_class_registrations:
                 if hasattr(user_class, event_handler_name):
                     user_function = getattr(user_class, event_handler_name)
-
+                    arg_len = len(inspect.signature(user_function).parameters)
+                    assert arg_len >= 0 and arg_len <= 4
                     if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
                         warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
-
                     if asyncio.iscoroutinefunction(user_function):
-                        await user_function(user_class, self, obj, data)
+                        await user_function(user_class, *arguments[:arg_len])
                     else:
-                        user_function(user_class, self, obj, data)
+                        user_function(user_class, *arguments[:arg_len])
 
         # Handle the special case of the ANY event.
         for user_function in DiscordClient._wrapper_registrations['ANY']:
+            arg_len = len(inspect.signature(user_function).parameters)
+            assert arg_len >= 0 and arg_len <= 3
             if asyncio.iscoroutinefunction(user_function):
-                await user_function(self, obj, data)
+                await user_function(*arguments[:arg_len])
             else:
-                user_function(self, obj, data)
+                user_function(*arguments[:arg_len])
+
         for user_class in DiscordClient._wrapper_class_registrations:
             if hasattr(user_class, 'on_any'):
                 user_function = getattr(user_class, event_handler_name)
-
+                arg_len = len(inspect.signature(user_function).parameters)
+                assert arg_len >= 0 and arg_len <= 4
                 if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
                     warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
 
                 if asyncio.iscoroutinefunction(user_function):
-                    await user_function(user_class, self, obj, data)
+                    await user_function(user_class, *arguments[:arg_len])
                 else:
-                    user_function(user_class, self, obj, data)
+                    user_function(user_class, *arguments[:arg_len])
 
     # Register all out events
     on_any = on_any
@@ -650,12 +657,32 @@ class DiscordClient:
     on_interaction_create = on_interaction_create
 
     @classmethod
-    def register_handler(cls, event: str):
-        '''Register a given function to a given event string.'''
+    def decorate_handler(cls, event: str):
+        '''Register a given function to a given event string.
+
+        This function should be used as a decorator around a function to map that function to a given event. The decorator takes one argument, a string which maps to the type of event we should map
+        to. See the definition of DISCORD_EVENTS for names to map against.
+
+        The decorated mapped should by an `async` function, although synchronous functions are allowed (and highly discouraged).
+
+        The arguments of the decorated decide which python objects are given to the function when the given event is called. The mapping is as follows:
+
+        - 1 Argument -> (discord_object)
+        - 2 Argument -> (discord_object, raw_dict)
+        - 3 Argument -> (discord_object, raw_dict, client)
+
+        The `discord_object` will be a python representation of the event object.
+
+        The `raw_dict` is a raw dictionary the API emitted.
+
+        The `client` is the DiscordClient instance.
+        '''
         if not hasattr(objects.DISCORD_EVENTS, event) and event != 'ANY':
             raise ValueError(f'Attempted to bind to unknown event \'{event}\', must be exact match for existing {objects.DISCORD_EVENTS} entry.')
 
         def func_wrapper(func):
+            arg_len = len(inspect.signature(func).parameters)
+            assert arg_len >= 0 and arg_len <= 3
             if asyncio.iscoroutinefunction(func):
                 @functools.wraps(func)
                 async def wrapped_func(*args, **kwargs):  # type: ignore
@@ -674,7 +701,7 @@ class DiscordClient:
         return func_wrapper
 
     @classmethod
-    def register_class(cls, target_class):
+    def decorate_class(cls, target_class):
         '''Register a given class and attempt to call any valid on_<event> functions.
 
         By convention functions of the class should be async.
@@ -687,3 +714,8 @@ class DiscordClient:
         cls._wrapper_class_registrations.append(class_wrapper)
 
         return class_wrapper
+
+    @classmethod
+    def _register_raw_callback(cls, callback: Callable[[dict], Any]):
+        '''Register a raw callback that will receive pure dicts from the API.'''
+        cls._raw_callbacks.append(callback)

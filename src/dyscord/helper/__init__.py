@@ -1,6 +1,6 @@
 
 from .command_handler import CommandHandler
-from .questions import Question, Confirmation
+from .interactions import Question, Confirmation
 
 __all__ = [
     'CommandHandler',

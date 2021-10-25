@@ -2,10 +2,28 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
-## [v0.3.2] WIP
+## [v0.4.0] WIP
 ### Added
 - New set_all_intents() function in DiscordClient. Sets all intents to True.
 - Better example code.
+- User and Member now have all attributes set to `None` by default.
+- Role now has all attributes set to `None` by default.
+- Begin restructure of documentation to make some sense.
+- Registering to a guild allows you to register different commands to different guilds.
+
+### Changed
+- `InteractionStructure` renamed to `Interaction`.
+- `InteractionDataStructure` renamed to `InteractionData`.
+- Reworked the repo to be a bit cleaner.
+- Moved Dockerfiles to their own folder, with a 4x speedup on initial build times.
+- Attributes of classes updated to be `None` by default.
+    - Channel (and subclasses).
+    - Guild
+    - Embed
+- Removed `ingest_raw_dict()` from classes.
+    - Channel (and subclasses).
+    - Guild
+    - Embed
 
 ### Fixed
 - Exposed the `__version__` string at the top module level.
