@@ -166,7 +166,7 @@ class Guild(BaseDiscordObject):
         if 'channels' in data:
             for channel_dict in data['channels']:
                 # Generate channel
-                new_channel = ext_channel.ChannelImporter.ingest_raw_dict(channel_dict, self)
+                new_channel = ext_channel.ChannelImporter.from_dict(channel_dict, self)
                 self.channels.append(new_channel)
 
         return self

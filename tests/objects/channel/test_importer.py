@@ -17,7 +17,7 @@ class TestImporter:
 
         for sample in samples.all:
 
-            obj = ChannelImporter().ingest_raw_dict(sample)
+            obj = ChannelImporter().from_dict(sample)
             print(type(obj))
             assert isinstance(obj, Channel)
 
@@ -25,7 +25,7 @@ class TestImporter:
 
         input_data = samples.dev_guild_text
 
-        channel = ChannelImporter().ingest_raw_dict(input_data)
+        channel = ChannelImporter().from_dict(input_data)
 
         assert isinstance(channel, Channel)
         assert isinstance(channel, TextChannel)
