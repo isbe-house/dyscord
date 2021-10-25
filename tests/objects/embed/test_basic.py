@@ -62,8 +62,25 @@ def test_add_fields(blank_embed: Embed):
     assert dict_output['timestamp'] == now.isoformat()
 
 
-def test_invalids(blank_embed: Embed):
-    pass
+def test_null_fieldds(blank_embed: Embed):
+    dict_output = blank_embed.to_dict()
+
+    assert dict_output == dict()
+
+
+def test_invalids():
+
+    obj = Embed()
+    obj.generate(title=1234)
+    with pytest.raises(AssertionError):
+        obj.validate()
+
+    obj.generate(title='fixed')
+    obj.validate()
+
+    obj.generate(title='Fine', type=1234)
+    with pytest.raises(AssertionError):
+        obj.validate()
 
 
 def test_basics(blank_embed: Embed):

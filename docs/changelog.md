@@ -19,9 +19,11 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 - Attributes of classes updated to be `None` by default.
     - Channel (and subclasses).
     - Guild
+    - Embed
 - Removed `ingest_raw_dict()` from classes.
     - Channel (and subclasses).
     - Guild
+    - Embed
 
 ### Fixed
 - Exposed the `__version__` string at the top module level.
