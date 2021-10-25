@@ -2,7 +2,7 @@
 
 Dyscord is an attempt to replace the discord.py library. There is no intention to provide 1:1 API compatibility, as there were several pain points from the original I intend to avoid.
 
-If you are looking to get started, than take a peak at the [Examples](#examples) section.
+If you are looking to get started, than take a peek at the [Examples](#examples) section.
 
 ## Support
 
