@@ -56,11 +56,11 @@ class DiscordClient:
             application_id (str): The application id. Can be left to None if client will not use Interactions.
         '''
         # Discord attributes
-        DiscordClient.token = token
-        DiscordClient.application_id = application_id
-        DiscordClient.intent = 0
-        DiscordClient.ready = False
-        DiscordClient.cache = utilities.Cache()
+        self.__class__.token = token
+        self.__class__.application_id = application_id
+        self.__class__.intent = 0
+        self.__class__.ready = False
+        self.__class__.cache = utilities.Cache()
 
         # Private attributes
         self._heartbeat_task = None
@@ -400,13 +400,13 @@ class DiscordClient:
 
         if event_type == 'READY':
             obj = objects.Ready().from_dict(data['d'])
-            DiscordClient.session_id = obj.session_id
-            DiscordClient.ready = True
-            DiscordClient.me = obj.user
+            self.__class__.session_id = obj.session_id
+            self.__class__.ready = True
+            self.__class__.me = obj.user
             self._log.info('Discord connection complete, we are ready!')
             self._log.info(f'We are now {self.me}')
 
-        elif not DiscordClient.ready:
+        elif not self.__class__.ready:
             self._log.info(f'Got event of type [{event_type}] before we were ready!')
             return
 
@@ -559,13 +559,15 @@ class DiscordClient:
         # Call own event handlers first.
         if hasattr(self, event_handler_name):
             self_function = getattr(self, event_handler_name)
-            await self_function(obj, data)
+            arg_len = len(inspect.signature(self_function).parameters)
+            arguments = (obj, data)
+            await self_function(*arguments[:arg_len - 1])
 
         # Call user wrapped classes, functions and cotoutines.
         # TODO: Should we invoke a create_task when able to avoid blocking calls?
         arguments = (obj, data, self)
         if obj is not None:
-            for user_function in DiscordClient._wrapper_registrations[event_type]:
+            for user_function in self.__class__._wrapper_registrations[event_type]:
                 arg_len = len(inspect.signature(user_function).parameters)
                 assert arg_len >= 0 and arg_len <= 3
                 if asyncio.iscoroutinefunction(user_function):
@@ -573,7 +575,7 @@ class DiscordClient:
                 else:
                     user_function(*arguments[:arg_len])
 
-            for user_class in DiscordClient._wrapper_class_registrations:
+            for user_class in self.__class__._wrapper_class_registrations:
                 if hasattr(user_class, event_handler_name):
                     user_function = getattr(user_class, event_handler_name)
                     arg_len = len(inspect.signature(user_function).parameters)
@@ -581,12 +583,12 @@ class DiscordClient:
                     if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
                         warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
                     if asyncio.iscoroutinefunction(user_function):
-                        await user_function(user_class, *arguments[:arg_len])
+                        await user_function(user_class, *arguments[:arg_len - 1])
                     else:
-                        user_function(user_class, *arguments[:arg_len])
+                        user_function(user_class, *arguments[:arg_len - 1])
 
         # Handle the special case of the ANY event.
-        for user_function in DiscordClient._wrapper_registrations['ANY']:
+        for user_function in self.__class__._wrapper_registrations['ANY']:
             arg_len = len(inspect.signature(user_function).parameters)
             assert arg_len >= 0 and arg_len <= 3
             if asyncio.iscoroutinefunction(user_function):
@@ -594,7 +596,7 @@ class DiscordClient:
             else:
                 user_function(*arguments[:arg_len])
 
-        for user_class in DiscordClient._wrapper_class_registrations:
+        for user_class in self.__class__._wrapper_class_registrations:
             if hasattr(user_class, 'on_any'):
                 user_function = getattr(user_class, event_handler_name)
                 arg_len = len(inspect.signature(user_function).parameters)
@@ -603,9 +605,9 @@ class DiscordClient:
                     warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
 
                 if asyncio.iscoroutinefunction(user_function):
-                    await user_function(user_class, *arguments[:arg_len])
+                    await user_function(user_class, *arguments[:arg_len - 1])
                 else:
-                    user_function(user_class, *arguments[:arg_len])
+                    user_function(user_class, *arguments[:arg_len - 1])
 
     # Register all out events
     on_any = on_any

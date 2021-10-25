@@ -14,6 +14,7 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ### Changed
 - `InteractionStructure` renamed to `Interaction`.
 - `InteractionDataStructure` renamed to `InteractionData`.
+- `register_handler` renamed to `decorate_handler`.
 - Reworked the repo to be a bit cleaner.
 - Moved Dockerfiles to their own folder, with a 4x speedup on initial build times.
 - Attributes of classes updated to be `None` by default.

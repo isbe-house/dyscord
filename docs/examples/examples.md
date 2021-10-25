@@ -19,7 +19,7 @@ client = dyscord.DiscordClient(token=token)
 
 client.set_all_intents()
 
-@client.register_handler('MESSAGE_CREATE')
+@client.decorate_handler('MESSAGE_CREATE')
 async def parse_message(message):
     # Logic to handle the event goes here.
     print(f"I got a {message} from the client!")
@@ -54,7 +54,7 @@ async def test_callback(client, interaction):
     # Handle your interaction
     pass
 
-@client.register_handler('ON_READY')
+@client.decorate_handler('ON_READY')
 async def get_bot_ready(client, message, raw_message):
 
     guild_id = '1234' # REPLACE ME WITH YOUR GUILD ID!
