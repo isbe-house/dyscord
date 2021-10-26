@@ -1,5 +1,8 @@
 import asyncio
 import datetime
+import cachetools
+import functools
+import operator
 from pprint import pprint
 
 import httpx
@@ -20,6 +23,7 @@ class API_V9:
 
     _lock = asyncio.Lock()
     _log = Log()
+    _ttl_cache = cachetools.TTLCache(10_000, ttl=datetime.timedelta(minutes=15), timer=datetime.datetime.now)
 
     @classmethod
     def _auth_header(cls):
@@ -474,6 +478,7 @@ class API_V9:
     # Channel methods
 
     @classmethod
+    @cachetools.cachedmethod(operator.attrgetter('_ttl_cache'), functools.partial(cachetools.keys.hashkey, 'get_channel'))
     async def get_channel(cls, channel_id: 'objects.Snowflake') -> dict:
         '''Get channel by ID.'''
         url = f'{cls.BASE_URL}/channels/{channel_id}'
@@ -515,6 +520,7 @@ class API_V9:
     # Guild methods
 
     @classmethod
+    @cachetools.cachedmethod(operator.attrgetter('_ttl_cache'), functools.partial(cachetools.keys.hashkey, 'get_guild'))
     async def get_guild(cls, guild_id: 'objects.Snowflake') -> dict:
         '''Get guilds.
 
@@ -568,6 +574,7 @@ class API_V9:
         return r.json()
 
     @classmethod
+    @cachetools.cachedmethod(operator.attrgetter('_ttl_cache'), functools.partial(cachetools.keys.hashkey, 'get_user'))
     async def get_user(cls, user_id: 'Snowflake') -> dict:
         '''Get User.
 

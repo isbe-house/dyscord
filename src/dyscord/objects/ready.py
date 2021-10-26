@@ -34,11 +34,6 @@ class Ready(BaseDiscordObject):
         '''Determine if other object came form the same application.'''
         return self.session_id == other.session_id
 
-    def ingest_raw_dict(self, data: dict) -> 'Ready':
-        '''Ingest and cache a given object for future use.'''
-        self.from_dict(data)
-        return self
-
     def from_dict(self, data: dict) -> 'Ready':
         '''Parse a Ready from an API compliant dict.'''
         self.geo_ordered_rtc_regions = copy.deepcopy(data['geo_ordered_rtc_regions'])
@@ -48,7 +43,7 @@ class Ready(BaseDiscordObject):
             new_guild.id = snowflake.Snowflake(partial_guild_dict['id'])
             self.guilds.append(new_guild)
         self.session_id = data['session_id']
-        self.user = ext_user.User().ingest_raw_dict(data['user'])
+        self.user = ext_user.User().from_dict(data['user'])
         self.version = data['v']
 
         return self

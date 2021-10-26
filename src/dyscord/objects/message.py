@@ -111,14 +111,6 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         self._log.info('Got guild from the API.')
         return guild
 
-    def ingest_raw_dict(self, data) -> 'Message':
-        '''Ingest and cache a given object for future use.'''
-        self.from_dict(data)
-
-        # I do not believe we need to cache these at this time.
-        # self.cache()
-        return self
-
     def from_dict(self, data: dict) -> 'Message':
         '''Parse a Message from an API compliant dict.'''
         # Mandatory Fields

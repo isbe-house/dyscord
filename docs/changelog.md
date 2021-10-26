@@ -26,6 +26,10 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
     - Channel (and subclasses).
     - Guild
     - Embed
+    - Message
+    - Ready
+    - User
+    - Member
 
 ### Fixed
 - Exposed the `__version__` string at the top module level.

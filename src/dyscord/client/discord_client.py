@@ -1,7 +1,6 @@
 import asyncio
 import functools
 import inspect
-import nest_asyncio  # type: ignore
 import platform
 import random
 import sys
@@ -12,8 +11,9 @@ from collections import defaultdict
 from pprint import pprint
 from typing import Any, Callable, Optional, List
 
-import websockets
+import nest_asyncio  # type: ignore
 import orjson as json
+import websockets
 
 from . import api, INTENTS, DISCORD_EVENTS
 
@@ -46,7 +46,6 @@ class DiscordClient:
     application_id: Optional[str]
     intent: int
     ready: bool
-    cache: 'utilities.Cache'
 
     def __init__(self, token: str, application_id: Optional[str] = None):
         '''Instantiate a DiscordClient.
@@ -60,7 +59,6 @@ class DiscordClient:
         self.__class__.application_id = application_id
         self.__class__.intent = 0
         self.__class__.ready = False
-        self.__class__.cache = utilities.Cache()
 
         # Private attributes
         self._heartbeat_task = None
@@ -516,7 +514,6 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'THREAD_CREATE':
-            pprint(data)
             obj = objects.ChannelImporter().from_dict(data['d'])
 
         elif event_type == 'THREAD_DELETE':
