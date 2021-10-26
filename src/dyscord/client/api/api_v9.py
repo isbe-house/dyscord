@@ -1,7 +1,5 @@
 import asyncio
 import datetime
-import functools
-import operator
 from pprint import pprint
 
 import cachetools
@@ -25,7 +23,7 @@ class API_V9:
 
     _lock = asyncio.Lock()
     _log = Log()
-    _ttl_cache: dict = cachetools.TTLCache(10_000, ttl=datetime.timedelta(minutes = 15), timer=datetime.datetime.now)  # type: ignore
+    _ttl_cache: dict = cachetools.TTLCache(10_000, ttl=datetime.timedelta(minutes=15), timer=datetime.datetime.now)  # type: ignore
 
     @classmethod
     def _auth_header(cls):
