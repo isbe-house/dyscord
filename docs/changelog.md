@@ -10,6 +10,7 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 - Role now has all attributes set to `None` by default.
 - Begin restructure of documentation to make some sense.
 - Registering to a guild allows you to register different commands to different guilds.
+- TTL Cache to API.get_user, API.get_guild and API.get_channel.
 
 ### Changed
 - `InteractionStructure` renamed to `Interaction`.
