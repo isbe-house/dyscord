@@ -558,7 +558,7 @@ class DiscordClient:
             self_function = getattr(self, event_handler_name)
             arg_len = len(inspect.signature(self_function).parameters)
             arguments = (obj, data)
-            await self_function(*arguments[:arg_len - 1])
+            await self_function(*arguments[:arg_len])
 
         # Call user wrapped classes, functions and cotoutines.
         # TODO: Should we invoke a create_task when able to avoid blocking calls?
@@ -580,9 +580,9 @@ class DiscordClient:
                     if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
                         warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
                     if asyncio.iscoroutinefunction(user_function):
-                        await user_function(user_class, *arguments[:arg_len - 1])
+                        await user_function(user_class, *arguments[:arg_len])
                     else:
-                        user_function(user_class, *arguments[:arg_len - 1])
+                        user_function(user_class, *arguments[:arg_len])
 
         # Handle the special case of the ANY event.
         for user_function in self.__class__._wrapper_registrations['ANY']:
@@ -602,9 +602,9 @@ class DiscordClient:
                     warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
 
                 if asyncio.iscoroutinefunction(user_function):
-                    await user_function(user_class, *arguments[:arg_len - 1])
+                    await user_function(user_class, *arguments[:arg_len])
                 else:
-                    user_function(user_class, *arguments[:arg_len - 1])
+                    user_function(user_class, *arguments[:arg_len])
 
     # Register all out events
     on_any = on_any
