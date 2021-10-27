@@ -4,7 +4,6 @@ from typing import List
 
 from . import snowflake, role
 from .base_object import BaseDiscordObject
-from .. import utilities
 
 
 class User(BaseDiscordObject):
