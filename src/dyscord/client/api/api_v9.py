@@ -2,7 +2,10 @@ import asyncio
 import datetime
 from pprint import pprint
 
+import cachetools
+import cachetools.keys
 import httpx
+
 from ...objects.snowflake import Snowflake
 
 from ...utilities import Log
@@ -20,6 +23,7 @@ class API_V9:
 
     _lock = asyncio.Lock()
     _log = Log()
+    _ttl_cache: dict = cachetools.TTLCache(10_000, ttl=datetime.timedelta(minutes=15), timer=datetime.datetime.now)  # type: ignore
 
     @classmethod
     def _auth_header(cls):
@@ -478,6 +482,11 @@ class API_V9:
         '''Get channel by ID.'''
         url = f'{cls.BASE_URL}/channels/{channel_id}'
 
+        try:
+            return cls._ttl_cache[cachetools.keys.hashkey('get_channel', channel_id)]
+        except KeyError:
+            pass
+
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
@@ -486,7 +495,7 @@ class API_V9:
                 )
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
-
+        cls._ttl_cache[cachetools.keys.hashkey('get_channel', channel_id)] = r.json()
         return r.json()
 
     @classmethod
@@ -522,6 +531,11 @@ class API_V9:
         '''
         url = f'{cls.BASE_URL}/guilds/{guild_id}'
 
+        try:
+            return cls._ttl_cache[cachetools.keys.hashkey('get_guild', guild_id)]
+        except KeyError:
+            pass
+
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
@@ -534,10 +548,11 @@ class API_V9:
                     cls._log.exception(r.content)
                     raise
             await cls._handle_rate_limit(r)
+        cls._ttl_cache[cachetools.keys.hashkey('get_guild', guild_id)] = r.json()
         return r.json()
 
     @classmethod
-    async def get_guild_roles(cls, guild_id: 'Snowflake', ) -> dict:
+    async def get_guild_roles(cls, guild_id: 'Snowflake') -> dict:
         '''Get Guild Roles.
 
         GET/guilds/{guild.id}/roles
@@ -545,9 +560,16 @@ class API_V9:
         Returns a list of role objects for the guild.
         '''
         url = f'{cls.BASE_URL}/guilds/{guild_id}/roles'
+
+        try:
+            return cls._ttl_cache[cachetools.keys.hashkey('get_guild_roles', guild_id)]
+        except KeyError:
+            pass
+
         async with httpx.AsyncClient() as client:
             method = client.get(url, headers=cls._auth_header())
             r = await cls._invoke_method(method)
+        cls._ttl_cache[cachetools.keys.hashkey('get_guild_roles', guild_id)] = r.json()
         return r.json()
 
     # User methods
@@ -576,9 +598,16 @@ class API_V9:
         Returns a user object for a given user ID.
         '''
         url = f'{cls.BASE_URL}/users/{user_id}'
+
+        try:
+            return cls._ttl_cache[cachetools.keys.hashkey('get_user', user_id)]
+        except KeyError:
+            pass
+
         async with httpx.AsyncClient() as client:
             method = client.get(url, headers=cls._auth_header())
             r = await cls._invoke_method(method)
+        cls._ttl_cache[cachetools.keys.hashkey('get_user', user_id)] = r.json()
         return r.json()
 
     @classmethod

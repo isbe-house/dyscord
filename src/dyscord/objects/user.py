@@ -93,14 +93,6 @@ class User(BaseDiscordObject):
         '''Generate a valid nickname mention for use in Discord.'''
         return f'<@!{self.id}>'
 
-    def ingest_raw_dict(self, data: dict) -> 'User':
-        '''Parse a User from an API compliant dict.'''
-        self.from_dict(data)
-
-        self.cache()
-
-        return self
-
     def from_dict(self, data: dict) -> 'User':
         '''Parse a User from an API compliant dict.'''
         # Required fields
@@ -205,14 +197,6 @@ class Member(User):
             self.premium_type = user.premium_type
         if user.public_flags is not None:
             self.public_flags = user.public_flags
-        return self
-
-    def ingest_raw_dict(self, data: dict) -> 'User':
-        '''Ingest and cache a given object for future use.'''
-        self.from_dict(data)
-
-        self.cache()
-
         return self
 
     def cache(self):

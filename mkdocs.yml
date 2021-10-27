@@ -3,7 +3,8 @@ site_name: Dyscord
 nav:
   - Index: index.md
   - Examples:
-    - Examples: examples.md
+    - Examples: examples/examples.md
+    - Events: examples/events.md
     - Interactions: examples/interactions.md
   - Changelog: changelog.md
   - Reference:
