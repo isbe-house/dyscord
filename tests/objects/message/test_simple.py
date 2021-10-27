@@ -40,61 +40,45 @@ def test_complex_samples():
             key_finder = set(sample.keys())
             continue
         key_finder = key_finder.intersection(set(sample.keys()))
-    print('All messages have the following:')
-    print(key_finder)
 
     for sample in samples.ALL:
+        from pprint import pprint
+        pprint(sample)
         message = Message()
         message.from_dict(sample)
 
-        assert hasattr(message, 'attachments')
-        assert type(message.attachments) is list
-
-        assert hasattr(message, 'author')
-        assert type(message.author) is User
-
-        assert hasattr(message, 'channel_id')
         assert type(message.channel_id) is Snowflake
-
-        assert hasattr(message, 'components')
-        assert type(message.components) is list
-
-        assert hasattr(message, 'content')
-        assert type(message.content) is str
-
-        assert hasattr(message, 'edited_timestamp')
-        assert (type(message.edited_timestamp) is datetime.datetime) or (message.edited_timestamp is None)
-
-        assert hasattr(message, 'embeds')
-        assert type(message.embeds) is list
-
-        assert hasattr(message, 'flags')
-        assert type(message.flags) is int
-
-        assert hasattr(message, 'id')
         assert type(message.id) is Snowflake
 
-        assert hasattr(message, 'mention_everyone')
-        assert type(message.mention_everyone) is bool
+        assert isinstance(message.attachments, (list, type(None)))
 
-        assert hasattr(message, 'mention_roles')
-        assert type(message.mention_roles) is list
+        assert isinstance(message.author, (User, type(None)))
 
-        assert hasattr(message, 'mentions')
-        assert type(message.mentions) is list
+        assert isinstance(message.components, (list, type(None)))
 
-        assert hasattr(message, 'pinned')
-        assert type(message.pinned) is bool
+        assert isinstance(message.content, (str, type(None)))
 
-        assert hasattr(message, 'timestamp')
-        assert type(message.timestamp) is datetime.datetime
+        assert isinstance(message.edited_timestamp, (datetime.datetime, type(None)))
 
-        assert hasattr(message, 'tts')
-        assert type(message.tts) is bool
+        assert isinstance(message.embeds, (list, type(None)))
 
-        assert hasattr(message, 'type')
-        assert type(message.type) is message.MESSAGE_TYPE
-        assert message.type in message.MESSAGE_TYPE
+        assert isinstance(message.flags, (int, type(None)))
+
+        assert isinstance(message.mention_everyone, (bool, type(None)))
+
+        assert isinstance(message.mention_roles, (list, type(None)))
+
+        assert isinstance(message.mentions, (list, type(None)))
+
+        assert isinstance(message.pinned, (bool, type(None)))
+
+        assert isinstance(message.timestamp, (datetime.datetime, type(None)))
+
+        assert isinstance(message.tts, (bool, type(None)))
+
+        assert isinstance(message.type, (message.MESSAGE_TYPE, type(None)))
+        if not isinstance(message.type, type(None)):
+            assert message.type in message.MESSAGE_TYPE
 
 
 def test_complex_properties():

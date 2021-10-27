@@ -250,6 +250,13 @@ message_reply = {'type': 19,
                  'attachments': [],
                  'guild_id': '804392362054910047'}
 
+short_message_update = {
+    'id': '902977002338938940',
+    'flags': 32,
+    'channel_id': '804392362629267458',
+    'guild_id': '804392362054910047'
+}
+
 ALL = [
     short_message,
     self_and_role_mention,
@@ -258,4 +265,5 @@ ALL = [
     message_from_a_thread,
     update_message,
     message_reply,
+    short_message_update,
 ]

@@ -42,7 +42,6 @@ async def complex(interaction: Interaction):
     followup = interaction.generate_followup('REALLY done!')
     await followup.edit_original_response()
 
-
     q = Question(interaction, 'What is your favorite bird?', ['Robin', 'Eagle', 'Crow'])
     a = await q.ask()
     print(a)

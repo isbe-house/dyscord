@@ -14,6 +14,7 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 
 ### Fixed
 - Removed `ephemeral` from followup generate messages, discord ignores this flag anyway!
+- `Message` objects assumed they would get a lot of fields, which is not true in `MESSAGE_UPDATE` events.
 
 ## [v0.4.0] 2021-10-27
 ### Added

@@ -111,50 +111,70 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
         self._log.info('Got guild from the API.')
         return guild
 
-    def from_dict(self, data: dict) -> 'Message':
+    def from_dict(self, data: dict) -> 'Message':  # noqa: C901
         '''Parse a Message from an API compliant dict.'''
         # Mandatory Fields
-        self.attachments = list()
+        self.id = snowflake.Snowflake(data['id'])
+
         if 'attachments' in data:
+            self.attachments = list()
             for attachment in data['attachments']:
                 self.attachments.append(attachment)
-        self.author = ext_user.User().from_dict(data['author'])  # TODO: Update after we can parse in users.
+        if 'author' in data:
+            self.author = ext_user.User().from_dict(data['author'])  # TODO: Update after we can parse in users.
         self.channel_id = snowflake.Snowflake(data['channel_id'])
-        self.components = list()
-        for component in data['components']:
-            self.components.append(component)
-        self.content = data['content']
-        self.edited_timestamp = datetime.datetime.fromisoformat(data['edited_timestamp']) if data['edited_timestamp'] is not None else None
-        self.embeds = list()
-        for embed in data['embeds']:
-            self.embeds.append(embed)
-        self.flags = data['flags']
-        self.id = snowflake.Snowflake(data['id'])
-        self.mention_everyone = data['mention_everyone']
-        self.mention_roles = list()
-        for role in data['mention_roles']:
-            # TODO: Roles are just ID's here, we need to parse them into actual role objects.
-            # self.mention_roles.append(ext_role.Role().from_dict(role))
-            pass
-        self.mentions = list()
-        for user_dict in data['mentions']:
-            self.mentions.append(ext_user.User().from_dict(user_dict))
-        self.pinned = data['pinned']
-        self.timestamp = datetime.datetime.fromisoformat(data['timestamp'])
-        self.tts = data['tts']
-        self.type = enumerations.MESSAGE_TYPE(data['type'])
+        if 'components' in data:
+            self.components = list()
+            for component in data['components']:
+                self.components.append(component)
+        if 'content' in data:
+            self.content = data['content']
+        if 'edited_timestamp' in data and data['edited_timestamp'] is not None:
+            self.edited_timestamp = datetime.datetime.fromisoformat(data['edited_timestamp'])
+        if 'embeds' in data:
+            self.embeds = list()
+            for embed in data['embeds']:
+                self.embeds.append(embed)
+        if 'flags' in data:
+            self.flags = data['flags']
+        if 'mention_everyone' in data:
+            self.mention_everyone = data['mention_everyone']
+        if 'menion_roles' in data:
+            self.mention_roles = list()
+            for role in data['mention_roles']:
+                # TODO: Roles are just ID's here, we need to parse them into actual role objects.
+                # self.mention_roles.append(ext_role.Role().from_dict(role))
+                pass
+        if 'mentions' in data:
+            self.mentions = list()
+            for user_dict in data['mentions']:
+                self.mentions.append(ext_user.User().from_dict(user_dict))
+        if 'pinned' in data:
+            self.pinned = data['pinned']
+        if 'timestamp' in data:
+            self.timestamp = datetime.datetime.fromisoformat(data['timestamp'])
+        if 'tts' in data:
+            self.tts = data['tts']
+        if 'type' in data:
+            self.type = enumerations.MESSAGE_TYPE(data['type'])
 
         # Optional fields
-        self.guild_id = snowflake.Snowflake(data['guild_id']) if (data.get('guild_id', None) is not None) else None
+        if 'guild_id' in data:
+            self.guild_id = snowflake.Snowflake(data['guild_id'])
         if 'member' in data:
             self.member = ext_user.Member().from_dict(data['member'])  # TODO: Update after we can parse in users.
-            self.member.update_from_user(self.author)
-        self.nonce = data['nonce'] if 'nonce' in data else None
-        self.webhook_id = snowflake.Snowflake(data['webhook_id']) if (data.get('webhook_id', None) is not None) else None
-        self.message_reference = MessageReference().from_dict(data['message_reference']) if ('message_reference' in data) and (data['message_reference'] is not None) else None
-        self.referenced_message = Message().from_dict(data['referenced_message']) if ('referenced_message' in data) and (data['referenced_message'] is not None) else None
-        self.mention_channels = list()
+            if self.author is not None:
+                self.member.update_from_user(self.author)
+        if 'nonce' in data:
+            self.nonce = data['nonce']
+        if 'webhook_id' in data:
+            self.webhook_id = snowflake.Snowflake(data['webhook_id'])
+        if 'message_reference' in data:
+            self.message_reference = MessageReference().from_dict(data['message_reference'])
+        if 'referenced_message' in data and data['referenced_message'] is not None:
+            self.referenced_message = Message().from_dict(data['referenced_message'])
         if 'mention_channels' in data:
+            self.mention_channels = list()
             for user_dict in data['mention_channels']:
                 self.mention_channels.append(ext_channel.ChannelImporter().from_dict(user_dict))
 
