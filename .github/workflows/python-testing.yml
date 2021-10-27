@@ -36,13 +36,6 @@ jobs:
         run: echo "The selected version is ${{ steps.version.outputs.version }}"
       - name: "Test: pytest"
         run: python3 -m pytest --cov=src --durations=5 -vv --color=yes tests
-      - name: "Produce coverage XML"
-        run: coverage xml
-      - name: "Upload coverage to Codecov"
-        uses: codecov/codecov-action@v2
-        with:
-          fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
       - name: "Test: mypy"
         run: mypy src/dyscord
       - name: "Test: flake8"
@@ -62,3 +55,22 @@ jobs:
       - run: python3 -m pip install -r docs/requirements_docs.txt
       - run: python3 -m pip install -r requirements.txt
       - run: mkdocs build
+
+  Code-Coverage:
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - run: python3 -m pip install --upgrade  pip
+      - run: python3 -m pip install -r tests/requirements_test.txt
+      - run: python3 -m pip install -r requirements.txt
+      - name: "Test: pytest"
+        run: python3 -m pytest --cov=src --durations=5 -vv --color=yes tests
+      - name: "Produce coverage XML"
+        run: coverage xml
+      - name: "Upload coverage to Codecov"
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
