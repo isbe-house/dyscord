@@ -6,6 +6,9 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ### Added
 - Added the `dyscord.command` alias to point to commonly used command interfaces.
 
+### Changed
+- `MESSAGE_UPDATE` events now return a `MessageUpdate` object. This is a duplicate of `Message`, except most fields are annotated as `Optional`
+
 ### Deprecated
 - `Command.generate(options)` Argument is optional, and should be removed by `0.6.0`.
 

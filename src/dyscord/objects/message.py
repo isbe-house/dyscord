@@ -395,3 +395,35 @@ class MessageReference(BaseDiscordObject):
             self.fail_if_not_exists = data['fail_if_not_exists']
 
         return self
+
+
+class MessageUpdate(Message):
+    '''Duplicate of the Message class, but most fields are now annotated as optional.'''
+    guild_id: 'Optional[snowflake.Snowflake]'  # type: ignore
+    author: 'Optional[ext_user.User]'  # type: ignore
+    member: 'Optional[ext_user.Member]'  # type: ignore
+    content: Optional[str]  # type: ignore
+    timestamp: Optional[datetime.datetime]  # type: ignore
+    edited_timestamp: Optional[datetime.datetime]  # type: ignore
+    tts: Optional[bool]  # type: ignore
+    mention_everyone: Optional[bool]  # type: ignore
+    mentions: 'Optional[List[ext_user.User]]'  # type: ignore
+    mention_roles: 'Optional[List[ext_role.Role]]'  # type: ignore
+    mention_channels: 'Optional[List[ext_channel.Channel]]'  # type: ignore
+    attachments: Optional[List]  # type: ignore
+    embeds: Optional[List[ext_embed.Embed]]  # type: ignore
+    # reactions: 'List[reaction.Reaction]'   # type: ignore
+    nonce: Optional[Union[int, str]]  # type: ignore
+    pinned: Optional[bool]  # type: ignore
+    webhook_id: Optional['snowflake.Snowflake']  # type: ignore
+    type: 'Optional[enumerations.MESSAGE_TYPE]'  # type: ignore
+    # activity  # Activity TBD  # type: ignore
+    # application: application.Application  # Application TBD  # type: ignore
+    application_id: 'Optional[snowflake.Snowflake]'  # type: ignore
+    message_reference: 'Optional[MessageReference]'  # type: ignore
+    flags: Optional[int]  # type: ignore
+    referenced_message: 'Optional[Message]'  # type: ignore
+    # interaction  # type: ignore
+    thread: 'Optional[ext_channel.Channel]'  # type: ignore
+    components: 'Optional[List[ext_components.Component]]'  # type: ignore
+    # sticker_items: Optional[List[Sticker]] = []  # type: ignore

@@ -375,12 +375,12 @@ async def on_message_reaction_remove_emoji(self, object: BaseDiscordObject, raw_
     pass
 
 
-async def on_message_update(self, object: BaseDiscordObject, raw_object: dict):
+async def on_message_update(self, message: objects.MessageUpdate, raw_object: dict):
     '''Empty placeholder for given event.
 
     Arguments:
         self (DiscordClient): Client
-        object (BaseDiscordObject): Python object representing the event.
+        message (MessageUpdate): Updated message. Note that many fields may be missing from this entity!
         raw_object (dict): Raw dict from discord API.
 
     '''
