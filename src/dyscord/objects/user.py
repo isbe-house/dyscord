@@ -59,19 +59,11 @@ class User(BaseDiscordObject):
     public_flags: int = None  # type: ignore
 
     def __str__(self):
-        '''Return string representation.'''
-        fields = []
-
-        if self.id is not None:
-            fields.append(f'id={self.id}')
-
-        if (self.username is not None) and (self.discriminator is not None):
-            fields.append(f'username=\'{self.username}#{self.discriminator}\'')
-
-        return f'User({", ".join(fields)})'
+        '''Return a discord compatible mention string.'''
+        return self.mention_nickname
 
     def __repr__(self):
-        '''Return string representation.'''
+        '''Return a discord compatible mention string.'''
         return self.__str__()
 
     def __eq__(self, other):
@@ -105,7 +97,20 @@ class User(BaseDiscordObject):
             self.bot = data['bot']
         if 'system' in data:
             self.system = data['system']
-
+        if 'verified' in data:
+            self.verified = data['verified']
+        if 'email' in data:
+            self.email = data['email']
+        if 'banner' in data:
+            self.banner = data['banner']
+        if 'accent_color' in data:
+            self.accent_color = data['accent_color']
+        if 'flags' in data:
+            self.flags = data['flags']
+        if 'premium_type' in data:
+            self.premium_type = data['premium_type']
+        if 'public_flags' in data:
+            self.public_flags = data['public_flags']
         return self
 
 

@@ -180,10 +180,6 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
 
         return self
 
-    def cache(self):
-        '''Save object to the cache for faster recall in the future.'''
-        raise NotImplementedError(f'{__class__.__name__} does not yet implement this function.')
-
     def to_sendable_dict(self) -> dict:
         '''Sending a message only allows a subset of attributes. Ignore anything else about this message when producing that dict.'''
         new_dict: Dict[str, object] = dict()
@@ -272,18 +268,21 @@ class Message(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedA
                 SHORT_TIME (enum): 16:20
                 LONG_TIME (enum): 16:20:30
                 SHORT_DATE (enum): 20/04/2021
+                SHORT_DATE_TIME (enum): 20 April 2021 16:20
                 LONG_DATE (enum): 20 April 2021
-                DEFAULT (enum): 20 April 2021 16:20
                 LONG_DATE_TIME (enum): Tuesday, 20 April 2021 16:20
                 RELATIVE_TIME (enum): 2 months ago
+                DEFAULT (enum): 20 April 2021 16:20
             '''
             SHORT_TIME = 't'
             LONG_TIME = 'T'
             SHORT_DATE = 'd'
             LONG_DATE = 'D'
-            DEFAULT = 'f'
+            SHORT_DATE_TIME = 'f'
             LONG_DATE_TIME = 'F'
             RELATIVE_TIME = 'R'
+
+            DEFAULT = SHORT_DATE_TIME
 
         @classmethod
         def timestamp(cls, timestamp: datetime.datetime = None, flag: Union[TIMESTAMP_FLAGS, str] = TIMESTAMP_FLAGS.DEFAULT) -> str:

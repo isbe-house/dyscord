@@ -81,5 +81,19 @@ def test_complex_samples():
             assert message.type in message.MESSAGE_TYPE
 
 
-def test_complex_properties():
-    pass
+def test_init():
+
+    obj = Message('Hello world!')
+
+    assert obj.content == 'Hello world!'
+    assert obj.channel is None
+    assert obj.guild is None
+
+    assert isinstance(obj.to_sendable_dict(), dict)
+
+
+def test_member_author_attrs():
+
+    obj = Message().from_dict(samples.message_from_a_thread)
+
+    assert obj.member.id == Snowflake('185846097284038656')
