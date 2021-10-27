@@ -13,7 +13,6 @@ up: ## Start all containers
         up -d --build dyscord
 
 run: ## Run container connected
-	make down
 	docker-compose \
 		-f  docker-compose.yaml \
 		run --rm dyscord

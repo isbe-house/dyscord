@@ -109,7 +109,7 @@ class CommandHandler:
             await cls.handle_application_command(client, interaction)
 
     @classmethod
-    async def handle_application_command(cls, client, interaction: 'interactions.Interaction') -> None:
+    async def handle_application_command(cls, client, interaction: 'interactions.Interaction') -> None:  # noqa: C901
         '''Handle interactions against Messages and Users.'''
         assert interaction.data is not None
         key: Tuple[Any, Optional['snowflake.Snowflake']]
@@ -127,7 +127,10 @@ class CommandHandler:
             cls._log.info('Attempt lookup inside global.')
             if results['name'] in cls.global_lookup:
                 cls.registered_commands[interaction.data.id] = cls.global_lookup[results['name']]
-                await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                try:
+                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                except Exception as e:
+                    raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
         except httpx.HTTPStatusError:
             pass
@@ -143,14 +146,20 @@ class CommandHandler:
             cls._log.info('Attempt lookup inside guild.')
             if (key in cls.guild_lookup):
                 cls.registered_commands[interaction.data.id] = cls.guild_lookup[key]
-                await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                try:
+                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                except Exception as e:
+                    raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
 
             key = (results['name'], None)
             cls._log.info('Attempt lookup inside ALL guilds.')
             if (key in cls.guild_lookup):
                 cls.registered_commands[interaction.data.id] = cls.guild_lookup[key]
-                await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                try:
+                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                except Exception as e:
+                    raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
         except httpx.HTTPStatusError:
             pass

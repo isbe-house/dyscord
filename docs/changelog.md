@@ -17,6 +17,7 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 
 ### Removed
 - Unused `Cache()` function from `User` and `Member`.
+- Nonfunctionl `edit_origional_response()` and `delete_initial_response()` from `InteractionResponse`, they are not in the discord API.
 
 ### Fixed
 - Removed `ephemeral` from followup generate messages, discord ignores this flag anyway!

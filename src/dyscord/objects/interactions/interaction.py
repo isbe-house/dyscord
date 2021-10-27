@@ -108,6 +108,7 @@ class Interaction(BaseDiscordObject):
         new_response.interaction_id = self.id
         new_response.interaction_token = self.token
         new_response.type = type
+        # new_response.generate(content, tts)  # TODO: Support this here too!
         if ephemeral:
             new_response.data.flags |= enumerations.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         return new_response
@@ -297,15 +298,6 @@ class InteractionResponse(BaseDiscordObject):
     async def send(self) -> None:
         '''Send response.'''
         await api.API.create_interaction_response(self.interaction_id, self.interaction_token, self.to_dict())
-
-    async def edit_original_response(self):
-        '''Edit the initial response to the original interaction.'''
-        data = await self._generate_webhook_data()
-        await api.API.edit_original_interaction_response(self.interaction_token, data)
-
-    async def delete_initial_response(self):
-        '''Delete the initial response to the original interaction.'''
-        await api.API.delete_original_interaction_response(self.interaction_token)
 
     def generate(self,
                  content: Optional[str] = None,
