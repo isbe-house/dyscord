@@ -50,7 +50,7 @@ class InteractionResponseHelper(ABC):
             base = target.generate_response(type=target.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE, ephemeral=True)
             self._initial_was_response = True
         else:
-            base = target.generate_followup(ephemeral=True)
+            base = target.generate_followup()
             self._initial_was_response = False
         return base
 
@@ -89,11 +89,11 @@ class InteractionResponseHelper(ABC):
             type = ext_interaction.enumerations.INTERACTION_RESPONSE_TYPES.UPDATE_MESSAGE
         return self.last_interaction.generate_response(type, ephemeral)
 
-    def generate_followup(self, ephemeral: bool = True):
+    def generate_followup(self):
         '''Generate a followup to the interaction.'''
         if self.cleanup:
             raise RuntimeError('You cannot respond to a message you asked us to cleanup.')
-        return self.last_interaction.generate_followup(ephemeral)
+        return self.last_interaction.generate_followup()
 
 
 class Question(InteractionResponseHelper):

@@ -1,6 +1,6 @@
 from .emoji import Emoji
 from .guild import Guild
-from .message import Message
+from .message import Message, MessageUpdate
 from .permissions import Permissions
 from .ready import Ready
 from .snowflake import Snowflake
@@ -25,6 +25,7 @@ __all__ = [
     'interactions',
     'Member',
     'Message',
+    'MessageUpdate',
     'NewsChannel',
     'Permissions',
     'Ready',

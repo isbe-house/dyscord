@@ -499,7 +499,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'MESSAGE_UPDATE':
-            obj = objects.Message().from_dict(data['d'])
+            obj = objects.MessageUpdate().from_dict(data['d'])
 
         elif event_type == 'PRESENCE_UPDATE':
             warnings.warn(f'Encountered unhandled event {event_type}')

@@ -64,7 +64,15 @@ class Command(BaseDiscordObject):
                  options: Optional[List['CommandOptionsBase']] = None,
                  default_permission: bool = True,
                  ):
-        '''Helper function to generate a new command bound for registration.'''
+        '''Helper function to generate a new command bound for registration.
+
+        Arguments:
+            name (str): Name of the command, will be referenced when registering the command with discord as well as locally.
+            description (str): Human readable description. For USER and MESSAGE types, this *must* be a zero length string.
+            type (COMMAND_TYPE): Either CHAT_INPUT for a slash command, or USER/MESSAGE for direct object interaction.
+            options ([CommandOptionsBase]): DEPRECATED[Removed by 0.6.0] List of valid Command Options. Will be copied.
+            default_permission (bool): Whether the command is enabled by default when the app is added to a guild.
+        '''
         self.name = name
         self.description = description
         self.default_permission = default_permission

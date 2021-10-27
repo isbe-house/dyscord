@@ -2,6 +2,26 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.4.1] WIP
+### Added
+- Added the `dyscord.command` alias to point to commonly used command interfaces.
+- `Message.formatter.TIMESTAMP_FLAGS` was missing the `SHORT_DATE_TIME` option.
+
+### Changed
+- `MESSAGE_UPDATE` events now return a `MessageUpdate` object. This is a duplicate of `Message`, except most fields are annotated as `Optional`.
+- `User` and `Member` objects now support mentions straight from the `__str__()` method. This allows you to do `f'Hello {user_variable}` and get a mention!\
+- Unit testing coverage now > 70% for the project. On our way to 100%!
+
+### Deprecated
+- `Command.generate(options)` Argument is optional, and should be removed by `0.6.0`.
+
+### Removed
+- Unused `Cache()` function from `User` and `Member`.
+
+### Fixed
+- Removed `ephemeral` from followup generate messages, discord ignores this flag anyway!
+- `Message` objects assumed they would get a lot of fields, which is not true in `MESSAGE_UPDATE` events.
+
 ## [v0.4.0] 2021-10-27
 ### Added
 - New set_all_intents() function in DiscordClient. Sets all intents to True.
