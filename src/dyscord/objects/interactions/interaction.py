@@ -94,7 +94,12 @@ class Interaction(BaseDiscordObject):
                           type: enumerations.INTERACTION_RESPONSE_TYPES = enumerations.INTERACTION_RESPONSE_TYPES.CHANNEL_MESSAGE_WITH_SOURCE,
                           ephemeral: bool = False,
                           ) -> 'InteractionResponse':
-        '''Produce a InteractionResponse object to follow up against the Interaction.'''
+        '''Produce a InteractionResponse object to follow up against the Interaction.
+
+        Arguments:
+            type (INTERACTION_RESPONSE_TYPES): Type of response to give.
+            ephemeral (bool): DEPRECATED[Removed by 0.6.0] should user see the response.
+        '''
         if self._response_generated:
             raise RuntimeError('You cannot reuse a token from a response. Call generate_followup()')
         else:

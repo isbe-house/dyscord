@@ -6,6 +6,9 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ### Added
 - Added the `dyscord.command` alias to point to commonly used command interfaces.
 
+### Changed
+- Deprecated `Interaction.generate_response()'s ephemeral argument`. Should be removed by `0.6.0`.
+
 ## [v0.4.0] 2021-10-27
 ### Added
 - New set_all_intents() function in DiscordClient. Sets all intents to True.

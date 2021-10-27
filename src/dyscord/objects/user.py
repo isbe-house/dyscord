@@ -109,10 +109,6 @@ class User(BaseDiscordObject):
 
         return self
 
-    def cache(self):
-        '''Deprecated caching method.'''
-        utilities.Cache().add(self)
-
 
 class Member(User):
     '''User within a guild.'''
@@ -198,7 +194,3 @@ class Member(User):
         if user.public_flags is not None:
             self.public_flags = user.public_flags
         return self
-
-    def cache(self):
-        '''Deprecated caching function.'''
-        utilities.Cache().add(self)
