@@ -56,7 +56,9 @@ jobs:
       - run: python3 -m pip install -r requirements.txt
       - run: mkdocs build
 
-  Code-Coverage:
+  Coverage:
+    runs-on: self-hosted
+    name: "Code Coverage"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
