@@ -98,7 +98,7 @@ class Interaction(BaseDiscordObject):
 
         Arguments:
             type (INTERACTION_RESPONSE_TYPES): Type of response to give.
-            ephemeral (bool): DEPRECATED[Removed by 0.6.0] should user see the response.
+            ephemeral (bool): Only user should see the response.
         '''
         if self._response_generated:
             raise RuntimeError('You cannot reuse a token from a response. Call generate_followup()')
@@ -113,7 +113,8 @@ class Interaction(BaseDiscordObject):
         return new_response
 
     def generate_followup(self,
-                          ephemeral: bool = False,
+                          content: Optional[str] = None,
+                          tts: Optional[bool] = None,
                           ) -> 'InteractionFollowup':
         '''Produce a InteractionFollowup object to follow up against the Interaction.'''
         if self._response_generated is False:
@@ -121,9 +122,7 @@ class Interaction(BaseDiscordObject):
         new_followup = InteractionFollowup()
         new_followup.interaction_id = self.id
         new_followup.interaction_token = self.token
-        if ephemeral:
-            new_followup.data.flags |= enumerations.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
-
+        new_followup.generate(content, tts)
         return new_followup
 
 
@@ -311,7 +310,7 @@ class InteractionResponse(BaseDiscordObject):
     def generate(self,
                  content: Optional[str] = None,
                  tts: Optional[bool] = None,
-                 ephemeral: bool = False,
+                 ephemeral: Optional[bool] = None,
                  ):
         '''Passthrough to data generate function.'''
         return self.data.generate(tts, content, ephemeral)
@@ -408,10 +407,17 @@ class InteractionFollowup(BaseDiscordObject):
     def generate(self,
                  content: Optional[str] = None,
                  tts: Optional[bool] = None,
-                 ephemeral: bool = False,
                  ):
-        '''Passthrough to data generate function.'''
-        return self.data.generate(tts, content, ephemeral)
+        '''Customize common attributes of a callback.
+
+        Arguments:
+            tts (bool): Send message as text to speech.
+            content (str): Text contents of the message to send.
+
+        Note:
+            You may be tempted to grab the resulting `InteractionCallback` and adjust the `ephemeral` flag. Followup messages do not support this!
+        '''
+        return self.data.generate(tts, content, None)
 
     def add_components(self) -> 'ext_components.ActionRow':
         '''Add components objects to the data attribute.'''
@@ -443,7 +449,10 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_
     def to_dict(self) -> dict:
         '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
-        new_dict['flags'] = self.flags
+        if type(self.flags) is enumerations.INTERACTION_CALLBACK_FLAGS:
+            new_dict['flags'] = self.flags.value
+        else:
+            new_dict['flags'] = self.flags
         if hasattr(self, 'tts'):
             new_dict['tts'] = self.tts
         if hasattr(self, 'content'):
@@ -465,20 +474,21 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_
     def generate(self,
                  tts: Optional[bool] = None,
                  content: Optional[str] = None,
-                 ephemeral: bool = False,
+                 ephemeral: Optional[bool] = None,
                  ):
         '''Customize common attributes of a callback.
 
         Arguments:
             tts (bool): Send message as text to speech.
             content (str): Text contents of the message to send.
-            ephemeral (bool): Only show message to the target user, default is `False`.
+            ephemeral (bool): Only show message to the target user. Not meaningful if message is a followup.
         '''
         if tts is not None:
             self.tts = tts
         if content is not None:
             self.content = content
-        self.flags = 0
-        if ephemeral:
+        if ephemeral is True:
             self.flags |= self.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
+        elif ephemeral is False:
+            self.flags &= ~self.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         self.components = []

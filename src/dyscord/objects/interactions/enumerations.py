@@ -68,7 +68,16 @@ class INTERACTION_TYPES(enum.IntEnum):
 
 
 class INTERACTION_RESPONSE_TYPES(enum.IntEnum):
-    '''Types of interaction responses.'''
+    '''Types of interaction responses.
+
+    Attributes:
+        PONG: ACK a Ping
+        CHANNEL_MESSAGE_WITH_SOURCE: Respond to an interaction with a message.
+        DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE: ACK an interaction and edit a response later, the user sees a loading state.
+        DEFERRED_UPDATE_MESSAGE: Only for components (Not slash commands), ACK an interaction and edit the original message later; the user does not see a loading state.
+        UPDATE_MESSAGE: Only for components (Not slash commands), edit the message the component was attached to
+
+    '''
     PONG = 1  # ACK a Ping
     CHANNEL_MESSAGE_WITH_SOURCE = 4  # respond to an interaction with a message
     DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5  # ACK an interaction and edit a response later, the user sees a loading state

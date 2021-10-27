@@ -6,8 +6,14 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ### Added
 - Added the `dyscord.command` alias to point to commonly used command interfaces.
 
-### Changed
-- Deprecated `Interaction.generate_response()'s ephemeral argument`. Should be removed by `0.6.0`.
+### Deprecated
+- `Command.generate(options)` Argument is optional, and should be removed by `0.6.0`.
+
+### Removed
+- Unused `Cache()` function from `User` and `Member`.
+
+### Fixed
+- Removed `ephemeral` from followup generate messages, discord ignores this flag anyway!
 
 ## [v0.4.0] 2021-10-27
 ### Added

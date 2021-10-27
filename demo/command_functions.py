@@ -1,3 +1,5 @@
+import asyncio
+
 from src.dyscord.helper.interactions import Question, Confirmation
 from src.dyscord.objects.interactions.interaction import Interaction
 from src.dyscord.utilities.log import Log
@@ -25,5 +27,22 @@ async def test(interaction: Interaction):
     print(a)
 
 
-async def complex(interaction: Interaction, client):
-    raise RuntimeError
+async def complex(interaction: Interaction):
+    response = interaction.generate_response(interaction.INTERACTION_RESPONSE_TYPES.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, ephemeral=True)
+    await response.send()
+
+    await asyncio.sleep(1)
+
+    followup = interaction.generate_followup()
+    followup.generate('Done!')
+    await followup.send()
+
+    await asyncio.sleep(1)
+
+    followup = interaction.generate_followup('REALLY done!')
+    await followup.edit_original_response()
+
+
+    q = Question(interaction, 'What is your favorite bird?', ['Robin', 'Eagle', 'Crow'])
+    a = await q.ask()
+    print(a)
