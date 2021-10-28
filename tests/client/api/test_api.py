@@ -94,8 +94,18 @@ async def test_bulk_overwrite_global_application_commands(mock_httpx, fresh_api)
     ret = await fresh_api.bulk_overwrite_global_application_commands(fake_id)
     assert ret == sentinel.JSON_RETURN
 
-    with pytest.raises(TypeError):
+    with pytest.raises(NotImplementedError):
         await fresh_api.bulk_overwrite_global_application_commands(None)
+
+
+@pytest.mark.asyncio
+async def test_bulk_overwrite_guild_application_command(mock_httpx, fresh_api):  # noqa: F811
+
+    fake_id = Mock(Snowflake)
+    fake_dict = Mock(dict)
+
+    with pytest.raises(NotImplementedError):
+        await fresh_api.bulk_overwrite_guild_application_command(fake_id, fake_id, fake_dict)
 
 
 @pytest.mark.asyncio
@@ -107,7 +117,7 @@ async def test_get_guild_application_commands(mock_httpx, fresh_api):  # noqa: F
     assert ret == sentinel.JSON_RETURN
 
     with pytest.raises(TypeError):
-        await fresh_api.get_guild_application_commands(None)
+        ret = await fresh_api.get_guild_application_commands(None)
 
 
 @pytest.mark.asyncio
@@ -173,26 +183,6 @@ async def test_delete_guild_application_command(mock_httpx, fresh_api):  # noqa:
 
     with pytest.raises(TypeError):
         await fresh_api.delete_guild_application_command(fake_id, None)
-
-
-@pytest.mark.skip(reason='Not implemented yet')
-@pytest.mark.asyncio
-async def test_bulk_overwrite_guild_application_command(mock_httpx, fresh_api):  # noqa: F811
-
-    fake_id = Mock(Snowflake)
-    fake_dict = Mock(dict)
-
-    ret = await fresh_api.bulk_overwrite_guild_application_command(fake_id, fake_id, fake_dict)
-    assert ret == sentinel.JSON_RETURN
-
-    with pytest.raises(TypeError):
-        await fresh_api.bulk_overwrite_guild_application_command(None, fake_id, fake_dict)
-
-    with pytest.raises(TypeError):
-        await fresh_api.bulk_overwrite_guild_application_command(fake_id, None, fake_dict)
-
-    with pytest.raises(TypeError):
-        await fresh_api.bulk_overwrite_guild_application_command(fake_id, fake_id, None)
 
 
 @pytest.mark.asyncio
