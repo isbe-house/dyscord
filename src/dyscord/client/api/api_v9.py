@@ -73,8 +73,6 @@ class API_V9:
             await cls._handle_rate_limit(r)
 
         # Add our own settings to URI
-        print(r)
-        print(r.json())
         data = r.json()
         data['url'] += '?v=9&encoding=json'
 
@@ -397,7 +395,6 @@ class API_V9:
                 r = await client.delete(
                     url,
                 )
-                print(r.content)
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
 
