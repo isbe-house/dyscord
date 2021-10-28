@@ -2,6 +2,10 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.4.2] WIP
+### Fixed
+- Made reconnection more robust.
+
 ## [v0.4.1] 2021-10-27
 ### Added
 - Added the `dyscord.command` alias to point to commonly used command interfaces.

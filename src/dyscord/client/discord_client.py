@@ -194,9 +194,14 @@ class DiscordClient:
                     if exception:
                         try:
                             raise exception
+                        except KeyboardInterrupt:
+                            self._log.critical('KeyboardInterrupt detected, exiting now!')
+                            exit()
                         except Exception:
                             self._log.exception('Caught exception')
-                            raise
+                    self._log.critical('Listener task has died, sleeping for 30 seconds and reconnecting.')
+                    await asyncio.sleep(30)
+                    await self._reconnect()
 
     async def _connect(self):
         '''TODO: Implement connection to discord's servers.'''
@@ -277,7 +282,6 @@ class DiscordClient:
                     await self._handle_op_9(data)
 
                 elif opcode == 10:
-                    # Hello
                     self._log.debug('OPCODE: HELLO')
                     await self._handle_op_10(data)
 
