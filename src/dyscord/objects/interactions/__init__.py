@@ -4,26 +4,27 @@ For more information, see [Discord API](https://discord.com/developers/docs/inte
 '''
 
 from .command import Command, CommandOptions, CommandOptionChoiceStructure
-from .interaction import Interaction, InteractionResponse
+from .interaction import Interaction, InteractionResponse, InteractionData
 from .components import Component, ActionRow, Button, SelectMenu
 from .enumerations import CHANNEL_TYPE, COMMAND_OPTION, COMMAND_TYPE, BUTTON_STYLES, INTERACTION_TYPES, INTERACTION_RESPONSE_TYPES,\
     INTERACTION_CALLBACK_FLAGS
 
 __all__ = [
-    'Command',
-    'CommandOptions',
-    'CommandOptionChoiceStructure',
-    'Interaction',
+    'ActionRow',
+    'BUTTON_STYLES',
+    'Button',
     'CHANNEL_TYPE',
     'COMMAND_OPTION',
     'COMMAND_TYPE',
+    'Command',
+    'CommandOptionChoiceStructure',
+    'CommandOptions',
     'Component',
-    'ActionRow',
-    'Button',
-    'SelectMenu',
-    'BUTTON_STYLES',
-    'InteractionResponse',
-    'INTERACTION_TYPES',
-    'INTERACTION_RESPONSE_TYPES',
     'INTERACTION_CALLBACK_FLAGS',
+    'INTERACTION_RESPONSE_TYPES',
+    'INTERACTION_TYPES',
+    'Interaction',
+    'InteractionData',
+    'InteractionResponse',
+    'SelectMenu',
 ]
