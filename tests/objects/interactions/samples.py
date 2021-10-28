@@ -1,3 +1,6 @@
+import json
+import pathlib
+
 button_press_interaction = {'application_id': '889065662641737791',
                             'channel_id': '804392362629267458',
                             'data': {'component_type': 2,
@@ -292,3 +295,8 @@ all_types = {'application_id': '889065662641737791',
              'OXFNNHdwVnlWb0JSR2lNUENyTmhoSkVTZTlC',
              'type': 2,
              'version': 1}
+
+
+target = pathlib.Path(pathlib.Path(__file__).parent, 'raw_INTERACTION_CREATE_samples.json')
+with open(target) as fp:
+    raw_interaction_create_samples = json.load(fp)

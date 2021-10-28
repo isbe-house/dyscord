@@ -95,7 +95,7 @@ class CommandHandler:
         if custom_id in cls.registered_custom_ids:
             del cls.registered_custom_ids[custom_id]
         elif not not_exists_ok:
-            cls._log.warning(f'Observed improper attempt to remove interaction_id [{custom_id}].')
+            raise KeyError(f'[{custom_id}] not in registered IDs!')
 
     @classmethod
     async def command_handler(cls, client, interaction: 'interactions.Interaction') -> None:  # noqa: C901
@@ -109,7 +109,7 @@ class CommandHandler:
             await cls.handle_application_command(client, interaction)
 
     @classmethod
-    async def handle_application_command(cls, client, interaction: 'interactions.Interaction') -> None:
+    async def handle_application_command(cls, client, interaction: 'interactions.Interaction') -> None:  # noqa: C901
         '''Handle interactions against Messages and Users.'''
         assert interaction.data is not None
         key: Tuple[Any, Optional['snowflake.Snowflake']]
@@ -124,33 +124,45 @@ class CommandHandler:
         # Lookup command in global
         try:
             results = await api.API.get_global_application_command(interaction.data.id)
-            cls._log.info('Attempt lookup inside global.')
+            cls._log.info(f'API responded, attempt lookup inside global with [{results["name"]}].')
             if results['name'] in cls.global_lookup:
                 cls.registered_commands[interaction.data.id] = cls.global_lookup[results['name']]
-                await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                cls._log.info(cls.registered_commands[interaction.data.id])
+                cls._log.info(interaction.data.id)
+                try:
+                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                except Exception as e:
+                    raise e
+                    raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
         except httpx.HTTPStatusError:
             pass
 
         # Lookup command in guild
         if (not hasattr(interaction, 'guild_id')) or (interaction.guild_id is None):
-            return
+            raise LookupError(f'Unable to find interaction [{interaction.data.id}] in Global, and no guild_id is in object.')
         try:
-            assert type(interaction.guild_id) is snowflake.Snowflake
+            assert isinstance(interaction.guild_id, snowflake.Snowflake)
             results = await api.API.get_guild_application_command(interaction.guild_id, interaction.data.id)
 
             key = (results['name'], interaction.guild_id)
             cls._log.info('Attempt lookup inside guild.')
             if (key in cls.guild_lookup):
                 cls.registered_commands[interaction.data.id] = cls.guild_lookup[key]
-                await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                try:
+                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                except Exception as e:
+                    raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
 
             key = (results['name'], None)
             cls._log.info('Attempt lookup inside ALL guilds.')
             if (key in cls.guild_lookup):
                 cls.registered_commands[interaction.data.id] = cls.guild_lookup[key]
-                await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                try:
+                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                except Exception as e:
+                    raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
         except httpx.HTTPStatusError:
             pass

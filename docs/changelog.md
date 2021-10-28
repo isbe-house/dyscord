@@ -2,7 +2,7 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
-## [v0.4.1] WIP
+## [v0.4.1] 2021-10-27
 ### Added
 - Added the `dyscord.command` alias to point to commonly used command interfaces.
 - `Message.formatter.TIMESTAMP_FLAGS` was missing the `SHORT_DATE_TIME` option.
@@ -17,6 +17,7 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 
 ### Removed
 - Unused `Cache()` function from `User` and `Member`.
+- Nonfunctionl `edit_origional_response()` and `delete_initial_response()` from `InteractionResponse`, they are not in the discord API.
 
 ### Fixed
 - Removed `ephemeral` from followup generate messages, discord ignores this flag anyway!

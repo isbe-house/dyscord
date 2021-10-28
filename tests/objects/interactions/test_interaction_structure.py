@@ -1,3 +1,6 @@
+import pytest
+from unittest.mock import AsyncMock
+
 from src.dyscord.objects.snowflake import Snowflake
 from src.dyscord.objects.interactions import Interaction, Command, enumerations
 from . import samples
@@ -5,7 +8,7 @@ from ..channel import samples as channel_samples
 from ..user import samples as user_samples
 from ..role import samples as role_samples
 
-from unittest.mock import AsyncMock, patch
+from ...fixtures import mock_api  # noqa: F401
 
 
 def test_button_interaction():
@@ -15,15 +18,14 @@ def test_button_interaction():
     assert hasattr(obj, 'data')
 
 
-@patch('src.dyscord.client.api.API')
-def test_text_interaction(api_mock):
-    api_mock.get_user = AsyncMock(return_value=samples.trigger_chat['data']['resolved']['users']['185846097284038656'])
+def test_text_interaction(mock_api):  # noqa: F811
+    mock_api.get_user = AsyncMock(return_value=samples.trigger_chat['data']['resolved']['users']['185846097284038656'])
 
     data = samples.trigger_chat
     obj = Interaction().from_dict(data)
     assert obj.application_id == Snowflake(data['application_id'])
     assert hasattr(obj, 'data')
-    api_mock.get_user.assert_called()
+    mock_api.get_user.assert_called()
 
     assert obj.can_respond
     assert not obj.can_followup
@@ -48,14 +50,7 @@ def test_message():
     assert hasattr(obj, 'data')
 
 
-@patch('src.dyscord.client.api.api_v9.API_V9.get_user')
-def test_complex_chat(get_user_func):
-
-    get_user_func.return_value = {'avatar': 'b437e9bd4b0e487a097c4538c6cdce3f',
-                                  'discriminator': '2585',
-                                  'id': '185846097284038656',
-                                  'public_flags': 0,
-                                  'username': 'Soton'}
+def test_complex_chat(mock_api):  # noqa: F811
 
     data = samples.nested_groups
     obj = Interaction().from_dict(data)
@@ -65,8 +60,8 @@ def test_complex_chat(get_user_func):
     assert obj.data is not None
 
     assert type(obj.data.options) is dict
-    print(obj.data.options['edit'].options['user'].options['target'])
-    assert obj.data.options['edit'].options['user'].options['target'].username == 'Soton'
+    assert obj.data.options['edit'].options['user'].options['target'].username == 'Nelly'
+    mock_api.get_user.assert_called()
 
 
 def test_build_sub_commands():
@@ -99,14 +94,52 @@ def test_build_sub_commands_groups():
     new_command.validate()
 
 
-@patch('src.dyscord.client.api.API')
-def test_all_types(api_mock):
-    api_mock.get_channel = AsyncMock(return_value=channel_samples.dev_guild_text)
-    api_mock.get_user = AsyncMock(return_value=user_samples.raw_get_user_response)
-    api_mock.get_guild_roles = AsyncMock(return_value=[role_samples.dev_role])
+def test_all_types(mock_api):  # noqa: F811
+    mock_api.get_channel = AsyncMock(return_value=channel_samples.dev_guild_text)
+    mock_api.get_user = AsyncMock(return_value=user_samples.raw_get_user_response)
+    mock_api.get_guild_roles = AsyncMock(return_value=[role_samples.dev_role])
 
     obj = Interaction().from_dict(samples.all_types)
     assert obj is not None
-    api_mock.get_channel.assert_called()
-    api_mock.get_user.assert_called()
-    api_mock.get_guild_roles.assert_called()
+    mock_api.get_channel.assert_called()
+    mock_api.get_user.assert_called()
+    mock_api.get_guild_roles.assert_called()
+
+
+def test_simple_interaction():
+
+    for sample in samples.raw_interaction_create_samples:
+        obj = Interaction()
+        obj.from_dict(sample['d'])
+
+
+@pytest.mark.asyncio
+async def test_responses(mock_api):  # noqa: F811
+
+    obj = Interaction()
+    obj.from_dict(samples.raw_interaction_create_samples[0]['d'])
+
+    with pytest.raises(RuntimeError):
+        obj.generate_followup()
+
+    response = obj.generate_response()
+
+    with pytest.raises(RuntimeError):
+        obj.generate_response()
+
+    await response.send()
+    mock_api.create_interaction_response.assert_called()
+
+    followup = obj.generate_followup()
+
+    followup.generate('This is a follow up')
+    await followup.send()
+    await followup.edit_original_response()
+    await followup.edit_followup_message()
+    await followup.delete_followup_message()
+    await followup.delete_initial_response()
+    mock_api.create_followup_message.assert_called()
+    mock_api.edit_original_interaction_response.assert_called()
+    mock_api.delete_original_interaction_response.assert_called()
+    mock_api.edit_followup_message.assert_called()
+    mock_api.delete_followup_message.assert_called()
