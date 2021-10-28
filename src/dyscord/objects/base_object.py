@@ -16,6 +16,9 @@ class BaseDiscordObject(ABC):
         Arguments:
             data (dict): Discord compliant dict for the given object.
         '''
+        if type(self) is BaseDiscordObject:
+            raise NotImplementedError('You cannot instance BaseDiscordObject directly. Use a child object.')
+
         if data is not None and isinstance(data, dict):
             self.from_dict(data)
 
@@ -39,7 +42,7 @@ class BaseDiscordObject(ABC):
                 if len(function) != 1:
                     raise IndexError('Auto map has function list in excess of 1.')
                 if not isinstance(value, list):
-                    raise TypeError('Data value was not a list with list auto_mapped type.')
+                    raise TypeError(f'Data from input dict [{attribute_key}:{value}] was not a list with list auto_mapped type [{function}].')
                 setattr(self, attribute_key, list())
                 target_list: list = getattr(self, attribute_key)
                 for sub_value in value:
