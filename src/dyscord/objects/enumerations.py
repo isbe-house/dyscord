@@ -51,3 +51,23 @@ class EMBED_TYPES(enum.Enum):
     gifv = enum.auto()      # animated gif image embed rendered as a video embed
     article = enum.auto()   # article embed
     link = enum.auto()      # link embed
+
+
+class ACTIVITY_TYPE(enum.IntEnum):
+    '''Enumeration of Activity types.'''
+    Game = 0        # Playing {name}
+    Streaming = 1   # Streaming {details}
+    Listening = 2   # Listening to {name}
+    Watching = 3    # Watching {name}
+    Custom = 4      # {emoji} {name}
+    Competing = 5   # Competing in {name}
+
+
+class ACTIVITY_FLAGS(enum.IntFlag):
+    '''Flags for activities.'''
+    INSTANCE = (1 << 0)
+    JOIN = (1 << 1)
+    SPECTATE = (1 << 2)
+    JOIN_REQUEST = (1 << 3)
+    SYNC = (1 << 4)
+    PLAY = (1 << 5)

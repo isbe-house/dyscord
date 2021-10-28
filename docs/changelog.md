@@ -3,6 +3,10 @@
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
 ## [v0.4.2] WIP
+### Added
+- `Activty` and friends.
+- `Presence` and friends.
+
 ### Fixed
 - Made reconnection more robust.
 

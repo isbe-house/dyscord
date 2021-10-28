@@ -1,4 +1,6 @@
+from datetime import datetime
 from abc import ABC
+from typing import Any, Dict, Optional
 from ..utilities import log
 
 
@@ -6,11 +8,46 @@ class BaseDiscordObject(ABC):
     '''Abstract base of all common discord objects. All subclasses map directly to an actual API object.'''
 
     _log = log.Log()
+    _auto_map: dict = None  # type: ignore
+
+    def __init__(self, data: Optional[dict] = None):
+        '''Base generic __init__ function.
+
+        Arguments:
+            data (dict): Discord compliant dict for the given object.
+        '''
+        if data is not None and isinstance(data, dict):
+            self.from_dict(data)
 
     def from_dict(self, data: dict) -> 'BaseDiscordObject':
         '''Parse an object from a dictionary and return it.'''
-        raise NotImplementedError(f'{self.__class__.__name__} does not yet implement this function.')
+        self._auto_dict(data)
+        return self
 
     def to_dict(self) -> dict:
         '''Convert object to dictionary suitable for API or other generic useage.'''
         raise NotImplementedError(f'{self.__class__.__name__} does not yet implement this function.')
+
+    def _auto_dict(self, data: 'Dict[str, Any]') -> 'BaseDiscordObject':
+        '''Attempt an automatic conversion of a dict to this objects type.'''
+        if self._auto_map is None:
+            raise NotImplementedError(f'_auto_map not defined for {self.__class__}.')
+
+        for attribute_key, value in data.items():
+            function = self._auto_map[attribute_key]
+            if isinstance(function, list):
+                if len(function) != 1:
+                    raise IndexError('Auto map has function list in excess of 1.')
+                if not isinstance(value, list):
+                    raise TypeError('Data value was not a list with list auto_mapped type.')
+                setattr(self, attribute_key, list())
+                target_list: list = getattr(self, attribute_key)
+                for sub_value in value:
+                    target_list.append(function[0](sub_value))
+            else:
+                setattr(self, attribute_key, function(value))
+        return self
+
+    @staticmethod
+    def _fromtimestamp_milliseconds(time_stamp):
+        return datetime.fromtimestamp(time_stamp / 1000)
