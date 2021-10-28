@@ -37,3 +37,6 @@ def test_rich_activity():
     assert obj.party is not None
     assert obj.assets is not None
     assert obj.secrets is not None
+    assert obj.buttons is not None
+    assert isinstance(obj.buttons, list)
+    assert obj.emoji is not None

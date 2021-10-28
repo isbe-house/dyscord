@@ -132,7 +132,7 @@ class ActivityEmoji(BaseDiscordObject):
     @property
     def _auto_map(self):
         return {
-            'join': str,
-            'spectate': str,
-            'match': str,
+            'name': str,
+            'id': snowflake.Snowflake,
+            'animated': bool,
         }
