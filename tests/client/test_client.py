@@ -1,10 +1,10 @@
 import logging
 import pytest
+import json
 from importlib import reload
 
 from src.dyscord.client import discord_client
 from src.dyscord.client import enumerations
-from unittest.mock import patch
 
 from tests.fixtures.fixtures import mock_api, mock_websocket  # noqa
 
@@ -66,40 +66,10 @@ async def test_bad_event(caplog):
     assert 'Encountered unknown event' in caplog.text
 
 
-@pytest.mark.skip(reason='Need more data.')
-@patch('websockets.connect')
-@pytest.mark.asyncio
-async def test_mock_connection(mock_websockets_connect):
-
-    class foo:
-        def __init__(self):
-            self.n = 0
-
-        def __iter__(self):
-            return self
-
-        def __next__(self):
-            self.n += 1
-            return self.n
-
-    mock_websockets_connect.return_value.__aenter__.return_value.recv.side_effect = foo()
-
-    x = discord_client.DiscordClient('1234', '5678')
-    try:
-        await x._web_socket_listener('foo')
-    except RuntimeError:
-        pass
-
-    print(mock_websockets_connect.call_args)
-
-    raise RuntimeError
-
-
-@pytest.mark.skip(reason='Need more data.')
 @pytest.mark.asyncio
 async def test_new_fixture(mock_websocket, mock_api):  # noqa
 
-    mock_websocket.connect.return_value.__aenter__.return_value.recv.side_effect = ['Hello', RuntimeError]
+    mock_websocket.connect.return_value.__aenter__.return_value.recv.side_effect = [json.dumps({'t': None, 's': None, 'op': 10, 'd': {'heartbeat_interval': 41250}}), RuntimeError]
 
     x = discord_client.DiscordClient('1234', '5678')
     try:
