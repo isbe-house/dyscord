@@ -58,8 +58,11 @@ class API_V9:
     # GATEWAY ENDPOINTS
 
     @classmethod
-    async def get_gateway_bot(cls, token) -> dict:
+    async def get_gateway_bot(cls, token: str) -> dict:
         '''Get URL of the gateway for bots.'''
+        if not isinstance(token, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(token)}] for token.')
+
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
@@ -70,6 +73,8 @@ class API_V9:
             await cls._handle_rate_limit(r)
 
         # Add our own settings to URI
+        print(r)
+        print(r.json())
         data = r.json()
         data['url'] += '?v=9&encoding=json'
 
@@ -106,10 +111,8 @@ class API_V9:
         '''Create or update a global application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands'
 
-        # if 'description' in command_structure and command_structure['type'] is not 1:
-        #     cls._log.warning('The API sucks, and only tells you later that description fields are not allowed for type 2 and 3.')
-        #     cls._log.warning('In an effort to make this easier, we just purge this here.')
-        #     del command_structure['description']
+        if not isinstance(command_structure, (dict,)):
+            raise TypeError(f'Got illegal type [{type(command_structure)}] for command_structure.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -126,6 +129,9 @@ class API_V9:
     async def get_global_application_command(cls, command_id: 'objects.Snowflake'):
         '''Get a global application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
+
+        if not isinstance(command_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(command_id)}] for command_id.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -145,6 +151,11 @@ class API_V9:
         '''Edit a global application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
 
+        if not isinstance(command_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(command_id)}] for command_id.')
+        if not isinstance(command_structure, (dict,)):
+            raise TypeError(f'Got illegal type [{type(command_structure)}] for command_structure.')
+
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.patch(
@@ -160,6 +171,9 @@ class API_V9:
     async def delete_global_application_command(cls, command_id: 'objects.Snowflake'):
         '''Delete a global application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/commands/{command_id}'
+
+        if not isinstance(command_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(command_id)}] for command_id.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -181,6 +195,9 @@ class API_V9:
         '''Get all application commands from a specific guild.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands'
 
+        if not isinstance(guild_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(guild_id)}] for guild_id.')
+
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
@@ -198,6 +215,11 @@ class API_V9:
                                                ) -> dict:
         '''Create a guild appplication command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands'
+
+        if not isinstance(guild_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(guild_id)}] for guild_id.')
+        if not isinstance(command_structure, (dict,)):
+            raise TypeError(f'Got illegal type [{type(command_structure)}] for command_structure.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -247,9 +269,14 @@ class API_V9:
     async def delete_guild_application_command(cls,
                                                guild_id: 'objects.Snowflake',
                                                command_id: 'objects.Snowflake',
-                                               ):
+                                               ) -> None:
         '''Delete an application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands/{command_id}'
+
+        if not isinstance(guild_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(guild_id)}] for guild_id.')
+        if not isinstance(command_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(command_id)}] for command_id.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -287,6 +314,13 @@ class API_V9:
         '''TODO: Copy from api docs.'''
         url = f'{cls.BASE_URL}/interactions/{interaction_id}/{interaction_token}/callback'
 
+        if not isinstance(interaction_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(interaction_id)}] for interaction_id.')
+        if not isinstance(interaction_token, (str, )):
+            raise TypeError(f'Got illegal type [{type(interaction_token)}] for interaction_token.')
+        if not isinstance(data_structure, (dict, )):
+            raise TypeError(f'Got illegal type [{type(data_structure)}] for data_structure.')
+
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.post(
@@ -306,6 +340,9 @@ class API_V9:
                                                 ) -> dict:
         '''TODO: Copy from api docs.'''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/@origional'
+
+        if not isinstance(interaction_token, (str, )):
+            raise TypeError(f'Got illegal type [{type(interaction_token)}] for interaction_token.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -328,6 +365,11 @@ class API_V9:
         Edits the initial Interaction response. Functions the same as Edit Webhook Message.
         '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/@original'
+
+        if not isinstance(interaction_token, (str, )):
+            raise TypeError(f'Got illegal type [{type(interaction_token)}] for interaction_token.')
+        if not isinstance(data_structure, (dict, )):
+            raise TypeError(f'Got illegal type [{type(data_structure)}] for data_structure.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -359,6 +401,9 @@ class API_V9:
                 r.raise_for_status()
             await cls._handle_rate_limit(r)
 
+        if not isinstance(interaction_token, (str, )):
+            raise TypeError(f'Got illegal type [{type(interaction_token)}] for interaction_token.')
+
     @classmethod
     async def create_followup_message(cls,
                                       interaction_token: str,
@@ -373,6 +418,11 @@ class API_V9:
         (and is furthermore ignored) when using this endpoint for interaction followups.
         '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}'
+
+        if not isinstance(interaction_token, (str, )):
+            raise TypeError(f'Got illegal type [{type(interaction_token)}] for interaction_token.')
+        if not isinstance(data_structure, (dict,)):
+            raise TypeError(f'Got illegal type [{type(data_structure)}] for data_structure.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -401,6 +451,11 @@ class API_V9:
         '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/{message_id}'
 
+        if not isinstance(interaction_token, (str, )):
+            raise TypeError(f'Got illegal type [{type(interaction_token)}] for interaction_token.')
+        if not isinstance(message_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(message_id)}] for message_id.')
+
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.get(
@@ -428,6 +483,13 @@ class API_V9:
         '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/{message_id}'
 
+        if not isinstance(interaction_token, (str, )):
+            raise TypeError(f'Got illegal type [{type(interaction_token)}] for interaction_token.')
+        if not isinstance(message_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(message_id)}] for message_id.')
+        if not isinstance(data_structure, (dict, )):
+            raise TypeError(f'Got illegal type [{type(data_structure)}] for data_structure.')
+
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.patch(
@@ -442,7 +504,7 @@ class API_V9:
     async def delete_followup_message(cls,
                                       interaction_token: str,
                                       message_id: 'Snowflake',
-                                      ):
+                                      ) -> None:
         '''Delete Followup Message.
 
         DELETE/webhooks/{application.id}/{interaction.token}/messages/{message.id}
@@ -450,6 +512,11 @@ class API_V9:
         Deletes a followup message for an Interaction. Returns 204 on success. Does not support ephemeral followups.
         '''
         url = f'{cls.BASE_URL}/webhooks/{cls.APPLICATION_ID}/{interaction_token}/messages/{message_id}'
+
+        if not isinstance(interaction_token, (str,)):
+            raise TypeError(f'Got illegal type [{type(interaction_token)}] for interaction_token.')
+        if not isinstance(message_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(message_id)}] for message_id.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -482,6 +549,9 @@ class API_V9:
         '''Get channel by ID.'''
         url = f'{cls.BASE_URL}/channels/{channel_id}'
 
+        if not isinstance(channel_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(channel_id)}] for channel_id.')
+
         try:
             return cls._ttl_cache[cachetools.keys.hashkey('get_channel', channel_id)]
         except KeyError:
@@ -505,6 +575,11 @@ class API_V9:
                              ):
         '''TODO: Copy from api docs.'''
         url = f'{cls.BASE_URL}/channels/{channel_id}/messages'
+
+        if not isinstance(channel_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(channel_id)}] for channel_id.')
+        if not isinstance(message_payload, (dict,)):
+            raise TypeError(f'Got illegal type [{type(message_payload)}] for message_payload.')
 
         async with cls._lock:
             async with httpx.AsyncClient() as client:
@@ -530,6 +605,9 @@ class API_V9:
         TODO: Document this.
         '''
         url = f'{cls.BASE_URL}/guilds/{guild_id}'
+
+        if not isinstance(guild_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(guild_id)}] for guild_id.')
 
         try:
             return cls._ttl_cache[cachetools.keys.hashkey('get_guild', guild_id)]
@@ -561,6 +639,9 @@ class API_V9:
         '''
         url = f'{cls.BASE_URL}/guilds/{guild_id}/roles'
 
+        if not isinstance(guild_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(guild_id)}] for guild_id.')
+
         try:
             return cls._ttl_cache[cachetools.keys.hashkey('get_guild_roles', guild_id)]
         except KeyError:
@@ -584,6 +665,7 @@ class API_V9:
         and optionally the email scope, which returns the object with an email.
         '''
         url = f'{cls.BASE_URL}/users/@me'
+
         async with httpx.AsyncClient() as client:
             method = client.get(url, headers=cls._auth_header())
             r = await cls._invoke_method(method)
@@ -598,6 +680,9 @@ class API_V9:
         Returns a user object for a given user ID.
         '''
         url = f'{cls.BASE_URL}/users/{user_id}'
+
+        if not isinstance(user_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(user_id)}] for user_id.')
 
         try:
             return cls._ttl_cache[cachetools.keys.hashkey('get_user', user_id)]
@@ -619,6 +704,10 @@ class API_V9:
         Create a new DM channel with a user. Returns a DM channel object.
         '''
         url = f'{cls.BASE_URL}/users/@me/channels'
+
+        if not isinstance(recipient_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(recipient_id)}] for recipient_id.')
+
         async with httpx.AsyncClient() as client:
             method = client.post(url,
                                  json={'recipient_id': recipient_id},
