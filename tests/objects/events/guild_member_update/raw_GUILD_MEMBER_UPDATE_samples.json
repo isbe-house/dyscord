@@ -1,0 +1,46 @@
+[
+    {
+        "t": "GUILD_MEMBER_UPDATE",
+        "s": 2,
+        "op": 0,
+        "d": {
+            "user": {
+                "username": "test-bot",
+                "id": "889065662641737791",
+                "discriminator": "8248",
+                "bot": true,
+                "avatar": null
+            },
+            "roles": [
+                "891182614428418088"
+            ],
+            "mute": false,
+            "joined_at": "2021-09-25T04:41:32.678000+00:00",
+            "hoisted_role": null,
+            "guild_id": "804392362054910047",
+            "deaf": false
+        }
+    },
+    {
+        "t": "GUILD_MEMBER_UPDATE",
+        "s": 2,
+        "op": 0,
+        "d": {
+            "user": {
+                "username": "test-bot",
+                "id": "889065662641737791",
+                "discriminator": "8248",
+                "bot": true,
+                "avatar": null
+            },
+            "roles": [
+                "891182614428418088"
+            ],
+            "mute": false,
+            "joined_at": "2021-09-25T04:41:32.678000+00:00",
+            "hoisted_role": null,
+            "guild_id": "804392362054910047",
+            "deaf": false
+        }
+    }
+]

@@ -506,7 +506,7 @@ class DiscordClient:
             obj = objects.MessageUpdate().from_dict(data['d'])
 
         elif event_type == 'PRESENCE_UPDATE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.Presence(data=data['d'])
 
         elif event_type == 'STAGE_INSTANCE_CREATE':
             warnings.warn(f'Encountered unhandled event {event_type}')

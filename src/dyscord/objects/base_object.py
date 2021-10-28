@@ -37,7 +37,10 @@ class BaseDiscordObject(ABC):
             raise NotImplementedError(f'_auto_map not defined for {self.__class__}.')
 
         for attribute_key, value in data.items():
+            self._log.debug(attribute_key)
             function = self._auto_map[attribute_key]
+            if function is None:
+                continue
             if isinstance(function, list):
                 if len(function) != 1:
                     raise IndexError('Auto map has function list in excess of 1.')
