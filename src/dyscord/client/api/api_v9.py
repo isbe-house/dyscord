@@ -243,6 +243,11 @@ class API_V9:
         '''Get a specific guild application command.'''
         url = f'{cls.BASE_URL}/applications/{cls.APPLICATION_ID}/guilds/{guild_id}/commands/{command_id}'
 
+        if not isinstance(guild_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(guild_id)}] for guild_id.')
+        if not isinstance(command_id, (str, Snowflake)):
+            raise TypeError(f'Got illegal type [{type(command_id)}] for command_id.')
+
         async with cls._lock:
             async with httpx.AsyncClient() as client:
                 r = await client.get(

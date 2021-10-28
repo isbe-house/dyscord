@@ -53,6 +53,9 @@ async def test_create_global_application_command(mock_httpx, fresh_api):  # noqa
     ret = await fresh_api.create_global_application_command(fake_dict)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.create_global_application_command(None)
+
 
 @pytest.mark.asyncio
 async def test_get_global_application_command(mock_httpx, fresh_api):  # noqa: F811
@@ -61,6 +64,9 @@ async def test_get_global_application_command(mock_httpx, fresh_api):  # noqa: F
 
     ret = await fresh_api.get_global_application_command(fake_id)
     assert ret == sentinel.JSON_RETURN
+
+    with pytest.raises(TypeError):
+        await fresh_api.get_global_application_command(None)
 
 
 @pytest.mark.asyncio
@@ -72,6 +78,12 @@ async def test_edit_global_application_command(mock_httpx, fresh_api):  # noqa: 
     ret = await fresh_api.edit_global_application_command(fake_id, fake_dict)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.edit_global_application_command(None, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.edit_global_application_command(fake_id, None)
+
 
 @pytest.mark.skip(reason='Not implemeted yet.')
 @pytest.mark.asyncio
@@ -82,6 +94,9 @@ async def test_bulk_overwrite_global_application_commands(mock_httpx, fresh_api)
     ret = await fresh_api.bulk_overwrite_global_application_commands(fake_id)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.bulk_overwrite_global_application_commands(None)
+
 
 @pytest.mark.asyncio
 async def test_get_guild_application_commands(mock_httpx, fresh_api):  # noqa: F811
@@ -90,6 +105,9 @@ async def test_get_guild_application_commands(mock_httpx, fresh_api):  # noqa: F
 
     ret = await fresh_api.get_guild_application_commands(fake_id)
     assert ret == sentinel.JSON_RETURN
+
+    with pytest.raises(TypeError):
+        await fresh_api.get_guild_application_commands(None)
 
 
 @pytest.mark.asyncio
@@ -101,6 +119,12 @@ async def test_create_guild_application_command(mock_httpx, fresh_api):  # noqa:
     ret = await fresh_api.create_guild_application_command(fake_id, fake_dict)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.create_guild_application_command(None, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.create_guild_application_command(fake_id, None)
+
 
 @pytest.mark.asyncio
 async def test_get_guild_application_command(mock_httpx, fresh_api):  # noqa: F811
@@ -109,6 +133,12 @@ async def test_get_guild_application_command(mock_httpx, fresh_api):  # noqa: F8
 
     ret = await fresh_api.get_guild_application_command(fake_id, fake_id)
     assert ret == sentinel.JSON_RETURN
+
+    with pytest.raises(TypeError):
+        await fresh_api.get_guild_application_command(None, fake_id)
+
+    with pytest.raises(TypeError):
+        await fresh_api.get_guild_application_command(fake_id, None)
 
 
 @pytest.mark.skip(reason='Not implemented yet')
@@ -121,6 +151,15 @@ async def test_edit_guild_application_command(mock_httpx, fresh_api):  # noqa: F
     ret = await fresh_api.edit_guild_application_command(fake_id, fake_id, fake_dict)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.edit_guild_application_command(None, fake_id, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.edit_guild_application_command(fake_id, None, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.edit_guild_application_command(fake_id, fake_id, None)
+
 
 @pytest.mark.asyncio
 async def test_delete_guild_application_command(mock_httpx, fresh_api):  # noqa: F811
@@ -128,6 +167,12 @@ async def test_delete_guild_application_command(mock_httpx, fresh_api):  # noqa:
     fake_id = Mock(Snowflake)
 
     await fresh_api.delete_guild_application_command(fake_id, fake_id)
+
+    with pytest.raises(TypeError):
+        await fresh_api.delete_guild_application_command(None, fake_id)
+
+    with pytest.raises(TypeError):
+        await fresh_api.delete_guild_application_command(fake_id, None)
 
 
 @pytest.mark.skip(reason='Not implemented yet')
@@ -140,6 +185,15 @@ async def test_bulk_overwrite_guild_application_command(mock_httpx, fresh_api): 
     ret = await fresh_api.bulk_overwrite_guild_application_command(fake_id, fake_id, fake_dict)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.bulk_overwrite_guild_application_command(None, fake_id, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.bulk_overwrite_guild_application_command(fake_id, None, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.bulk_overwrite_guild_application_command(fake_id, fake_id, None)
+
 
 @pytest.mark.asyncio
 async def test_create_interaction_response(mock_httpx, fresh_api):  # noqa: F811
@@ -150,6 +204,15 @@ async def test_create_interaction_response(mock_httpx, fresh_api):  # noqa: F811
 
     await fresh_api.create_interaction_response(fake_id, fake_token, fake_dict)
 
+    with pytest.raises(TypeError):
+        await fresh_api.create_interaction_response(None, fake_token, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.create_interaction_response(fake_id, None, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.create_interaction_response(fake_id, fake_token, None)
+
 
 @pytest.mark.asyncio
 async def test_edit_original_interaction_response(mock_httpx, fresh_api):  # noqa: F811
@@ -159,6 +222,12 @@ async def test_edit_original_interaction_response(mock_httpx, fresh_api):  # noq
 
     await fresh_api.edit_original_interaction_response(fake_token, fake_dict)
 
+    with pytest.raises(TypeError):
+        await fresh_api.edit_original_interaction_response(None, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.edit_original_interaction_response(fake_token, None)
+
 
 @pytest.mark.asyncio
 async def test_delete_original_interaction_response(mock_httpx, fresh_api):  # noqa: F811
@@ -166,6 +235,9 @@ async def test_delete_original_interaction_response(mock_httpx, fresh_api):  # n
     fake_token = Mock(str)
 
     await fresh_api.delete_original_interaction_response(fake_token)
+
+    with pytest.raises(TypeError):
+        await fresh_api.delete_original_interaction_response(None)
 
 
 @pytest.mark.asyncio
@@ -177,6 +249,12 @@ async def test_create_followup_message(mock_httpx, fresh_api):  # noqa: F811
     ret = await fresh_api.create_followup_message(fake_token, fake_dict)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.create_followup_message(None, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.create_followup_message(fake_token, None)
+
 
 @pytest.mark.asyncio
 async def test_get_followup_message(mock_httpx, fresh_api):  # noqa: F811
@@ -186,6 +264,12 @@ async def test_get_followup_message(mock_httpx, fresh_api):  # noqa: F811
 
     ret = await fresh_api.get_followup_message(fake_token, fake_id)
     assert ret == sentinel.JSON_RETURN
+
+    with pytest.raises(TypeError):
+        await fresh_api.get_followup_message(None, fake_id)
+
+    with pytest.raises(TypeError):
+        await fresh_api.get_followup_message(fake_token, None)
 
 
 @pytest.mark.asyncio
@@ -198,6 +282,15 @@ async def test_edit_followup_message(mock_httpx, fresh_api):  # noqa: F811
     ret = await fresh_api.edit_followup_message(fake_token, fake_id, fake_dict)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.edit_followup_message(None, fake_id, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.edit_followup_message(fake_token, None, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.edit_followup_message(fake_token, fake_id, None)
+
 
 @pytest.mark.asyncio
 async def test_delete_followup_message(mock_httpx, fresh_api):  # noqa: F811
@@ -208,6 +301,12 @@ async def test_delete_followup_message(mock_httpx, fresh_api):  # noqa: F811
     await fresh_api.delete_followup_message(fake_token, fake_id)
     mock_httpx.return_value.delete.assert_called()
 
+    with pytest.raises(TypeError):
+        await fresh_api.delete_followup_message(None, fake_id)
+
+    with pytest.raises(TypeError):
+        await fresh_api.delete_followup_message(fake_token, None)
+
 
 @pytest.mark.asyncio
 async def test_get_channel(mock_httpx, fresh_api):  # noqa: F811
@@ -216,6 +315,9 @@ async def test_get_channel(mock_httpx, fresh_api):  # noqa: F811
 
     ret = await fresh_api.get_channel(fake_id)
     assert ret == sentinel.JSON_RETURN
+
+    with pytest.raises(TypeError):
+        await fresh_api.get_channel(None)
 
 
 @pytest.mark.asyncio
@@ -227,6 +329,12 @@ async def test_create_message(mock_httpx, fresh_api):  # noqa: F811
     ret = await fresh_api.create_message(fake_id, fake_dict)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.create_message(None, fake_dict)
+
+    with pytest.raises(TypeError):
+        await fresh_api.create_message(fake_id, None)
+
 
 @pytest.mark.asyncio
 async def test_get_guild(mock_httpx, fresh_api):  # noqa: F811
@@ -236,6 +344,9 @@ async def test_get_guild(mock_httpx, fresh_api):  # noqa: F811
     ret = await fresh_api.get_guild(fake_id)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.get_guild(None)
+
 
 @pytest.mark.asyncio
 async def test_get_guild_roles(mock_httpx, fresh_api):  # noqa: F811
@@ -244,6 +355,9 @@ async def test_get_guild_roles(mock_httpx, fresh_api):  # noqa: F811
 
     ret = await fresh_api.get_guild_roles(fake_id)
     assert ret == sentinel.JSON_RETURN
+
+    with pytest.raises(TypeError):
+        await fresh_api.get_guild_roles(None)
 
 
 @pytest.mark.asyncio
@@ -261,6 +375,9 @@ async def test_get_user(mock_httpx, fresh_api):  # noqa: F811
     ret = await fresh_api.get_user(fake_id)
     assert ret == sentinel.JSON_RETURN
 
+    with pytest.raises(TypeError):
+        await fresh_api.get_user(None)
+
 
 @pytest.mark.asyncio
 async def test_create_dm(mock_httpx, fresh_api):  # noqa: F811
@@ -271,3 +388,6 @@ async def test_create_dm(mock_httpx, fresh_api):  # noqa: F811
     assert ret == sentinel.JSON_RETURN
 
     mock_httpx.return_value.post.assert_called()
+
+    with pytest.raises(TypeError):
+        await fresh_api.create_dm(None)
