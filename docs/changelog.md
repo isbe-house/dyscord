@@ -6,6 +6,7 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ### Added
 - `Activty` and friends.
 - `Presence` and friends.
+- Support `GUILD_MEMBER_UPDATE` events.
 
 ### Fixed
 - Made reconnection more robust.

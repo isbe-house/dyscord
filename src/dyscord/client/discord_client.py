@@ -449,7 +449,7 @@ class DiscordClient:
             warnings.warn(f'Encountered unhandled event {event_type}')
 
         elif event_type == 'GUILD_MEMBER_UPDATE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.events.GuildMemberUpdate(data['d'])
 
         elif event_type == 'GUILD_ROLE_CREATE':
             warnings.warn(f'Encountered unhandled event {event_type}')
