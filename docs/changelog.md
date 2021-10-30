@@ -2,6 +2,10 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.4.3] WIP
+### Fixed
+- `PRESENCE_UPDATE` could sometimes brick us with IDs and creation timestamps in the 4000's. Handle both now.
+
 ## [v0.4.2] 2021-10-30
 ### Added
 - `Activty` and friends.

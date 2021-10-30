@@ -8,6 +8,7 @@ from . import snowflake, enumerations
 class Activity(BaseDiscordObject):
     '''Activity.'''
 
+    id: str = None  # type: ignore # UNDOCUMENTED General ID for the given activity
     name: str = None  # type: ignore # string the activity's name
     type: enumerations.ACTIVITY_TYPE = None  # type: ignore # integer activity type
     url: Optional[str] = None  # type: ignore #? ?string stream url, is validated when type is 1
@@ -27,10 +28,11 @@ class Activity(BaseDiscordObject):
     @property
     def _auto_map(self):
         return {
+            'id': str,
             'name': str,
             'type': enumerations.ACTIVITY_TYPE,
             'url': str,
-            'created_at': datetime.fromtimestamp,
+            'created_at': self._fromtimestamp_milliseconds,
             'timestamps': TimeStamps,
             'application_id': snowflake.Snowflake,
             'details': str,

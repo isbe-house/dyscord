@@ -1,0 +1,210 @@
+[
+    {
+        "_id": {
+            "$oid": "617b29e5f7ab0e2ef1242e1e"
+        },
+        "t": "PRESENCE_UPDATE",
+        "s": 3,
+        "op": 0,
+        "d": {
+            "user": {
+                "id": "185846097284038656"
+            },
+            "status": "dnd",
+            "guild_id": "804392362054910047",
+            "client_status": {
+                "desktop": "dnd"
+            },
+            "activities": []
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617b29e8f7ab0e2ef1242e1f"
+        },
+        "t": "PRESENCE_UPDATE",
+        "s": 4,
+        "op": 0,
+        "d": {
+            "user": {
+                "id": "185846097284038656"
+            },
+            "status": "online",
+            "guild_id": "804392362054910047",
+            "client_status": {
+                "desktop": "online"
+            },
+            "activities": []
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617cea453829499e9a0b4c16"
+        },
+        "t": "PRESENCE_UPDATE",
+        "s": 9,
+        "op": 0,
+        "d": {
+            "user": {
+                "id": "153061232138518529"
+            },
+            "status": "online",
+            "guild_id": "346094316428591104",
+            "client_status": {
+                "desktop": "online"
+            },
+            "activities": [
+                {
+                    "type": 4,
+                    "name": "Custom Status",
+                    "id": "custom",
+                    "emoji": {
+                        "name": "BEEEEES",
+                        "id": "852357197903167490",
+                        "animated": true
+                    },
+                    "created_at": 1635572957376
+                },
+                {
+                    "type": 0,
+                    "timestamps": {},
+                    "state": "Playing Solo",
+                    "party": {},
+                    "name": "Warframe",
+                    "id": "35b04aaed4aad299",
+                    "details": "Strata Relay",
+                    "created_at": 1635576389557,
+                    "assets": {
+                        "large_text": "Strata Relay",
+                        "large_image": "422773887512870923"
+                    },
+                    "application_id": "422772752647323649"
+                }
+            ]
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617cea5e3829499e9a0b4c19"
+        },
+        "t": "PRESENCE_UPDATE",
+        "s": 11,
+        "op": 0,
+        "d": {
+            "user": {
+                "id": "153061232138518529"
+            },
+            "status": "online",
+            "guild_id": "346094316428591104",
+            "client_status": {
+                "desktop": "online"
+            },
+            "activities": [
+                {
+                    "type": 4,
+                    "name": "Custom Status",
+                    "id": "custom",
+                    "emoji": {
+                        "name": "BEEEEES",
+                        "id": "852357197903167490",
+                        "animated": true
+                    },
+                    "created_at": 1635572957376
+                },
+                {
+                    "type": 0,
+                    "timestamps": {},
+                    "party": {},
+                    "name": "Warframe",
+                    "id": "35b04aaed4aad299",
+                    "created_at": 1635576414163,
+                    "assets": {
+                        "large_image": "422773248191627264"
+                    },
+                    "application_id": "422772752647323649"
+                }
+            ]
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617ceab204b366868eddf2d5"
+        },
+        "t": "PRESENCE_UPDATE",
+        "s": 4,
+        "op": 0,
+        "d": {
+            "user": {
+                "id": "153061232138518529"
+            },
+            "status": "online",
+            "guild_id": "346094316428591104",
+            "client_status": {
+                "desktop": "online"
+            },
+            "activities": [
+                {
+                    "type": 4,
+                    "name": "Custom Status",
+                    "id": "custom",
+                    "emoji": {
+                        "name": "BEEEEES",
+                        "id": "852357197903167490",
+                        "animated": true
+                    },
+                    "created_at": 1635572957376
+                },
+                {
+                    "type": 0,
+                    "timestamps": {
+                        "start": 1635576267499
+                    },
+                    "name": "Warframe",
+                    "id": "35b04aaed4aad299",
+                    "created_at": 1635576498349,
+                    "application_id": "422772752647323649"
+                }
+            ]
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617ceab704b366868eddf2d6"
+        },
+        "t": "PRESENCE_UPDATE",
+        "s": 5,
+        "op": 0,
+        "d": {
+            "user": {
+                "id": "153061232138518529"
+            },
+            "status": "online",
+            "guild_id": "346094316428591104",
+            "client_status": {
+                "desktop": "online"
+            },
+            "activities": [
+                {
+                    "type": 4,
+                    "name": "Custom Status",
+                    "id": "custom",
+                    "emoji": {
+                        "name": "BEEEEES",
+                        "id": "852357197903167490",
+                        "animated": true
+                    },
+                    "created_at": 1635572957376
+                },
+                {
+                    "type": 0,
+                    "timestamps": {
+                        "start": 1635576502940
+                    },
+                    "name": "Cookie Clicker",
+                    "id": "62bf4b0afe7bd2ba",
+                    "created_at": 1635576503118
+                }
+            ]
+        }
+    }
+]
