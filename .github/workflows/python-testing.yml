@@ -36,7 +36,7 @@ jobs:
       - name: "Get Version"
         run: echo "The selected version is ${{ steps.version.outputs.version }}"
       - name: "Test: pytest"
-        run: python3 -m pytest --cov=src --durations=5 -vv --color=yes tests
+        run: python3 -m pytest --error-for-skips --durations=5 --color=yes tests
       - name: "Test: mypy"
         run: mypy src/dyscord
       - name: "Test: flake8"

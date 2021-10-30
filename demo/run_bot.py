@@ -50,6 +50,8 @@ client.configure_intents(
     direct_messages=True,
 )
 
+client.set_all_intents()
+
 async def purge_commands(client, message: Message):
     client._log.info('Get global commands')
     commands = await API.get_global_application_commands()

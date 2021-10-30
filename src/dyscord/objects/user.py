@@ -84,13 +84,17 @@ class User(BaseDiscordObject):
         '''Generate a valid nickname mention for use in Discord.'''
         return f'<@!{self.id}>'
 
-    def from_dict(self, data: dict) -> 'User':
+    def from_dict(self, data: dict) -> 'User':  # noqa: C901
         '''Parse a User from an API compliant dict.'''
         # Required fields
         self.id = snowflake.Snowflake(data['id'])
-        self.username = data['username']
-        self.discriminator = data['discriminator']
-        self.avatar = data['avatar']
+
+        if 'username' in data:
+            self.username = data['username']
+        if 'discriminator' in data:
+            self.discriminator = data['discriminator']
+        if 'avatar' in data:
+            self.avatar = data['avatar']
 
         # Optional fields
         if 'bot' in data:
