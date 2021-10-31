@@ -1,6 +1,7 @@
 from datetime import datetime
 from abc import ABC
 from typing import Any, Dict, Optional
+import warnings
 from ..utilities import log
 
 
@@ -38,8 +39,12 @@ class BaseDiscordObject(ABC):
 
         for attribute_key, value in data.items():
             self._log.debug(attribute_key)
+            if attribute_key not in self._auto_map:
+                warnings.warn(RuntimeWarning(f'Saw unexpected attribute key [{attribute_key}] in [{self.__class__}].'))
+                setattr(self, attribute_key, value)
+                continue
             function = self._auto_map[attribute_key]
-            if function is None:
+            if (function is None) or (value is None):
                 continue
             if isinstance(function, list):
                 if len(function) != 1:

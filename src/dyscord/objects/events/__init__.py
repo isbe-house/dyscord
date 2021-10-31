@@ -2,9 +2,11 @@
 
 from .typing_start import TypingStart
 from .guild_member_update import GuildMemberUpdate
+from .voice_state import VoiceState
 
 
 __all__ = [
-    'TypingStart',
     'GuildMemberUpdate',
+    'TypingStart',
+    'VoiceState'
 ]

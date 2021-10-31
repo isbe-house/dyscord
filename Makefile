@@ -73,7 +73,7 @@ test-pytest:
 	docker-compose \
 		-f  docker-compose.yaml \
 		run --rm dyscord-tests \
-		python -m pytest --cov=src --durations=5 -vv --color=yes tests
+		python -m pytest --cov=src --no-cov-on-fail --cov-report=term:skip-covered  --durations=5 -vv --color=yes tests
 	docker-compose \
 		-f  docker-compose.yaml \
 		run --rm dyscord-tests \

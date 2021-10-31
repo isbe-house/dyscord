@@ -1,0 +1,331 @@
+[
+    {
+        "_id": {
+            "$oid": "617cea0f3829499e9a0b4c10"
+        },
+        "t": "VOICE_STATE_UPDATE",
+        "s": 4,
+        "op": 0,
+        "d": {
+            "member": {
+                "user": {
+                    "username": "Soton",
+                    "id": "185846097284038656",
+                    "discriminator": "2585",
+                    "avatar": "ce48763db4ef0884f6d95fedead4f47c"
+                },
+                "roles": [
+                    "346104880575938560"
+                ],
+                "premium_since": null,
+                "pending": false,
+                "nick": "John",
+                "mute": false,
+                "joined_at": "2017-08-13T00:55:15.161000+00:00",
+                "is_pending": false,
+                "hoisted_role": "346104880575938560",
+                "deaf": false,
+                "avatar": null
+            },
+            "user_id": "185846097284038656",
+            "suppress": false,
+            "session_id": "68317390f34b4fc7852db36ce46f2751",
+            "self_video": false,
+            "self_mute": true,
+            "self_deaf": true,
+            "request_to_speak_timestamp": null,
+            "mute": false,
+            "guild_id": "346094316428591104",
+            "deaf": false,
+            "channel_id": "454434922908876811"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617cea103829499e9a0b4c11"
+        },
+        "t": "VOICE_STATE_UPDATE",
+        "s": 5,
+        "op": 0,
+        "d": {
+            "member": {
+                "user": {
+                    "username": "Soton",
+                    "id": "185846097284038656",
+                    "discriminator": "2585",
+                    "avatar": "ce48763db4ef0884f6d95fedead4f47c"
+                },
+                "roles": [
+                    "346104880575938560"
+                ],
+                "premium_since": null,
+                "pending": false,
+                "nick": "John",
+                "mute": false,
+                "joined_at": "2017-08-13T00:55:15.161000+00:00",
+                "is_pending": false,
+                "hoisted_role": "346104880575938560",
+                "deaf": false,
+                "avatar": null
+            },
+            "user_id": "185846097284038656",
+            "suppress": false,
+            "session_id": "68317390f34b4fc7852db36ce46f2751",
+            "self_video": false,
+            "self_mute": false,
+            "self_deaf": false,
+            "request_to_speak_timestamp": null,
+            "mute": false,
+            "guild_id": "346094316428591104",
+            "deaf": false,
+            "channel_id": "454434922908876811"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617cea273829499e9a0b4c12"
+        },
+        "t": "VOICE_STATE_UPDATE",
+        "s": 6,
+        "op": 0,
+        "d": {
+            "member": {
+                "user": {
+                    "username": "UnknownChain",
+                    "id": "214057188312875008",
+                    "discriminator": "6867",
+                    "avatar": "a24f17e92545a6c0faf1f92deff5e20a"
+                },
+                "roles": [
+                    "346105578516512778",
+                    "454441386578542592",
+                    "461350690082521098",
+                    "511056018801950731",
+                    "688550413061980328"
+                ],
+                "mute": false,
+                "joined_at": "2018-03-28T23:51:25.990000+00:00",
+                "hoisted_role": null,
+                "deaf": false
+            },
+            "user_id": "214057188312875008",
+            "suppress": false,
+            "session_id": "31762fd44ce9ce1971707895c684c893",
+            "self_video": false,
+            "self_mute": true,
+            "self_deaf": false,
+            "request_to_speak_timestamp": null,
+            "mute": false,
+            "guild_id": "346094316428591104",
+            "deaf": false,
+            "channel_id": "454434922908876811"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617cea343829499e9a0b4c14"
+        },
+        "t": "VOICE_STATE_UPDATE",
+        "s": 7,
+        "op": 0,
+        "d": {
+            "member": {
+                "user": {
+                    "username": "UnknownChain",
+                    "id": "214057188312875008",
+                    "discriminator": "6867",
+                    "avatar": "a24f17e92545a6c0faf1f92deff5e20a"
+                },
+                "roles": [
+                    "346105578516512778",
+                    "454441386578542592",
+                    "461350690082521098",
+                    "511056018801950731",
+                    "688550413061980328"
+                ],
+                "mute": false,
+                "joined_at": "2018-03-28T23:51:25.990000+00:00",
+                "hoisted_role": null,
+                "deaf": false
+            },
+            "user_id": "214057188312875008",
+            "suppress": false,
+            "session_id": "31762fd44ce9ce1971707895c684c893",
+            "self_video": false,
+            "self_mute": false,
+            "self_deaf": false,
+            "request_to_speak_timestamp": null,
+            "mute": false,
+            "guild_id": "346094316428591104",
+            "deaf": false,
+            "channel_id": "454434922908876811"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617cea353829499e9a0b4c15"
+        },
+        "t": "VOICE_STATE_UPDATE",
+        "s": 8,
+        "op": 0,
+        "d": {
+            "member": {
+                "user": {
+                    "username": "UnknownChain",
+                    "id": "214057188312875008",
+                    "discriminator": "6867",
+                    "avatar": "a24f17e92545a6c0faf1f92deff5e20a"
+                },
+                "roles": [
+                    "346105578516512778",
+                    "454441386578542592",
+                    "461350690082521098",
+                    "511056018801950731",
+                    "688550413061980328"
+                ],
+                "mute": false,
+                "joined_at": "2018-03-28T23:51:25.990000+00:00",
+                "hoisted_role": null,
+                "deaf": false
+            },
+            "user_id": "214057188312875008",
+            "suppress": false,
+            "session_id": "31762fd44ce9ce1971707895c684c893",
+            "self_video": false,
+            "self_mute": true,
+            "self_deaf": false,
+            "request_to_speak_timestamp": null,
+            "mute": false,
+            "guild_id": "346094316428591104",
+            "deaf": false,
+            "channel_id": "454434922908876811"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617cea593829499e9a0b4c18"
+        },
+        "t": "VOICE_STATE_UPDATE",
+        "s": 10,
+        "op": 0,
+        "d": {
+            "member": {
+                "user": {
+                    "username": "UnknownChain",
+                    "id": "214057188312875008",
+                    "discriminator": "6867",
+                    "avatar": "a24f17e92545a6c0faf1f92deff5e20a"
+                },
+                "roles": [
+                    "346105578516512778",
+                    "454441386578542592",
+                    "461350690082521098",
+                    "511056018801950731",
+                    "688550413061980328"
+                ],
+                "mute": false,
+                "joined_at": "2018-03-28T23:51:25.990000+00:00",
+                "hoisted_role": null,
+                "deaf": false
+            },
+            "user_id": "214057188312875008",
+            "suppress": false,
+            "session_id": "31762fd44ce9ce1971707895c684c893",
+            "self_video": false,
+            "self_mute": false,
+            "self_deaf": false,
+            "request_to_speak_timestamp": null,
+            "mute": false,
+            "guild_id": "346094316428591104",
+            "deaf": false,
+            "channel_id": "454434922908876811"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617cef1cab8e8bb1a8e9e343"
+        },
+        "t": "VOICE_STATE_UPDATE",
+        "s": 4,
+        "op": 0,
+        "d": {
+            "member": {
+                "user": {
+                    "username": "UnknownChain",
+                    "id": "214057188312875008",
+                    "discriminator": "6867",
+                    "avatar": "a24f17e92545a6c0faf1f92deff5e20a"
+                },
+                "roles": [
+                    "346105578516512778",
+                    "454441386578542592",
+                    "461350690082521098",
+                    "511056018801950731",
+                    "688550413061980328"
+                ],
+                "mute": false,
+                "joined_at": "2018-03-28T23:51:25.990000+00:00",
+                "hoisted_role": null,
+                "deaf": false
+            },
+            "user_id": "214057188312875008",
+            "suppress": false,
+            "session_id": "31762fd44ce9ce1971707895c684c893",
+            "self_video": false,
+            "self_mute": false,
+            "self_deaf": false,
+            "request_to_speak_timestamp": null,
+            "mute": false,
+            "guild_id": "346094316428591104",
+            "deaf": false,
+            "channel_id": "454434922908876811"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "617cf2afab8e8bb1a8e9e365"
+        },
+        "t": "VOICE_STATE_UPDATE",
+        "s": 16,
+        "op": 0,
+        "d": {
+            "member": {
+                "user": {
+                    "username": "Antalis",
+                    "id": "323985437746003970",
+                    "discriminator": "0616",
+                    "avatar": "0e2ccc36af65d5d0ee753933dfd7f43d"
+                },
+                "roles": [
+                    "346105578516512778",
+                    "449771079758643211",
+                    "454441386578542592",
+                    "461350690082521098",
+                    "511056018801950731",
+                    "688550413061980328",
+                    "763077845907406909"
+                ],
+                "premium_since": null,
+                "pending": false,
+                "nick": null,
+                "mute": false,
+                "joined_at": "2018-03-28T01:17:48.316000+00:00",
+                "is_pending": false,
+                "hoisted_role": null,
+                "deaf": false,
+                "avatar": null
+            },
+            "user_id": "323985437746003970",
+            "suppress": false,
+            "session_id": "a9587f6016fe5ef08528dbef73b92894",
+            "self_video": false,
+            "self_mute": false,
+            "self_deaf": false,
+            "request_to_speak_timestamp": null,
+            "mute": false,
+            "guild_id": "346094316428591104",
+            "deaf": false,
+            "channel_id": "454434922908876811"
+        }
+    }
+]
