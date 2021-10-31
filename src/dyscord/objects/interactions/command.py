@@ -147,7 +147,7 @@ class Command(BaseDiscordObject):
         if hasattr(self, 'options'):
             del self.options
 
-    async def register_to_guild(self, guild: 'Union[ext_guild.Guild, snowflake.Snowflake]') -> dict:
+    async def register_to_guild(self, guild: 'Union[ext_guild.Guild, snowflake.Snowflake, str]') -> dict:
         '''Register a Command to a specific guild discord scope.
 
         Note that discord will limit you to 200 of these calls per bot per guild per day.
@@ -156,6 +156,8 @@ class Command(BaseDiscordObject):
             guild_id = guild
         elif isinstance(guild, ext_guild.Guild):
             guild_id = guild.id
+        elif isinstance(guild, str):
+            guild_id = snowflake.Snowflake(guild)
         return await api.API.create_guild_application_command(guild_id, self.to_dict())
 
     async def register_globally(self) -> dict:
