@@ -44,7 +44,7 @@ class BaseDiscordObject(ABC):
                 setattr(self, attribute_key, value)
                 continue
             function = self._auto_map[attribute_key]
-            if function is None:
+            if (function is None) or (value is None):
                 continue
             if isinstance(function, list):
                 if len(function) != 1:

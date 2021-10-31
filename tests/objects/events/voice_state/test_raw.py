@@ -1,19 +1,20 @@
-from src.dyscord.objects.events import GuildMemberUpdate
+from src.dyscord.objects.events import VoiceState
 
 from . import samples
 
 
 def test_instance():
 
-    obj = GuildMemberUpdate()
-    assert isinstance(obj, GuildMemberUpdate)
+    obj = VoiceState()
+    assert isinstance(obj, VoiceState)
 
 
 def test_raw_samples():
 
-    for sample in samples.raw_guild_member_update_samples:
+    for sample in samples.raw_voice_state_update_samples:
         data = sample['d']
-        obj = GuildMemberUpdate(data)
+        print(data)
+        obj = VoiceState(data)
         for key in data:
             if key == 'hoisted_role':
                 continue

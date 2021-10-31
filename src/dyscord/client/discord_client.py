@@ -539,7 +539,7 @@ class DiscordClient:
             obj = objects.events.typing_start.TypingStart().from_dict(data['d'])
 
         elif event_type == 'VOICE_STATE_UPDATE':
-            warnings.warn(f'Encountered unhandled event {event_type}')
+            obj = objects.events.voice_state.VoiceState(data=data['d'])
 
         elif event_type == 'WEBHOOKS_UPDATE':
             warnings.warn(f'Encountered unhandled event {event_type}')
