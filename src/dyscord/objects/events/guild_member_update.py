@@ -32,6 +32,7 @@ class GuildMemberUpdate(BaseDiscordObject):
     deaf: 'Optional[bool]' = None  # type: ignore
     mute: 'Optional[bool]' = None  # type: ignore
     pending: 'Optional[bool]' = None  # type: ignore
+    is_pending: 'Optional[bool]' = None  # type: ignore
 
     @property
     def _auto_map(self):
@@ -47,4 +48,5 @@ class GuildMemberUpdate(BaseDiscordObject):
             'mute': bool,
             'pending': bool,
             'hoisted_role': copy.copy,
+            'is_pending': bool,
         }

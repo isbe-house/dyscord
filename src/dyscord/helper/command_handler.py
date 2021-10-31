@@ -132,7 +132,6 @@ class CommandHandler:
                 try:
                     await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
                 except Exception as e:
-                    raise e
                     raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
         except httpx.HTTPStatusError:
