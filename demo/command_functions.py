@@ -1,28 +1,44 @@
-from src.dyscord.helper.interactions import Question, Confirmation
+import difflib
+
 from src.dyscord.objects.interactions.interaction import Interaction
 from src.dyscord.utilities.log import Log
 
 
 async def test(interaction: Interaction):
     log = Log()
+    if interaction.type == Interaction.INTERACTION_TYPES.APPLICATION_COMMAND_AUTOCOMPLETE:
+        log.info('Process autocompete interactio.')
+        print('Server asking for auto complete, lets give it to them!')
+        response = interaction.generate_response(interaction.INTERACTION_RESPONSE_TYPES.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT)
 
-    try:
-        log.info(f'[{interaction.data.options}]')
-        assert interaction.data is not None
-        cleanup: bool = interaction.data.options['cleanup']
-    except Exception:
-        log.critical('No cleanup give, assume true.')
-        cleanup: bool = True
+        demo_names = [
+            'SotonAshKetch',
+            'SotonBrandUm',
+            'SotonBuffUm',
+            'Sotonis',
+            'SotonJabanesJabon',
+            'SotonLegoPoison',
+            'SotonPlantPotPewPew',
+            'SotonPokemondRed',
+            'SotonShockUm',
+        ]
 
-    cleanup = False
-    auto_respond = True
-    print(f'Test function got cleanup of [{cleanup}].')
+        choices = difflib.get_close_matches(interaction.data.options['name'], demo_names, 5, cutoff=0)
 
-    q = Question(interaction, 'What is your favorite bird?', ['Robin', 'Eagle', 'Crow'], cleanup=cleanup, auto_respond=auto_respond)
-    await q.ask()
+        while len(choices) < 5:
+            choices.append(demo_names[0])
 
-    a = await Confirmation(q, 'Are you sure?', auto_respond=True).ask()
-    print(a)
+        for choice in choices:
+            response.add_choice(choice, choice)
+
+        print(response.to_dict())
+        await response.send()
+        return
+
+    log.info('Process full interaction.')
+    response = interaction.generate_response()
+    response.generate('Okay!', ephemeral=True)
+    await response.send()
 
 
 async def complex(interaction: Interaction):

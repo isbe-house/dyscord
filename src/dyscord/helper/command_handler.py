@@ -105,7 +105,7 @@ class CommandHandler:
 
         if interaction.type == interactions.enumerations.INTERACTION_TYPES.MESSAGE_COMPONENT:
             await cls.handle_message_component(client, interaction)
-        elif interaction.type == interactions.enumerations.INTERACTION_TYPES.APPLICATION_COMMAND:
+        elif interaction.type in [interactions.enumerations.INTERACTION_TYPES.APPLICATION_COMMAND, interactions.enumerations.INTERACTION_TYPES.APPLICATION_COMMAND_AUTOCOMPLETE]:
             await cls.handle_application_command(client, interaction)
 
     @classmethod

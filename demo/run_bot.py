@@ -56,22 +56,19 @@ async def purge_commands(client, message: Message):
     client._log.info('Get global commands')
     commands = await API.get_global_application_commands()
     for command in commands:
-        print(command)
         command = Command().from_dict(command)
         assert command.id is not None
         await API.delete_global_application_command(command.id)
 
     client._log.info('Get guild commands')
-    print(message.guild)
-    print(message.guild_id)
     assert message.guild is not None
     guild: Guild = message.guild
     commands = await API.get_guild_application_commands(guild.id)
     for command in commands:
-        print(command)
-        # command = Command().from_dict(command)
-        # assert command.id is not None
-        # await API.delete_guild_application_command(guild.id, command.id)
+        command = Command().from_dict(command)
+        print(command.name)
+        assert command.id is not None
+        await API.delete_guild_application_command(guild.id, command.id)
 
 
 async def register_commands(client: dyscord.client.DiscordClient, message):
@@ -86,14 +83,14 @@ async def register_commands(client: dyscord.client.DiscordClient, message):
         description='Generic test slash command.',
         type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
     )
-    new_command.add_option_typed(new_command.COMMAND_OPTION.BOOLEAN, 'cleanup', 'Cleanup commands after execution?', required=False)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.STRING, 'name', 'Guess a name.', autocomplete=True, cutoff=0)
 
     new_command.validate()
 
     registration = await new_command.register_to_guild(guild)
     log.info(f'Registration: {registration}')
-    registration = await new_command.register_globally()
-    log.info(f'Registration: {registration}')
+    # registration = await new_command.register_globally()
+    # log.info(f'Registration: {registration}')
 
     new_command = Command()
     new_command.generate(
@@ -116,8 +113,8 @@ async def register_commands(client: dyscord.client.DiscordClient, message):
 
     registration = await new_command.register_to_guild(guild)
     log.info(f'Registration: {registration}')
-    registration = await new_command.register_globally()
-    log.info(f'Registration: {registration}')
+    # registration = await new_command.register_globally()
+    # log.info(f'Registration: {registration}')
 
 
 async def list_commands(client):

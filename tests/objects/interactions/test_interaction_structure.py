@@ -5,7 +5,6 @@ from src.dyscord.objects.snowflake import Snowflake
 from src.dyscord.objects.interactions import Interaction, Command, enumerations
 from . import samples
 from ..channel import samples as channel_samples
-from ..user import samples as user_samples
 from ..role import samples as role_samples
 
 from ...fixtures import mock_api  # noqa: F401
@@ -25,15 +24,17 @@ def test_text_interaction(mock_api):  # noqa: F811
     obj = Interaction().from_dict(data)
     assert obj.application_id == Snowflake(data['application_id'])
     assert hasattr(obj, 'data')
-    mock_api.get_user.assert_called()
+    mock_api.get_user.assert_not_called()
 
     assert obj.can_respond
     assert not obj.can_followup
 
-    response = obj.generate_response()
+    response = obj.generate_response(ephemeral=True)
     ar = response.add_components()
     ar.add_button(ar.BUTTON_STYLES.PRIMARY, 'foo', 'My Button')
     ar.add_select_menu('bar', 'placeholder?')
+
+    assert response.data.flags & enumerations.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
 
     followup = obj.generate_followup()
     followup.generate('This is a followup message!', tts=True)
@@ -60,8 +61,8 @@ def test_complex_chat(mock_api):  # noqa: F811
     assert obj.data is not None
 
     assert type(obj.data.options) is dict
-    assert obj.data.options['edit'].options['user'].options['target'].username == 'Nelly'
-    mock_api.get_user.assert_called()
+    assert obj.data.options['edit'].options['user'].options['target'].username == 'Soton'
+    mock_api.get_user.assert_not_called()
 
 
 def test_build_sub_commands():
@@ -96,14 +97,15 @@ def test_build_sub_commands_groups():
 
 def test_all_types(mock_api):  # noqa: F811
     mock_api.get_channel = AsyncMock(return_value=channel_samples.dev_guild_text)
-    mock_api.get_user = AsyncMock(return_value=user_samples.raw_get_user_response)
+    mock_api.get_user = AsyncMock(side_effect=RuntimeError)
     mock_api.get_guild_roles = AsyncMock(return_value=[role_samples.dev_role])
 
     obj = Interaction().from_dict(samples.all_types)
     assert obj is not None
-    mock_api.get_channel.assert_called()
-    mock_api.get_user.assert_called()
-    mock_api.get_guild_roles.assert_called()
+    mock_api.get_channel.assert_not_called()
+    print(mock_api.get_user.call_args)
+    mock_api.get_user.assert_not_called()
+    mock_api.get_guild_roles.assert_not_called()
 
 
 def test_simple_interaction():
@@ -143,3 +145,13 @@ async def test_responses(mock_api):  # noqa: F811
     mock_api.delete_original_interaction_response.assert_called()
     mock_api.edit_followup_message.assert_called()
     mock_api.delete_followup_message.assert_called()
+
+
+def test_invalid_interaction_data():
+
+    data = samples.all_types
+
+    data['data']['resolved']['foo'] = {'Bad': 'Type'}
+
+    with pytest.raises(TypeError):
+        Interaction().from_dict(data)

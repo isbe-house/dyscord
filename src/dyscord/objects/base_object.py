@@ -59,6 +59,14 @@ class BaseDiscordObject(ABC):
                 setattr(self, attribute_key, function(value))
         return self
 
+    def validate(self):
+        '''Check for valid object type.
+
+        Raises:
+            NotImplementedError: Always.
+        '''
+        raise NotImplementedError('This object does not support validation.')
+
     @staticmethod
     def _fromtimestamp_milliseconds(time_stamp):
         return datetime.fromtimestamp(time_stamp / 1000)
