@@ -1,4 +1,4 @@
-name: Python Testing
+name: Codecov
 on:
   push:
     branches:
