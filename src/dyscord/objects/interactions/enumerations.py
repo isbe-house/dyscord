@@ -2,21 +2,6 @@
 import enum
 
 
-class CHANNEL_TYPE(enum.IntEnum):
-    '''Types of channels.'''
-    GUILD_TEXT = 0  # a text channel within a server
-    DM = 1  # a direct message between users
-    GUILD_VOICE = 2  # a voice channel within a server
-    GROUP_DM = 3  # a direct message between multiple users
-    GUILD_CATEGORY = 4  # an organizational category that contains up to 50 channels
-    GUILD_NEWS = 5  # a channel that users can follow and crosspost into their own server
-    GUILD_STORE = 6  # a channel in which game developers can sell their game on Discord
-    GUILD_NEWS_THREAD = 10  # a temporary sub-channel within a GUILD_NEWS channel
-    GUILD_PUBLIC_THREAD = 11  # a temporary sub-channel within a GUILD_TEXT channel
-    GUILD_PRIVATE_THREAD = 12  # a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
-    GUILD_STAGE_VOICE = 13  # a voice channel for hosting events with an audience
-
-
 class COMMAND_TYPE(enum.IntEnum):
     '''Type of command.
 
@@ -61,21 +46,30 @@ class BUTTON_STYLES(enum.IntEnum):
 
 
 class INTERACTION_TYPES(enum.IntEnum):
-    '''Types of interactions.'''
+    '''Types of interactions.
+
+    Attributes:
+        PING: Used by server to get online status of webhook based applications. Handled by Dyscord in background.
+        APPLICATION_COMMAND: Command was a `/slash` style command, typed by the user.
+        MESSAGE_COMPONENT: Command was an interaction directly with a `Message` or `User`, the client right clicked on them.
+        APPLICATION_COMMAND_AUTOCOMPLETE: User it attempting to complete an interaction as is asking for suggestions.
+    '''
     PING = 1
     APPLICATION_COMMAND = 2
     MESSAGE_COMPONENT = 3
+    APPLICATION_COMMAND_AUTOCOMPLETE = 4
 
 
 class INTERACTION_RESPONSE_TYPES(enum.IntEnum):
     '''Types of interaction responses.
 
     Attributes:
-        PONG: ACK a Ping
+        PONG: ACK a Ping.
         CHANNEL_MESSAGE_WITH_SOURCE: Respond to an interaction with a message.
         DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE: ACK an interaction and edit a response later, the user sees a loading state.
         DEFERRED_UPDATE_MESSAGE: Only for components (Not slash commands), ACK an interaction and edit the original message later; the user does not see a loading state.
-        UPDATE_MESSAGE: Only for components (Not slash commands), edit the message the component was attached to
+        UPDATE_MESSAGE: Only for components (Not slash commands), edit the message the component was attached to.
+        APPLICATION_COMMAND_AUTOCOMPLETE_RESULT: Respond to an autocomplete interaction with suggested choices.
 
     '''
     PONG = 1  # ACK a Ping
@@ -83,8 +77,10 @@ class INTERACTION_RESPONSE_TYPES(enum.IntEnum):
     DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5  # ACK an interaction and edit a response later, the user sees a loading state
     DEFERRED_UPDATE_MESSAGE = 6  # for components, ACK an interaction and edit the original message later; the user does not see a loading state
     UPDATE_MESSAGE = 7  # for components, edit the message the component was attached to
+    APPLICATION_COMMAND_AUTOCOMPLETE_RESULT = 8  # respond to an autocomplete interaction with suggested choices
 
 
 class INTERACTION_CALLBACK_FLAGS(enum.IntFlag):
     '''Flags for callback methods.'''
+    NONE = 0
     EPHEMERAL = (1 << 6)  # only the user receiving the message can see it

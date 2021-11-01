@@ -11,20 +11,52 @@ from ...client import api
 from ..base_object import BaseDiscordObject
 
 from .. import snowflake, guild as ext_guild
+from ..enumerations import CHANNEL_TYPES
 
 from . import enumerations
+
+
+class ChoiceAdderBase(abc.ABC):
+    '''Allow other objects to start adding components to themselves with a common set of helper functions.
+
+    Caution: This is an abstract class, and is not intended for direct instantiation.
+    '''
+
+    choices: 'Optional[List[CommandOptionChoiceStructure]]' = None
+
+    def add_choice(self,
+                   name: str,
+                   value: Union[str, int, float],
+                   ) -> 'CommandOptionChoiceStructure':
+        '''Add a choice to the object.'''
+        if not isinstance(self.choices, list):
+            self.choices = list()
+        assert type(self.choices) is list
+        new_choice = CommandOptionChoiceStructure()
+        new_choice.name = name
+        new_choice.value = value
+        self.choices.append(new_choice)
+
+        return new_choice
+
+    def add_choices(self) -> None:
+        '''Add a choice to the object.'''
+        if not isinstance(self.choices, list):
+            self.choices = list()
 
 
 class Command(BaseDiscordObject):
     '''Command root used to generate new commands.
 
     Attributes:
-        COMMAND_TYPE (COMMAND_TYPE): Helper pointer to the COMMAND_TYPE enumeration.
-        COMMAND_OPTION (COMMAND_OPTION): Helper pointer to the COMMAND_OPTION enumeration.
         id (Snowflake): Unique ID of the command.
         type (Optional[COMMAND_TYPE]): Type of the command.
         application_id: (Snowflake): Unique id of the parent application.
+        guild_id (Snowflake): Guild ID of the command.
+        name: (str): Name of the command.
 
+        COMMAND_TYPE (COMMAND_TYPE): Helper pointer to the COMMAND_TYPE enumeration.
+        COMMAND_OPTION (COMMAND_OPTION): Helper pointer to the COMMAND_OPTION enumeration.
     '''
 
     COMMAND_TYPE = enumerations.COMMAND_TYPE
@@ -125,6 +157,8 @@ class Command(BaseDiscordObject):
                          description: str,
                          required: bool = True,
                          choices: Optional[List['CommandOptionChoiceStructure']] = None,
+                         autocomplete: 'Optional[bool]' = None,
+                         channel_types: 'Optional[List[CHANNEL_TYPES]]' = None
                          ) -> 'CommandOptions':
         '''Add option to the command.'''
         new_option = CommandOptions()  # type: ignore
@@ -132,6 +166,12 @@ class Command(BaseDiscordObject):
         new_option.name = name
         new_option.description = description
         new_option.required = required
+        new_option.autocomplete = autocomplete
+        new_option.channel_types = copy.deepcopy(channel_types)
+
+        if channel_types is not None and type != enumerations.COMMAND_OPTION.CHANNEL:
+            raise ValueError('Cannot give channel_types if type is not COMMAND_OPTION.CHANNEL!')
+
         if choices is not None:
             new_option.choices = copy.deepcopy(choices)
 
@@ -273,7 +313,18 @@ class Command(BaseDiscordObject):
 
 
 class CommandOptionsBase(BaseDiscordObject, abc.ABC):
-    '''Abstract base for options.'''
+    '''Abstract base for options.
+
+    Attributes:
+        type (COMMAND_OPTION): Type of the option.
+        name (str): Name of the option.
+        description (str): Human description of the option.
+        required (bool): If the option is required.
+        autocomplete (bool): If auto complete is requested for this option, default is no.
+        choices ([CommandOptionChoiceStructure]): Array of choices for this option.
+        options ([CommandOptions]): Array of options if this is a Subcommand or SubCommandGroup.
+        channel_types: ([CHANNEL_TYPES]): Array of channels types to filter against if type supports channel mentions.
+    '''
 
     # Handy shortcut
     COMMAND_OPTION = enumerations.COMMAND_OPTION
@@ -281,11 +332,13 @@ class CommandOptionsBase(BaseDiscordObject, abc.ABC):
     type: 'enumerations.COMMAND_OPTION'                       # one of application command option type the type of option
     name: str                                                 # string 1-32 character name
     description: str                                          # string 1-100 character description
-    required: bool                                            # boolean if the parameter is required or optional--default false
-    choices: Optional[List['CommandOptionChoiceStructure']]   # array of application command option choice choices for STRING, INTEGER, and
+    required: bool
+    autocomplete: 'Optional[bool]' = None
+    choices: 'Optional[List[CommandOptionChoiceStructure]]' = None  # array of application command option choice choices for STRING, INTEGER, and
     # NUMBER types for the user to pick from, max 25
     options: Optional[List['CommandOptions']]                 # array of application command option if the option is a subcommand or subcommand group type,
     # this nested options will be the parameters
+    channel_types: 'Optional[List[CHANNEL_TYPES]]' = None  # Array of valid channel types when type supports channel mentions.
 
     def from_dict(self, data: dict) -> 'CommandOptionsBase':
         '''Parse a CommandOptionsBase from an API compliant dict.'''
@@ -315,7 +368,9 @@ class CommandOptionsBase(BaseDiscordObject, abc.ABC):
         ret_dict['description'] = self.description
         if hasattr(self, 'required'):
             ret_dict['required'] = self.required
-        if hasattr(self, 'choices'):
+        if self.autocomplete is not None:
+            ret_dict['autocomplete'] = self.autocomplete
+        if hasattr(self, 'choices') and self.choices is not None:
             ret_dict['choices'] = list()
             assert type(ret_dict['choices']) is list  # This has got to be the stupidest assert ever, but mypy wants it!
             assert type(self.choices) is list
@@ -327,6 +382,11 @@ class CommandOptionsBase(BaseDiscordObject, abc.ABC):
             assert type(self.options) is list
             for option in self.options:
                 ret_dict['options'].append(option.to_dict())
+        if self.channel_types is not None:
+            ret_dict['channel_types'] = list()
+            assert type(ret_dict['channel_types']) is list
+            for channel_type in self.channel_types:
+                ret_dict['channel_types'].append(channel_type.value)
 
         return ret_dict
 
@@ -354,7 +414,6 @@ class CommandOptionsBase(BaseDiscordObject, abc.ABC):
             total_characters += len(self.name)
         if hasattr(self, 'description') and type(self.description) is str:
             total_characters += len(self.description)
-
         if hasattr(self, 'choices') and type(self.choices) is list:
             for choice in self.choices:
                 total_characters += choice.total_characters()
@@ -364,7 +423,7 @@ class CommandOptionsBase(BaseDiscordObject, abc.ABC):
         return total_characters
 
 
-class CommandOptions(CommandOptionsBase):
+class CommandOptions(CommandOptionsBase, ChoiceAdderBase):
     '''Options for a Command.'''
 
     def add_choice(self,

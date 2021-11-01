@@ -27,6 +27,14 @@ def test_simply_child():
     with pytest.raises(NotImplementedError):
         obj._auto_dict({})
 
+    with pytest.raises(NotImplementedError):
+        obj.validate()
+
+    Child._auto_map = {'test': str}
+    obj = Child()
+    with pytest.warns(RuntimeWarning, match=r'unexpected attribute key'):
+        obj.from_dict({'test2': 1234})
+
 
 def test_simply_child2():
     class Child(BaseDiscordObject):

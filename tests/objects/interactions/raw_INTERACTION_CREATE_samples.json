@@ -39,5 +39,33 @@
             "channel_id": "804392362629267458",
             "application_id": "889065662641737791"
         }
+    },
+    {
+        "_id": {
+            "$oid": "617f0df56232ebf78f72e915"
+        },
+        "t": "INTERACTION_CREATE",
+        "s": 21,
+        "op": 0,
+        "d": {
+            "version": 1,
+            "user": {
+                "username": "Soton",
+                "public_flags": 0,
+                "id": "185846097284038656",
+                "discriminator": "2585",
+                "avatar": "ce48763db4ef0884f6d95fedead4f47c"
+            },
+            "type": 2,
+            "token": "aW50ZXJhY3Rpb246OTA0NDg1NzEwMDg4Nzk0MTMzOnJUc25iQk5aVW9XZGRpcDJsejZxVGFuTWpJNTVuRGZ1eElWeFlON0xQaWZNS2ZXUTNSWmFnTFlGQzVhczdIRHNUWG5maW1KRGl2NWoxa0M4TjhiTHg1YVloN0RlS1FmajdHZG1WVkhwZzFpSVNaZTdLMWJVWGJ3TVpIaXNUN3ZT",
+            "id": "904485710088794133",
+            "data": {
+                "type": 1,
+                "name": "complex",
+                "id": "904485667491434566"
+            },
+            "channel_id": "891042668744945704",
+            "application_id": "889065662641737791"
+        }
     }
 ]

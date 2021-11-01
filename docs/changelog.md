@@ -2,6 +2,17 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.4.4] 2021-10-31
+### Added
+- Support for autocomplete `Interaction` flows.
+- All `BaseDiscordObjects` now support `validation` as a defaulted (NonImplemented) function. All classes should implement this soon.
+
+### Removed
+- We had a `CHANNEL_TYPE` and `CHANNEL_TYPES` enumeration in two places, removed the one in `interactions`.
+
+### Fixed
+- Interaction processing called the API without reason, fixed that.
+
 ## [v0.4.3] 2021-10-31
 ### Added
 - Handle `VOICE_STATE_UPDATE` events.

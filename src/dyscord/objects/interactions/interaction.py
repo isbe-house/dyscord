@@ -1,4 +1,3 @@
-import asyncio
 from collections import defaultdict
 from typing import Any, Optional, Union, List, Dict
 
@@ -32,6 +31,7 @@ class Interaction(BaseDiscordObject):
     '''
 
     INTERACTION_RESPONSE_TYPES = enumerations.INTERACTION_RESPONSE_TYPES
+    INTERACTION_TYPES = enumerations.INTERACTION_TYPES
 
     id: snowflake.Snowflake
     application_id: snowflake.Snowflake
@@ -66,7 +66,6 @@ class Interaction(BaseDiscordObject):
 
     def from_dict(self, data: dict) -> 'Interaction':
         '''Import data from dict and populate object with it.'''
-        self._log.info('Parsing  a Interaction dict')
         self.application_id = snowflake.Snowflake(data['application_id'])
         self.id = snowflake.Snowflake(data['id'])
         self.token = str(data['token'])
@@ -77,6 +76,7 @@ class Interaction(BaseDiscordObject):
         if 'guild_id' in data:
             self.guild_id = snowflake.Snowflake(data['guild_id'])
         if 'data' in data:
+            # Provide none if we don't get a guild_id!
             guild_id = snowflake.Snowflake(data['guild_id']) if 'guild_id' in data else None
             self.data = InteractionData().from_dict(data['data'], guild_id)
         if 'channel_id' in data:
@@ -110,7 +110,7 @@ class Interaction(BaseDiscordObject):
         new_response.type = type
         # new_response.generate(content, tts)  # TODO: Support this here too!
         if ephemeral:
-            new_response.data.flags |= enumerations.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
+            new_response.data.flags = enumerations.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         return new_response
 
     def generate_followup(self,
@@ -133,7 +133,7 @@ class InteractionData(BaseDiscordObject):
     id: snowflake.Snowflake  # snowflake the ID of the invoked command Application Command
     name: str  # string the name of the invoked command Application Command
     type: enumerations.COMMAND_TYPE  # integer the type of the invoked command Application Command
-    resolved: Dict[str, dict]  # ? resolved data converted users + roles + channels Application Command
+    resolved: Dict[str, dict] = None  # type: ignore # ? resolved data converted users + roles + channels Application Command
     options: Dict[str, Any]  # ? array of application command interaction data option the params + values from the user Application Command
     custom_id: str  # ? string the custom_id of the component Component
     component_type: Optional[enumerations.COMPONENT_TYPES]  # ? integer the type of the component Component
@@ -142,7 +142,6 @@ class InteractionData(BaseDiscordObject):
 
     def from_dict(self, data: dict, guild_id: Optional['snowflake.Snowflake'] = None) -> 'InteractionData':  # noqa: C901
         '''Import data from dict and populate object with it.'''
-        self._log.info('Parse a InteractionData dict.')
         if 'id' in data:
             self.id = snowflake.Snowflake(data['id'])
         if 'name' in data:
@@ -150,21 +149,19 @@ class InteractionData(BaseDiscordObject):
         if 'type' in data:
             self.type = enumerations.COMMAND_TYPE(data['type'])
         if 'resolved' in data:
-            self._log.info('FOUND RESOLVED!')
             self.resolved = defaultdict(lambda: dict())
             for resolution_type in data['resolved']:
-                self._log.info(f'Resolved [{resolution_type}].')
                 for entry_id in data['resolved'][resolution_type]:
                     if resolution_type == 'members':
-                        self.resolved[resolution_type][entry_id] = ext_user.Member()
+                        self.resolved[resolution_type][entry_id] = ext_user.Member().from_dict(data['resolved'][resolution_type][entry_id])
                     elif resolution_type == 'users':
-                        self.resolved[resolution_type][entry_id] = ext_user.User()
+                        self.resolved[resolution_type][entry_id] = ext_user.User().from_dict(data['resolved'][resolution_type][entry_id])
                     elif resolution_type == 'messages':
-                        self.resolved[resolution_type][entry_id] = ext_message.Message()
+                        self.resolved[resolution_type][entry_id] = ext_message.Message().from_dict(data['resolved'][resolution_type][entry_id])
                     elif resolution_type == 'channels':
-                        self.resolved[resolution_type][entry_id] = channel.ChannelImporter()
+                        self.resolved[resolution_type][entry_id] = channel.ChannelImporter().from_dict(data['resolved'][resolution_type][entry_id])
                     elif resolution_type == 'roles':
-                        self.resolved[resolution_type][entry_id] = role.Role()
+                        self.resolved[resolution_type][entry_id] = role.Role().from_dict(data['resolved'][resolution_type][entry_id])
                     else:
                         self._log.critical(f'Cannot resolve type [{resolution_type}]!')
                         raise TypeError
@@ -180,7 +177,7 @@ class InteractionData(BaseDiscordObject):
         self.options = dict()
         if 'options' in data:
             for option_dict in data['options']:
-                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id).parse(guild_id)
+                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id, self.resolved).parse(guild_id, self.resolved)
         return self
 
 
@@ -202,7 +199,7 @@ class InteractionDataOptionStructure(BaseDiscordObject):
         if hasattr(self, 'options') and type(self.options) is dict:
             return item in self.options
 
-    def from_dict(self, data: dict, guild_id: Optional['snowflake.Snowflake'] = None) -> 'InteractionDataOptionStructure':  # noqa: C901
+    def from_dict(self, data: dict, guild_id: Optional['snowflake.Snowflake'] = None, resolved: dict = None) -> 'InteractionDataOptionStructure':  # noqa: C901
         '''Import data from dict and populate object with it.'''
         self.name = data['name']
         self.type = enumerations.COMMAND_OPTION(data['type'])
@@ -228,10 +225,10 @@ class InteractionDataOptionStructure(BaseDiscordObject):
         self.options = dict()
         if 'options' in data:
             for option_dict in data['options']:
-                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id).parse(guild_id)
+                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id, resolved).parse(guild_id, resolved)
         return self
 
-    def parse(self, guild_id: Optional['snowflake.Snowflake'] = None):  # noqa: C901
+    def parse(self, guild_id: Optional['snowflake.Snowflake'] = None, resolution_map: dict = None):  # noqa: C901
         '''Look at the type field of self and attempt to return a sane result.
 
         For SUB_COMMAND and SUB_COMMAND_GROUP types, return another InteractionDataOptionStructure object.
@@ -246,29 +243,25 @@ class InteractionDataOptionStructure(BaseDiscordObject):
             return self.value
 
         assert type(self.value) is snowflake.Snowflake
+        if resolution_map is None:
+            raise RuntimeError('Cannot parse without a resolution map!')
 
         if self.type == CO.USER:
-            return ext_user.User().from_dict(asyncio.run(api.API.get_user(self.value)))
-
+            return resolution_map['users'][str(self.value)]
         if self.type == CO.CHANNEL:
-            return channel.Channel().from_dict(asyncio.run(api.API.get_channel(self.value)))
-
+            return resolution_map['channels'][str(self.value)]
         if self.type == CO.ROLE:
-            assert type(guild_id) is snowflake.Snowflake
-            roles_list = asyncio.run(api.API.get_guild_roles(guild_id))
-            for role_dict in roles_list:
-                if role_dict['id'] == self.value:
-                    return role.Role().from_dict(role_dict)
-
+            return resolution_map['roles'][str(self.value)]
         if self.type == CO.MENTIONABLE:
-            try:
-                return ext_user.User().from_dict(asyncio.run(api.API.get_user(self.value)))
-            except Exception:
-                assert type(guild_id) is snowflake.Snowflake
-                roles_list = asyncio.run(api.API.get_guild_roles(guild_id))
-                for role_dict in roles_list:
-                    if role_dict['id'] == self.value:
-                        return role.Role().from_dict(role_dict)
+            value_key = str(self.value)
+            if value_key in resolution_map['users']:
+                return resolution_map['users'][str(value_key)]
+            elif value_key in resolution_map['members']:
+                return resolution_map['members'][str(value_key)]
+            elif value_key in resolution_map['roles']:
+                return resolution_map['roles'][str(value_key)]
+            elif value_key in resolution_map['channels']:
+                return resolution_map['channels'][str(value_key)]
 
 
 class InteractionResponse(BaseDiscordObject):
@@ -314,6 +307,27 @@ class InteractionResponse(BaseDiscordObject):
     def add_embeds(self) -> 'ext_embed.Embed':
         '''Add embed objects to the data attribute.'''
         return self.data.add_embeds()
+
+    def add_choices(self) -> None:
+        '''Add choice.'''
+        self.data.choices = list()
+
+    def add_choice(self, name: str, value: str) -> 'command.CommandOptionChoiceStructure':
+        '''Add choice.'''
+        return self.data.add_choice(name, value)
+
+    def validate(self):
+        '''Validated object.'''
+        if not hasattr(self, 'type'):
+            raise AttributeError('Must have a type.')
+
+        if self.type == self.INTERACTION_RESPONSE_TYPES.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT:
+            if type(self.data.choices) is not list:
+                raise AttributeError('Autocomplete responses must have choices, or have called .add_choices() to initialize a blank list.')
+            if len(self.data.choices) > 25:
+                raise AttributeError('Cannot have more than 25 choices.')
+
+        self.data.validate()
 
 
 class InteractionFollowup(BaseDiscordObject):
@@ -384,12 +398,12 @@ class InteractionFollowup(BaseDiscordObject):
         data_structure: dict = dict()
         if hasattr(self.data, 'content'):
             data_structure['content'] = self.data.content
-        if hasattr(self.data, 'embeds'):
+        if self.data.embeds is not None:
             data_structure['embeds'] = list()
             assert type(self.data.embeds) is list
             for embed in self.data.embeds:
                 data_structure['embeds'].append(embed.to_dict())
-        if hasattr(self.data, 'components'):
+        if self.data.components is not None:
             data_structure['components'] = list()
             assert type(self.data.components) is list
             for component in self.data.components:
@@ -419,48 +433,57 @@ class InteractionFollowup(BaseDiscordObject):
         '''Add embed objects to the data attribute.'''
         return self.data.add_embeds()
 
+    def validate(self):
+        '''Validated object.'''
+        self.data.validate()
 
-class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder):
+
+class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_embed.EmbedAdder, command.ChoiceAdderBase):
     '''InteractionCallback.'''
 
     INTERACTION_CALLBACK_FLAGS = enumerations.INTERACTION_CALLBACK_FLAGS
 
-    tts: Optional[bool]
-    content: Optional[str]
-    embeds: Optional[List['ext_embed.Embed']]  # TODO: Support embeds here.
+    tts: 'Optional[bool]' = None
+    content: 'Optional[str]' = None
+    embeds: 'Optional[List[ext_embed.Embed]]' = None
     # allowed_mentions: dict
-    flags: int
-    components: Optional[List[ext_components.Component]]
+    flags: 'enumerations.INTERACTION_CALLBACK_FLAGS' = None  # type: ignore
+    components: 'Optional[List[ext_components.Component]]' = None
+    choices: 'Optional[List[command.CommandOptionChoiceStructure]]' = None
 
-    def __init__(self):
-        '''InteractionCallback.'''
-        self.flags = 0
-        self.embeds = list()
-        self.components = list()
-
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict:  # noqa: C901
         '''Convert object to dictionary suitable for API or other generic useage.'''
         new_dict: Dict[str, object] = dict()
-        if type(self.flags) is enumerations.INTERACTION_CALLBACK_FLAGS:
-            new_dict['flags'] = self.flags.value
-        else:
-            new_dict['flags'] = self.flags
-        if hasattr(self, 'tts'):
+
+        if self.flags:
+            if type(self.flags) == enumerations.INTERACTION_CALLBACK_FLAGS:
+                new_dict['flags'] = self.flags.value
+            elif type(self.flags) == int:
+                new_dict['flags'] = self.flags
+            else:
+                raise TypeError(f'Got unexpected type for flags of [{type(self.flags)}]. Must be int or INTERACTION_CALLBACK_FLAGS!')
+        if self.tts is not None:
             new_dict['tts'] = self.tts
-        if hasattr(self, 'content'):
+        if self.content is not None:
             new_dict['content'] = self.content
-        if hasattr(self, 'components'):
+        if self.components is not None:
             new_dict['components'] = list()
             assert type(self.components) is list
             assert type(new_dict['components']) is list
             for component in self.components:
                 new_dict['components'].append(component.to_dict())
-        if hasattr(self, 'embeds'):
+        if self.embeds is not None:
             new_dict['embeds'] = list()
             assert type(self.embeds) is list
             assert type(new_dict['embeds']) is list
             for embed in self.embeds:
                 new_dict['embeds'].append(embed.to_dict())
+        if self.choices is not None:
+            new_dict['choices'] = list()
+            assert type(self.choices) is list
+            assert type(new_dict['choices']) is list
+            for choice in self.choices:
+                new_dict['choices'].append(choice.to_dict())
         return new_dict
 
     def generate(self,
@@ -479,8 +502,24 @@ class InteractionCallback(BaseDiscordObject, ext_components.ComponentAdder, ext_
             self.tts = tts
         if content is not None:
             self.content = content
+        if ephemeral is not None:
+            self.flags = self.INTERACTION_CALLBACK_FLAGS.NONE
         if ephemeral is True:
             self.flags |= self.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         elif ephemeral is False:
             self.flags &= ~self.INTERACTION_CALLBACK_FLAGS.EPHEMERAL
         self.components = []
+
+    def validate(self):
+        '''Validated object.'''
+        if self.choices is not None:
+            if self.tts is not None:
+                raise AttributeError('Cannot have tts and choices in one callback.')
+            if self.content is not None:
+                raise AttributeError('Cannot have content and choices in one callback.')
+            if self.embeds is not None:
+                raise AttributeError('Cannot have embeds and choices in one callback.')
+            if self.flags is not None:
+                raise AttributeError('Cannot have flags and choices in one callback.')
+            if self.components is not None:
+                raise AttributeError('Cannot have components and choices in one callback.')

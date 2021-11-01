@@ -6,7 +6,7 @@ from typing import Callable, Dict, List, Union, Optional
 
 from . import command, enumerations
 from ..base_object import BaseDiscordObject
-from .. import emoji
+from .. import emoji as ext_emoji
 from ...helper import command_handler
 
 
@@ -43,7 +43,7 @@ class ActionRow(Component):
                    style: enumerations.BUTTON_STYLES,
                    custom_id: Optional[str] = None,
                    label: Optional[str] = None,
-                   emoji: Optional[emoji.Emoji] = None,
+                   emoji: Optional[ext_emoji.Emoji] = None,
                    url: Optional[str] = None,
                    disabled: Optional[bool] = None,
                    callback: Callable = None,
@@ -178,7 +178,7 @@ class Button(Component):
     disabled: bool
     style: enumerations.BUTTON_STYLES
     label: str
-    emoji: emoji.Emoji
+    emoji: ext_emoji.Emoji
     url: str
 
     def to_dict(self) -> dict:
@@ -227,8 +227,10 @@ class Button(Component):
             assert type(self.custom_id) is str,\
                 f'Got invalid type {type(self.custom_id)} of Button.custom_id, must be str.'
         else:
-            assert hasattr(self, 'url'),\
-                'Button must have URL when style is BUTTON_STYLES.LINK.'
+            if not hasattr(self, 'url'):
+                raise AttributeError('Button must have URL when style is BUTTON_STYLES.LINK.')
+            if not isinstance(self.url, str):
+                raise TypeError(f'Unexpected type for url, got [{self.url}]')
 
 
 class SelectMenu(Component):
@@ -243,6 +245,8 @@ class SelectMenu(Component):
     max_values: int
 
     add_option_typed = command.Command.add_option_typed
+
+    COMMAND_OPTION = enumerations.COMMAND_OPTION
 
     def to_dict(self) -> dict:
         '''Convert object to dictionary suitable for API or other generic useage.'''
