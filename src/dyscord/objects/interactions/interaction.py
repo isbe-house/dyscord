@@ -213,27 +213,25 @@ class InteractionDataOptionStructure(BaseDiscordObject):
                 raise ValueError('Sub Command Groups should not have values!')
             elif self.type in [enumerations.COMMAND_OPTION.STRING, enumerations.COMMAND_OPTION.INTEGER, enumerations.COMMAND_OPTION.BOOLEAN, enumerations.COMMAND_OPTION.NUMBER]:
                 self.value = data['value']
-
-            if resolved is None:
-                print(data)
-                raise ValueError('Cannot have an unresolved type if it was accepted by discord.')
-
-            value_key = str(data['value'])
-            if self.type == CO.USER:
-                self.value = resolved['users'][value_key]
-            elif self.type == CO.CHANNEL:
-                self.value = resolved['channels'][value_key]
-            elif self.type == CO.ROLE:
-                self.value = resolved['roles'][value_key]
-            elif self.type == CO.MENTIONABLE:
-                if value_key in resolved['users']:
+            else:
+                if resolved is None:
+                    raise ValueError('Cannot have an unresolved type if it was accepted by discord.')
+                value_key = str(data['value'])
+                if self.type == CO.USER:
                     self.value = resolved['users'][value_key]
-                elif value_key in resolved['members']:
-                    self.value = resolved['members'][value_key]
-                elif value_key in resolved['roles']:
-                    self.value = resolved['roles'][value_key]
-                elif value_key in resolved['channels']:
+                elif self.type == CO.CHANNEL:
                     self.value = resolved['channels'][value_key]
+                elif self.type == CO.ROLE:
+                    self.value = resolved['roles'][value_key]
+                elif self.type == CO.MENTIONABLE:
+                    if value_key in resolved['users']:
+                        self.value = resolved['users'][value_key]
+                    elif value_key in resolved['members']:
+                        self.value = resolved['members'][value_key]
+                    elif value_key in resolved['roles']:
+                        self.value = resolved['roles'][value_key]
+                    elif value_key in resolved['channels']:
+                        self.value = resolved['channels'][value_key]
         if 'focused' in data:
             self.focused = True
         self.options = dict()

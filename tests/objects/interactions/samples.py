@@ -402,6 +402,43 @@ all_types_nested = {'application_id': '889065662641737791',
                     'version': 1}
 
 
+interaction_simple_data = {'version': 1,
+                           'type': 4,
+                           'token': 'aW50ZXJhY3Rpb246OTA2MDY0NTY1OTc1MDExMzY5Ojg4SjVPWklUWUdhRjhPN0NDWWEyUE1IRzY4c0tTeXIycmU5cHNQZ3FweERTbG4zOTIyNzhJWWxuZ0V2TWNHTU5uRWNUV1VzVWQwMGhneFF4clNGeFFEWG9WcX'
+                           'U3MEw4ZGZRSU53YlRIRzJiMmxHd3BhemhLenMwY3ZCTXdhOU85',
+                           'member': {
+                               'user': {
+                                   'username': 'Soton',
+                                   'public_flags': 0,
+                                   'id': '185846097284038656',
+                                   'discriminator': '2585',
+                                   'avatar': 'ce48763db4ef0884f6d95fedead4f47c'},
+                               'roles': ['346104880575938560'],
+                               'premium_since': None,
+                               'permissions': '1099511627775',
+                               'pending': False,
+                               'nick': 'John',
+                               'mute': False,
+                               'joined_at': '2017-08-13T00:55:15.161000+00:00',
+                               'is_pending': False,
+                               'deaf': False,
+                               'communication_disabled_until': None,
+                               'avatar': None},
+                           'id': '906064565975011369',
+                           'guild_id': '346094316428591104',
+                           'data': {'type': 1,
+                                    'options': [{'type': 1,
+                                                 'options': [{'value': '',
+                                                              'type': 3,
+                                                              'name': 'league',
+                                                              'focused': True}],
+                                                 'name': 'price_stash'}],
+                                    'name': 'poe',
+                                    'id': '904269829375160340'},
+                           'channel_id': '606974927308062750',
+                           'application_id': '655139987829948432'}
+
+
 target = pathlib.Path(pathlib.Path(__file__).parent, 'raw_INTERACTION_CREATE_samples.json')
 with open(target) as fp:
     raw_interaction_create_samples = json.load(fp)
