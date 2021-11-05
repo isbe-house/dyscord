@@ -60,3 +60,5 @@ client.run()
 ```
 
 The users is left to determine how to handle the `registration_function()` invocation, as you only even need to do this when you create a new command, or change an existing one.
+
+The `callback_function` should service the command quickly, as the event will wait until this function completes before triggering other event callbacks.
