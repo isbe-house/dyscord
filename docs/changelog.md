@@ -5,6 +5,7 @@ This project follows [Semantic Versioning](https://semver.org/) and [Keep A Chan
 ## [v0.5.2] 2021-11-05
 ### Added
 - `InteractionDataOptionStructure` now supports a `get()` method like a dict.
+- More testing coverage.
 
 ## [v0.5.1] 2021-11-04
 ### Fixed
