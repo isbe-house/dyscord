@@ -69,7 +69,7 @@ class User(BaseDiscordObject):
     def __eq__(self, other):
         '''Determine if other User and self are the same User.'''
         if not isinstance(other, User):
-            return NotImplemented
+            raise NotImplementedError(f'Cannot compare User to [{type(other)}].')
         return self.id == other.id
 
     # TODO: We could have a lot of handy "is_X" functions here to return if user is something form the USER_FLAG enumeration

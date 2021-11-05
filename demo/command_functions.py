@@ -11,19 +11,16 @@ async def test(interaction: Interaction):
         print('Server asking for auto complete, lets give it to them!')
         response = interaction.generate_response(interaction.INTERACTION_RESPONSE_TYPES.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT)
 
-        demo_names = [
-            'SotonAshKetch',
-            'SotonBrandUm',
-            'SotonBuffUm',
-            'Sotonis',
-            'SotonJabanesJabon',
-            'SotonLegoPoison',
-            'SotonPlantPotPewPew',
-            'SotonPokemondRed',
-            'SotonShockUm',
-        ]
+        with open('demo/words.txt') as fp:
+            demo_names = fp.read()
 
-        choices = difflib.get_close_matches(interaction.data.options['name'], demo_names, 5, cutoff=0)
+        demo_names = demo_names.split('\n')
+
+        print(demo_names[:5])
+        print(type(demo_names))
+
+        assert interaction.data is not None
+        choices = difflib.get_close_matches(interaction.data.options['name'].value, demo_names, 5, cutoff=0)
 
         while len(choices) < 5:
             choices.append(demo_names[0])

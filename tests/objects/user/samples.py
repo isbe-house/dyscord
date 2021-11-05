@@ -45,6 +45,7 @@ self_and_role_mention = {'attachments': [],
                          'member': {'deaf': False,
                                     'hoisted_role': None,
                                     'joined_at': '2021-01-28T16:48:04.105000+00:00',
+                                    'premium_since': '2021-01-28T16:48:04.105000+00:00',
                                     'mute': False,
                                     'roles': []},
                          'mention_everyone': False,
@@ -157,5 +158,6 @@ raw_get_user_response = {
     "banner": "06c16474723fe537c283b8efa61a30c8",
     "accent_color": 16711680,
     "premium_type": 1,
-    "public_flags": 64
+    "public_flags": 64,
+    "system": True,
 }

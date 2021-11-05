@@ -83,7 +83,7 @@ async def register_commands(client: dyscord.client.DiscordClient, message):
         description='Generic test slash command.',
         type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
     )
-    new_command.add_option_typed(new_command.COMMAND_OPTION.STRING, 'name', 'Guess a name.', autocomplete=True, cutoff=0)
+    new_command.add_option_typed(new_command.COMMAND_OPTION.STRING, 'name', 'Guess a name.', autocomplete=True)
 
     new_command.validate()
 

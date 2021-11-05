@@ -61,7 +61,7 @@ def test_complex_chat(mock_api):  # noqa: F811
     assert obj.data is not None
 
     assert type(obj.data.options) is dict
-    assert obj.data.options['edit'].options['user'].options['target'].username == 'Soton'
+    assert obj.data.options['edit']['user']['target'].value.username == 'Soton'
     mock_api.get_user.assert_not_called()
 
 
