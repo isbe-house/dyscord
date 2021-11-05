@@ -2,6 +2,10 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.5.1] 2021-11-04
+### Fixed
+- `Interaction` would fail on simple data types due to a logic error within the type resolver. Added test and corrected.
+
 ## [v0.5.0] 2021-11-04
 ### Changed
 - Reworked `Interactions` to use values on their options fields. This allows for the `focused` field to exist next to it, which is required for Autocomplete actions.

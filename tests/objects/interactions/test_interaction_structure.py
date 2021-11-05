@@ -155,3 +155,10 @@ def test_invalid_interaction_data():
 
     with pytest.raises(TypeError):
         Interaction().from_dict(data)
+
+
+def test_simple_unresolved_fields():
+
+    data = samples.interaction_simple_data
+
+    Interaction().from_dict(data)
