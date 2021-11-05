@@ -14,12 +14,14 @@ def test_magics(mock_api):  # noqa: F811
 
     obj = Interaction().from_dict(samples.all_types)
 
-    assert isinstance(obj.data.options['channel'], Channel)
+    assert obj.data is not None
+    assert isinstance(obj.data.options['channel'].value, Channel)
     assert 'channel' in obj.data.options
 
     obj = Interaction().from_dict(samples.nested_groups)
 
-    assert isinstance(obj.data.options['edit']['user']['target'], User)
+    assert obj.data is not None
+    assert isinstance(obj.data.options['edit']['user']['target'].value, User)
     assert 'edit' in obj.data.options
     assert 'user' in obj.data.options['edit']
     assert 'target' in obj.data.options['edit']['user']
@@ -82,5 +84,5 @@ def test_no_resolution_map(mock_api):  # noqa: F811
     data = copy.deepcopy(samples.all_types)
 
     del data['data']['resolved']
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         Interaction().from_dict(data)

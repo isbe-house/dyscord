@@ -46,6 +46,8 @@ def test_dict_parsing():
 
     assert g1 != g2
 
+    assert isinstance(g1.__str__(), str)
+
 
 def test_str():
 

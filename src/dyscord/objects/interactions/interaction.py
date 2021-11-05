@@ -36,7 +36,7 @@ class Interaction(BaseDiscordObject):
     id: snowflake.Snowflake
     application_id: snowflake.Snowflake
     type: enumerations.INTERACTION_TYPES
-    data: Optional['InteractionData']
+    data: 'InteractionData'
     guild_id: Optional[snowflake.Snowflake]
     # TODO: add a Guild object from the ID.
     channel_id: Optional[snowflake.Snowflake]
@@ -177,7 +177,7 @@ class InteractionData(BaseDiscordObject):
         self.options = dict()
         if 'options' in data:
             for option_dict in data['options']:
-                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id, self.resolved).parse(guild_id, self.resolved)
+                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id, self.resolved)
         return self
 
 
@@ -188,6 +188,7 @@ class InteractionDataOptionStructure(BaseDiscordObject):
     type: enumerations.COMMAND_OPTION                          # integer the type of the invoked command Application Command
     value: Optional[Union[str, int, bool, 'snowflake.Snowflake', float]]               # the value of the pair
     options: Optional[Dict[str, Any]]  # Present when command is a group or subcommand
+    focused: bool = False
 
     def __getitem__(self, key: str):
         '''Return item from the options dict.'''
@@ -201,6 +202,8 @@ class InteractionDataOptionStructure(BaseDiscordObject):
 
     def from_dict(self, data: dict, guild_id: Optional['snowflake.Snowflake'] = None, resolved: dict = None) -> 'InteractionDataOptionStructure':  # noqa: C901
         '''Import data from dict and populate object with it.'''
+        CO = enumerations.COMMAND_OPTION
+
         self.name = data['name']
         self.type = enumerations.COMMAND_OPTION(data['type'])
         if 'value' in data:
@@ -210,58 +213,33 @@ class InteractionDataOptionStructure(BaseDiscordObject):
                 raise ValueError('Sub Command Groups should not have values!')
             elif self.type in [enumerations.COMMAND_OPTION.STRING, enumerations.COMMAND_OPTION.INTEGER, enumerations.COMMAND_OPTION.BOOLEAN, enumerations.COMMAND_OPTION.NUMBER]:
                 self.value = data['value']
-            elif self.type == enumerations.COMMAND_OPTION.USER:
-                # TODO: Actually lookup the user here and replace the snowflake with a full object.
-                self.value = snowflake.Snowflake(data['value'])
-            elif self.type == enumerations.COMMAND_OPTION.CHANNEL:
-                # TODO: Actually lookup the channel here and replace the snowflake with a full object.
-                self.value = snowflake.Snowflake(data['value'])
-            elif self.type == enumerations.COMMAND_OPTION.ROLE:
-                # TODO: Actually lookup the role here and replace the snowflake with a full object.
-                self.value = snowflake.Snowflake(data['value'])
-            elif self.type == enumerations.COMMAND_OPTION.MENTIONABLE:
-                # TODO: Actually lookup the mentionable here and replace the snowflake with a full object.
-                self.value = snowflake.Snowflake(data['value'])
+
+            if resolved is None:
+                raise ValueError('Cannot have an unresolved type if it was accepted by discord.')
+
+            value_key = str(data['value'])
+            if self.type == CO.USER:
+                self.value = resolved['users'][value_key]
+            elif self.type == CO.CHANNEL:
+                self.value = resolved['channels'][value_key]
+            elif self.type == CO.ROLE:
+                self.value = resolved['roles'][value_key]
+            elif self.type == CO.MENTIONABLE:
+                if value_key in resolved['users']:
+                    self.value = resolved['users'][value_key]
+                elif value_key in resolved['members']:
+                    self.value = resolved['members'][value_key]
+                elif value_key in resolved['roles']:
+                    self.value = resolved['roles'][value_key]
+                elif value_key in resolved['channels']:
+                    self.value = resolved['channels'][value_key]
+        if 'focused' in data:
+            self.focused = True
         self.options = dict()
         if 'options' in data:
             for option_dict in data['options']:
-                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id, resolved).parse(guild_id, resolved)
+                self.options[option_dict['name']] = InteractionDataOptionStructure().from_dict(option_dict, guild_id, resolved)
         return self
-
-    def parse(self, guild_id: Optional['snowflake.Snowflake'] = None, resolution_map: dict = None):  # noqa: C901
-        '''Look at the type field of self and attempt to return a sane result.
-
-        For SUB_COMMAND and SUB_COMMAND_GROUP types, return another InteractionDataOptionStructure object.
-        For all others, attempt to reference the type and handle it.
-        '''
-        CO = enumerations.COMMAND_OPTION
-
-        if self.type in [CO.SUB_COMMAND, CO.SUB_COMMAND_GROUP]:
-            return self
-
-        if self.type in [CO.STRING, CO.INTEGER, CO.BOOLEAN, CO.NUMBER]:
-            return self.value
-
-        assert type(self.value) is snowflake.Snowflake
-        if resolution_map is None:
-            raise RuntimeError('Cannot parse without a resolution map!')
-
-        if self.type == CO.USER:
-            return resolution_map['users'][str(self.value)]
-        if self.type == CO.CHANNEL:
-            return resolution_map['channels'][str(self.value)]
-        if self.type == CO.ROLE:
-            return resolution_map['roles'][str(self.value)]
-        if self.type == CO.MENTIONABLE:
-            value_key = str(self.value)
-            if value_key in resolution_map['users']:
-                return resolution_map['users'][str(value_key)]
-            elif value_key in resolution_map['members']:
-                return resolution_map['members'][str(value_key)]
-            elif value_key in resolution_map['roles']:
-                return resolution_map['roles'][str(value_key)]
-            elif value_key in resolution_map['channels']:
-                return resolution_map['channels'][str(value_key)]
 
 
 class InteractionResponse(BaseDiscordObject):

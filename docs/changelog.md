@@ -2,10 +2,14 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.5.0] 2021-11-04
+### Changed
+- Reworked `Interactions` to use values on their options fields. This allows for the `focused` field to exist next to it, which is required for Autocomplete actions.
+
 ## [v0.4.4] 2021-10-31
 ### Added
 - Support for autocomplete `Interaction` flows.
-- All `BaseDiscordObjects` now support `validation` as a defaulted (NonImplemented) function. All classes should implement this soon.
+- All `BaseDiscordObjects` now support `validation` as a defaulted (`NonImplementedError`) function. All classes should implement this soon.
 
 ### Removed
 - We had a `CHANNEL_TYPE` and `CHANNEL_TYPES` enumeration in two places, removed the one in `interactions`.
