@@ -215,6 +215,7 @@ class InteractionDataOptionStructure(BaseDiscordObject):
                 self.value = data['value']
 
             if resolved is None:
+                print(data)
                 raise ValueError('Cannot have an unresolved type if it was accepted by discord.')
 
             value_key = str(data['value'])
