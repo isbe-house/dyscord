@@ -162,3 +162,16 @@ def test_simple_unresolved_fields():
     data = samples.interaction_simple_data
 
     Interaction().from_dict(data)
+
+
+def test_dict_likeness():
+
+    data = samples.interaction_simple_data
+
+    obj = Interaction().from_dict(data)
+
+    assert obj.data is not None
+    obj.data.options['price_stash']
+    obj.data.options.get('price_stash', None)
+    assert obj.data.options['price_stash'].get('league', None) is not None
+    assert obj.data.options['price_stash'].get('foo', None) is None
