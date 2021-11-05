@@ -2,6 +2,10 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.5.2] 2021-11-05
+### Added
+- `InteractionDataOptionStructure` now supports a `get()` method like a dict.
+
 ## [v0.5.1] 2021-11-04
 ### Fixed
 - `Interaction` would fail on simple data types due to a logic error within the type resolver. Added test and corrected.

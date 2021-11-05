@@ -195,6 +195,14 @@ class InteractionDataOptionStructure(BaseDiscordObject):
         if hasattr(self, 'options') and type(self.options) is dict:
             return self.options[key]
 
+    def get(self, key: str, default: Any = None):
+        '''Return item from the options dict, or None if it doesn't exist.'''
+        try:
+            if hasattr(self, 'options') and type(self.options) is dict:
+                return self.options[key]
+        except KeyError:
+            return default
+
     def __contains__(self, item: str):
         '''Determine if item is in the options dict.'''
         if hasattr(self, 'options') and type(self.options) is dict:
