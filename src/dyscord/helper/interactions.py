@@ -6,6 +6,7 @@ from typing import Any, List, Union, Optional
 
 from ..objects.interactions import interaction as ext_interaction
 from ..utilities import Log
+from ..client import discord_client
 
 
 class InteractionResponseHelper(ABC):
@@ -62,7 +63,7 @@ class InteractionResponseHelper(ABC):
             if self._answered is True:
                 break
 
-    async def _call_back(self, client, interaction: 'ext_interaction.Interaction'):
+    async def _call_back(self, interaction: 'ext_interaction.Interaction', raw_data: dict, client: 'discord_client.DiscordClient'):
         self._answered = True
         self.last_interaction = interaction
         assert interaction.data is not None

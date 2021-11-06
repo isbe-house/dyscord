@@ -113,6 +113,19 @@ async def register_commands(client: dyscord.client.DiscordClient, message):
 
     registration = await new_command.register_to_guild(guild)
     log.info(f'Registration: {registration}')
+
+    new_command = Command()
+    new_command.generate(
+        name='reconnect',
+        description='Trigger a reconnect event.',
+        type=objects.interactions.enumerations.COMMAND_TYPE.CHAT_INPUT,
+    )
+    new_command.add_option_typed(new_command.COMMAND_OPTION.NUMBER, 'delay', 'Seconds of delay until reconnect is forced.')
+
+    new_command.validate()
+
+    registration = await new_command.register_to_guild(guild)
+    log.info(f'Registration: {registration}')
     # registration = await new_command.register_globally()
     # log.info(f'Registration: {registration}')
 
@@ -183,6 +196,7 @@ async def parse_message(message: objects.Message, raw_message, client):
 
 dyscord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
 dyscord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)
+dyscord.helper.CommandHandler.register_guild_callback('reconnect', command_functions.reconnect)
 dyscord.helper.CommandHandler.register_global_callback('test', command_functions.test)
 dyscord.helper.CommandHandler.register_global_callback('complex', command_functions.complex)
 

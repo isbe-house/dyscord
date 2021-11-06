@@ -1,6 +1,11 @@
+import asyncio
 import difflib
 
+
+from src.dyscord.client.discord_client import DiscordClient
+from src.dyscord.helper import interactions
 from src.dyscord.objects.interactions.interaction import Interaction
+from src.dyscord.helper.interactions import Question
 from src.dyscord.utilities.log import Log
 
 
@@ -39,5 +44,21 @@ async def test(interaction: Interaction):
 
 
 async def complex(interaction: Interaction):
-    response = interaction.generate_response(interaction.INTERACTION_RESPONSE_TYPES.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, ephemeral=True)
+    # response = interaction.generate_response(interaction.INTERACTION_RESPONSE_TYPES.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, ephemeral=True)
+    # await response.send()
+
+    q = Question(interaction, 'What is 1+2?', ['Three', 'potato!'], auto_respond=True)
+    answer = await q.ask()
+    print(answer)
+
+
+async def reconnect(interaction: Interaction, raw_dict, client: DiscordClient):
+    print('GOT RECONNECT COMMAND')
+    delay = interaction.data.options['delay'].value
+    response = interaction.generate_response()
+    response.generate(f'Will reconnect after {delay:,.1f}!', ephemeral=True)
     await response.send()
+
+    await asyncio.sleep(delay)
+
+    await client._reconnect()

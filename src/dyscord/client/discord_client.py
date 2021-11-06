@@ -40,6 +40,8 @@ class DiscordClient:
     _wrapper_registrations: dict = defaultdict(lambda: list())
     _wrapper_class_registrations: list = list()
     _version = __version__
+    _sequence_number = None
+    _reconnect_lock = asyncio.Lock()
     me: objects.User
     session_id: str
     token: str
@@ -64,7 +66,6 @@ class DiscordClient:
         self._heartbeat_task = None
         self._last_heartbeat_ack = None
         self._listener_task = None
-        self._sequence_number = None
         self._intents_defined = False
 
     def configure_intents(self,  # noqa: C901
@@ -151,11 +152,11 @@ class DiscordClient:
         Arguments:
             loop (asyncio.AbstractEventLoop): If desired, use a given asyncio compatible loop. One will be created if not given.
         '''
-        self._log.info('Starting...')
-        self._log.info(f'Platform: [{platform.platform()}]')
-        self._log.info(f'Python Version: [{sys.version}]')
-        self._log.info(f'Python Version Info: [{sys.version_info}]')
-        self._log.info(f'Dyscord Version: [v{__version__}]')
+        self._log.notice('Starting...')
+        self._log.notice(f'Platform: [{platform.platform()}]')
+        self._log.notice(f'Python Version: [{sys.version}]')
+        self._log.notice(f'Python Version Info: [{sys.version_info}]')
+        self._log.notice(f'Dyscord Version: [v{__version__}]')
 
         loop = loop if loop is not None else asyncio.get_event_loop()
 
@@ -186,6 +187,9 @@ class DiscordClient:
 
             await asyncio.sleep(1)
 
+            if self._reconnect_lock.locked():
+                continue
+
             if self._listener_task is not None:
 
                 if self._listener_task.done():
@@ -204,7 +208,7 @@ class DiscordClient:
                     await asyncio.sleep(30)
                     await self._reconnect()
 
-    async def _connect(self):
+    async def _connect(self, is_reconnect = False):
         '''TODO: Implement connection to discord's servers.'''
         api.API.TOKEN = self.token
         if type(self.application_id) is str:
@@ -233,7 +237,10 @@ class DiscordClient:
 
         self._log.debug('Heartbeat observed, begin to identify.')
 
-        await self._identify()
+        if not is_reconnect:
+            await self._identify()
+        else:
+            await self._resume()
 
     async def _web_socket_listener(self, uri):  # noqa
 
@@ -243,8 +250,8 @@ class DiscordClient:
                 return
             try:
                 raise exception
-            except Exception:
-                self._log.exception('Exception from event dispatcher.')
+            except Exception as e:
+                self._log.exception(f'Exception from event dispatcher: [{e}].')
 
         async with websockets.connect(uri) as websocket:
 
@@ -264,8 +271,8 @@ class DiscordClient:
                     await callback(data)
 
                 if 's' in data and data['s'] is not None:
-                    self._sequence_number = data['s']
-                    self._log.debug(f'Updated seq count to [{self._sequence_number}].')
+                    self.__class__._sequence_number = data['s']
+                    self._log.trace(f'Updated seq count to [{self.__class__._sequence_number}].')
 
                 opcode = data['op']
 
@@ -276,8 +283,12 @@ class DiscordClient:
 
                 elif opcode == 1:
                     self._log.debug('OPCODE: HEARTBEAT')
-                    data = {'op': 1, 'd': self._sequence_number}
+                    data = {'op': 1, 'd': self.__class__._sequence_number}
                     await self._gateway_ws.send(json.dumps(data))
+
+                elif opcode == 6:
+                    self._log.critical('OPCODE: RESUMED')
+                    exit()
 
                 elif opcode == 7:
                     self._log.debug('OPCODE: RECONNECT')
@@ -285,7 +296,7 @@ class DiscordClient:
 
                 elif opcode == 9:
                     self._log.debug('OPCODE: INVALID SESSION')
-                    await self._handle_op_9(data)
+                    await asyncio.shield(self._handle_op_9(data))
 
                 elif opcode == 10:
                     self._log.debug('OPCODE: HELLO')
@@ -301,10 +312,9 @@ class DiscordClient:
 
     async def _heartbeat(self, interval):
 
-        self._log.info('New heartbeat task started. Send new heartbeat NOW.')
         self._log.debug('New heartbeat task started. Send new heartbeat NOW.')
 
-        data = {'op': 1, 'd': self._sequence_number}
+        data = {'op': 1, 'd': self.__class__._sequence_number}
         await self._gateway_ws.send(json.dumps(data))
 
         self._log.info('Heartbeat sent, loop time.')
@@ -315,37 +325,53 @@ class DiscordClient:
 
             await asyncio.sleep(interval / 1000)
 
-            data = {'op': 1, 'd': self._sequence_number}
+            data = {'op': 1, 'd': self.__class__._sequence_number}
             self._log.debug(f'Sending heartbeat: {data}')
 
             await self._gateway_ws.send(json.dumps(data))
 
     async def _handle_op_7(self, data):
 
+        self._log.warning('Opcode 7 called...')
+
         await self._reconnect()
 
-        self._log.critical('Opcode 7 handled.')
+        self._log.warning('Opcode 7 handled.')
 
     async def _handle_op_9(self, data):
 
-        if self._listener_task is not None:
-            self._listener_task.cancel()
-            self._listener_task = None
+        async with self._reconnect_lock:
+            self._log.warning(f'Opcode 9 called with [{data}]...')
 
-        if self._heartbeat_task is not None:
-            self._heartbeat_task.cancel()
-            self._heartbeat_task = None
-            self._last_heartbeat_ack = None
-            self._gateway_ws = None
+            if self._listener_task is not None:
+                self._log.debug('Kill listener...')
+                self._listener_task.cancel()
+                self._listener_task = None
 
-        # Wait 1-5 seconds then try to connect.
-        await asyncio.sleep(random.random() * 4 + 1)
+            if self._heartbeat_task is not None:
+                self._log.debug('Kill heartbeat...')
+                self._heartbeat_task.cancel()
+                self._heartbeat_task = None
+                self._last_heartbeat_ack = None
 
-        await self._reconnect()
+            if self._gateway_ws is not None:
+                self._log.debug('Kill websocket...')
+                self._gateway_ws = None
+                # Allow discord to accept that we are gone.
+                await asyncio.sleep(2)
 
-        self._log.critical('Opcode 9 handled.')
+            self._log.trace('Wait...')
+
+            # Wait 1-5 seconds then try to connect.
+            await asyncio.sleep(random.random() * 4 + 1)
+
+            await self._connect(is_reconnect=data['d'])
+
+            self._log.warning('Opcode 9 handled.')
 
     async def _handle_op_10(self, data):
+
+        self.connected = True
 
         if self._heartbeat_task is not None:
             self._heartbeat_task.cancel()
@@ -355,36 +381,48 @@ class DiscordClient:
         self._log.debug('Opcode 10 handled.')
 
     async def _reconnect(self):
+        '''Attempt to reconnect forever with exponential backoff.'''
+        async with self._reconnect_lock:
+            current_backoff = 0
+            while True:
+                try:
+                    await asyncio.wait_for(self.__reconnect(), 60 + current_backoff)
+                    break
+                except KeyboardInterrupt:
+                    exit()
+                except Exception as e:
+                    self._log.critical(f'Reconnection failed with {e}, trying again in {current_backoff:,.1f}...')
+                    await asyncio.sleep(current_backoff)
+                current_backoff += 1
+                current_backoff *= 1.1
+        self._log.info('Reconnection successful.')
+
+    async def __reconnect(self):
         '''Send a reconnect message.'''
-        gateway_uri = (await api.API.get_gateway_bot(self.token))['url']
-        self._log.critical(f'Try to connect to {gateway_uri}')
+        self._log.warning('Starting __reconnect...')
+        self.__class__.ready = False
 
         if self._listener_task is not None:
+            self._log.trace('Kill listener...')
             self._listener_task.cancel()
             self._listener_task = None
 
         if self._heartbeat_task is not None:
+            self._log.trace('Kill heartbeat...')
             self._heartbeat_task.cancel()
             self._heartbeat_task = None
             self._last_heartbeat_ack = None
+
+        if self._gateway_ws is not None:
+            self._log.trace('Kill websocket...')
             self._gateway_ws = None
+            # Allow discord to accept that we are gone.
+            await asyncio.sleep(30)
 
-        self._listener_task = asyncio.create_task(self._web_socket_listener(gateway_uri))
+        self._log.warning('Issue connect...')
+        await self._connect(is_reconnect=True)
 
-        while self._gateway_ws is None:
-            await asyncio.sleep(1)
-
-        data = {
-            'op': 6,
-            'd': {
-                'token': self.token,
-                'session_id': self.session_id,
-                'seq': self._sequence_number,
-            }
-        }
-        self._log.info('Sending reconnect.')
-        await self._gateway_ws.send(json.dumps(data))
-        self._log.info('Reconnect complete.')
+        self._log.warning('_reconnect complete.')
 
     async def _identify(self):
         data = {
@@ -400,6 +438,18 @@ class DiscordClient:
             }
         }
         self._log.info('Sending identify.')
+        await self._gateway_ws.send(json.dumps(data))
+
+    async def _resume(self):
+        data = {
+            'op': 6,
+            'd': {
+                'token': self.token,
+                'session_id': self.__class__.session_id,
+                'seq': self.__class__._sequence_number,
+            }
+        }
+        self._log.info(f'Sending resume: [{data}].')
         await self._gateway_ws.send(json.dumps(data))
 
     async def _event_dispatcher(self, data):  # noqa: C901
@@ -557,7 +607,7 @@ class DiscordClient:
         elif event_type == 'INTERACTION_CREATE':
             obj = objects.interactions.Interaction().from_dict(data['d'])
             self._log.info('Saw INTERACTION_CREATE event.')
-            await helper.CommandHandler.command_handler(self, obj)
+            await helper.CommandHandler.command_handler(obj, data['d'], self)
 
         else:
             # We have an unknown event on our hands, PANIC!!!
