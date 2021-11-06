@@ -106,14 +106,14 @@ async def test_handle_application_command(command_handler, mock_api):  # noqa: F
     mock_interaction.data.id = mock_id
 
     with pytest.raises(LookupError):
-        await command_handler.handle_application_command(mock_client, mock_interaction)
+        await command_handler.handle_application_command(mock_interaction, {}, mock_client)
 
     mock_interaction.guild_id = Mock(Snowflake)
 
     assert isinstance(mock_interaction.guild_id, Snowflake)
 
     with pytest.raises(LookupError):
-        await command_handler.handle_application_command(mock_client, mock_interaction)
+        await command_handler.handle_application_command(mock_interaction, {}, mock_client)
 
 
 @pytest.mark.asyncio
@@ -144,6 +144,6 @@ async def test_handle_registered_global_application_command(command_handler, moc
 
     command_handler.register_global_callback(mock_interaction.data.name, callback_2)
 
-    await command_handler.handle_application_command(mock_client, mock_interaction)
+    await command_handler.handle_application_command(mock_interaction, {}, mock_client)
 
     mock_func.assert_called_once()

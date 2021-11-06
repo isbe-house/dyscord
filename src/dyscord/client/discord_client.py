@@ -27,7 +27,7 @@ from .events import on_any, on_channel_create, on_channel_delete, on_channel_pin
     on_guild_delete, on_guild_emojis_update, on_guild_integrations_update, on_guild_member_add, on_guild_member_remove, on_guild_member_update,\
     on_guild_role_create, on_guild_role_delete, on_guild_role_update, on_guild_stickers_update, on_guild_update, on_integration_create, on_integration_delete,\
     on_integration_update, on_invite_create, on_invite_delete, on_message_create, on_message_delete, on_message_delete_bulk, on_message_reaction_add,\
-    on_message_reaction_remove, on_message_reaction_remove_all, on_message_reaction_remove_emoji, on_message_update, on_presence_update, on_ready,\
+    on_message_reaction_remove, on_message_reaction_remove_all, on_message_reaction_remove_emoji, on_message_update, on_presence_update, on_ready, on_resumed,\
     on_stage_instance_create, on_stage_instance_delete, on_stage_instance_update, on_thread_create, on_thread_delete, on_thread_list_sync,\
     on_thread_member_update, on_thread_members_update, on_thread_update, on_typing_start, on_voice_state_update, on_webhooks_update, on_interaction_create
 
@@ -48,6 +48,7 @@ class DiscordClient:
     application_id: Optional[str]
     intent: int
     ready: bool
+    resuming: bool = False
 
     def __init__(self, token: str, application_id: Optional[str] = None):
         '''Instantiate a DiscordClient.
@@ -166,7 +167,7 @@ class DiscordClient:
 
         loop.run_forever()
 
-    async def _run(self, ):
+    async def _run(self, ):  # noqa: C901
 
         if self._intents_defined is False:
             warnings.warn('Started without defining intents. Client will likely get ZERO input. Consider calling the \'configure_intents\' function.', UserWarning)
@@ -208,7 +209,7 @@ class DiscordClient:
                     await asyncio.sleep(30)
                     await self._reconnect()
 
-    async def _connect(self, is_reconnect = False):
+    async def _connect(self, is_reconnect=False):
         '''TODO: Implement connection to discord's servers.'''
         api.API.TOKEN = self.token
         if type(self.application_id) is str:
@@ -260,9 +261,10 @@ class DiscordClient:
             while True:
 
                 try:
+                    self._log.debug('Waiting for next message...')
                     data = await asyncio.wait_for(websocket.recv(), 60)
                 except asyncio.TimeoutError:
-                    self._log.debug('Websocket timeout occurred, looping.')
+                    self._log.critical('Websocket timeout occurred, looping.')
                     continue
 
                 data = json.loads(data)
@@ -277,33 +279,29 @@ class DiscordClient:
                 opcode = data['op']
 
                 if opcode == 0:
-                    self._log.debug('Received event, dispatch...')
+                    self._log.debug('OPCODE 0: EVENT')
                     task = asyncio.create_task(self._event_dispatcher(data))
                     task.add_done_callback(_handle_completed_tasks)
 
                 elif opcode == 1:
-                    self._log.debug('OPCODE: HEARTBEAT')
+                    self._log.debug('OPCODE 1: HEARTBEAT')
                     data = {'op': 1, 'd': self.__class__._sequence_number}
                     await self._gateway_ws.send(json.dumps(data))
 
-                elif opcode == 6:
-                    self._log.critical('OPCODE: RESUMED')
-                    exit()
-
                 elif opcode == 7:
-                    self._log.debug('OPCODE: RECONNECT')
+                    self._log.debug('OPCODE 7: RECONNECT')
                     await self._handle_op_7(data)
 
                 elif opcode == 9:
-                    self._log.debug('OPCODE: INVALID SESSION')
+                    self._log.debug('OPCODE 9: INVALID SESSION')
                     await asyncio.shield(self._handle_op_9(data))
 
                 elif opcode == 10:
-                    self._log.debug('OPCODE: HELLO')
+                    self._log.debug('OPCODE 10: HELLO')
                     await self._handle_op_10(data)
 
                 elif opcode == 11:
-                    self._log.debug('Saw a heartbeat ACK')
+                    self._log.debug('OPCODE 11: HEARTBEAT ACK')
                     self._last_heartbeat_ack = time.time()
 
                 else:
@@ -317,17 +315,24 @@ class DiscordClient:
         data = {'op': 1, 'd': self.__class__._sequence_number}
         await self._gateway_ws.send(json.dumps(data))
 
-        self._log.info('Heartbeat sent, loop time.')
+        self._log.debug('Heartbeat sent, loop time.')
+        current_last_heartbeat = None
 
         while True:
-
             self._log.debug(f'Sleeping for {interval / 1000}s')
+
+            if current_last_heartbeat and self._last_heartbeat_ack == current_last_heartbeat:
+                # ZOMBIE CONNECTION, AHHHHHHH!
+                # Shield this, as it is going to kill this task promptly.
+                asyncio.shield(self._reconnect())
+                return
 
             await asyncio.sleep(interval / 1000)
 
             data = {'op': 1, 'd': self.__class__._sequence_number}
             self._log.debug(f'Sending heartbeat: {data}')
 
+            current_last_heartbeat = self._last_heartbeat_ack
             await self._gateway_ws.send(json.dumps(data))
 
     async def _handle_op_7(self, data):
@@ -339,9 +344,12 @@ class DiscordClient:
         self._log.warning('Opcode 7 handled.')
 
     async def _handle_op_9(self, data):
+        self._log.warning(f'Opcode 9 called with [{data}]...')
+
+        if self._reconnect_lock.locked():
+            raise RuntimeError('Op code 9 was ')
 
         async with self._reconnect_lock:
-            self._log.warning(f'Opcode 9 called with [{data}]...')
 
             if self._listener_task is not None:
                 self._log.debug('Kill listener...')
@@ -415,9 +423,8 @@ class DiscordClient:
 
         if self._gateway_ws is not None:
             self._log.trace('Kill websocket...')
+            await self._gateway_ws.close(1011)
             self._gateway_ws = None
-            # Allow discord to accept that we are gone.
-            await asyncio.sleep(30)
 
         self._log.warning('Issue connect...')
         await self._connect(is_reconnect=True)
@@ -437,7 +444,7 @@ class DiscordClient:
                 }
             }
         }
-        self._log.info('Sending identify.')
+        self._log.debug('Sending identify.')
         await self._gateway_ws.send(json.dumps(data))
 
     async def _resume(self):
@@ -449,27 +456,35 @@ class DiscordClient:
                 'seq': self.__class__._sequence_number,
             }
         }
-        self._log.info(f'Sending resume: [{data}].')
+        self._log.debug('Sending resume.')
+        self._log.debug(f'{data}')
+        self.__class__.resuming = True
         await self._gateway_ws.send(json.dumps(data))
 
     async def _event_dispatcher(self, data):  # noqa: C901
 
         event_type = data['t']
-        self._log.info(f'Got a {event_type}')
+        self._log.debug(f'Got a {event_type}')
         obj = None
 
-        # pprint(data)
+        if self.resuming:
+            self._log.debug('Event is part of a resume.')
 
         if event_type == 'READY':
             obj = objects.Ready().from_dict(data['d'])
             self.__class__.session_id = obj.session_id
             self.__class__.ready = True
             self.__class__.me = obj.user
-            self._log.info('Discord connection complete, we are ready!')
-            self._log.info(f'We are now {self.me}')
+            self._log.debug('Discord connection complete, we are ready!')
+            self._log.debug(f'We are now {self.me}')
 
-        elif not self.__class__.ready:
-            self._log.info(f'Got event of type [{event_type}] before we were ready!')
+        elif event_type == 'RESUMED':
+            self.__class__.ready = True
+            self.__class__.resuming = False
+            self._log.info('Discord resume complete, we are ready!')
+
+        elif not self.__class__.ready and not self.resuming:
+            self._log.warning(f'Got event of type [{event_type}] before we were ready!')
             return
 
         elif event_type == 'CHANNEL_CREATE':
@@ -606,7 +621,7 @@ class DiscordClient:
 
         elif event_type == 'INTERACTION_CREATE':
             obj = objects.interactions.Interaction().from_dict(data['d'])
-            self._log.info('Saw INTERACTION_CREATE event.')
+            self._log.debug('Saw INTERACTION_CREATE event.')
             await helper.CommandHandler.command_handler(obj, data['d'], self)
 
         else:
@@ -627,26 +642,29 @@ class DiscordClient:
         # Call user wrapped classes, functions and cotoutines.
         # TODO: Should we invoke a create_task when able to avoid blocking calls?
         arguments = (obj, data, self)
-        if obj is not None:
-            for user_function in self.__class__._wrapper_registrations[event_type]:
-                arg_len = len(inspect.signature(user_function).parameters)
-                assert arg_len >= 0 and arg_len <= 3
-                if asyncio.iscoroutinefunction(user_function):
-                    await user_function(*arguments[:arg_len])
-                else:
-                    user_function(*arguments[:arg_len])
+        for user_function in self.__class__._wrapper_registrations[event_type]:
+            arg_len = len(inspect.signature(user_function).parameters)
+            assert arg_len >= 0 and arg_len <= 3
+            if asyncio.iscoroutinefunction(user_function):
+                self._log.critical('Found function!')
+                await user_function(*arguments[:arg_len])
+            else:
+                self._log.critical('Found function!')
+                user_function(*arguments[:arg_len])
 
-            for user_class in self.__class__._wrapper_class_registrations:
-                if hasattr(user_class, event_handler_name):
-                    user_function = getattr(user_class, event_handler_name)
-                    arg_len = len(inspect.signature(user_function).parameters)
-                    assert arg_len >= 0 and arg_len <= 4
-                    if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
-                        warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
-                    if asyncio.iscoroutinefunction(user_function):
-                        await user_function(user_class, *arguments[:arg_len])
-                    else:
-                        user_function(user_class, *arguments[:arg_len])
+        for user_class in self.__class__._wrapper_class_registrations:
+            if hasattr(user_class, event_handler_name):
+                user_function = getattr(user_class, event_handler_name)
+                arg_len = len(inspect.signature(user_function).parameters)
+                assert arg_len >= 0 and arg_len <= 4
+                if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
+                    warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
+                if asyncio.iscoroutinefunction(user_function):
+                    self._log.critical('Found function!')
+                    await user_function(user_class, *arguments[:arg_len])
+                else:
+                    self._log.critical('Found function!')
+                    user_function(user_class, *arguments[:arg_len])
 
         # Handle the special case of the ANY event.
         for user_function in self.__class__._wrapper_registrations['ANY']:
@@ -705,6 +723,7 @@ class DiscordClient:
     on_message_update = on_message_update
     on_presence_update = on_presence_update
     on_ready = on_ready
+    on_resumed = on_resumed
     on_stage_instance_create = on_stage_instance_create
     on_stage_instance_delete = on_stage_instance_delete
     on_stage_instance_update = on_stage_instance_update

@@ -21,11 +21,6 @@ from src import dyscord
 from demo import command_functions
 from demo.mongo import Mongo
 
-log = Log()
-log.setLevel(logging.INFO)
-
-log.info('Test')
-
 try:
     with open('/run/secrets/discord_client_token') as fp:
         token = fp.read()
@@ -193,6 +188,17 @@ async def parse_message(message: objects.Message, raw_message, client):
             log.critical('Run test command.')
             assert type(message) is objects.Message
             await test(client, message)
+
+@client.decorate_handler('READY')
+async def on_ready():
+    print('READY!')
+
+@client.decorate_handler('RESUMED')
+async def on_resumed():
+    print('RESUMED!')
+
+log = Log()
+log.setLevel(logging.INFO)
 
 dyscord.helper.CommandHandler.register_guild_callback('test', command_functions.test)
 dyscord.helper.CommandHandler.register_guild_callback('complex', command_functions.complex)

@@ -127,6 +127,7 @@ class DISCORD_EVENTS(enum.Enum):
         MESSAGE_UPDATE (enum):
         PRESENCE_UPDATE (enum):
         READY (enum):
+        RESUME (enum):
         STAGE_INSTANCE_CREATE (enum):
         STAGE_INSTANCE_DELETE (enum):
         STAGE_INSTANCE_UPDATE (enum):
@@ -174,6 +175,7 @@ class DISCORD_EVENTS(enum.Enum):
     MESSAGE_UPDATE = enum.auto()
     PRESENCE_UPDATE = enum.auto()
     READY = enum.auto()
+    RESUMED = enum.auto()
     STAGE_INSTANCE_CREATE = enum.auto()
     STAGE_INSTANCE_DELETE = enum.auto()
     STAGE_INSTANCE_UPDATE = enum.auto()

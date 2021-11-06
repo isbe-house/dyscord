@@ -114,21 +114,19 @@ class CommandHandler:
         assert interaction.data is not None
         key: Tuple[Any, Optional['snowflake.Snowflake']]
 
-        cls._log.info(f'Attempt lookup of [{interaction.data.name}] with id [{interaction.data.id}].')
+        cls._log.debug(f'Attempt lookup of [{interaction.data.name}] with id [{interaction.data.id}].')
 
         if interaction.data.id in cls.registered_commands:
-            cls._log.info(f'Found [{interaction.data.id}] in registered commands.')
+            cls._log.debug(f'Found [{interaction.data.id}] in registered commands.')
             await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], interaction, raw_data, client)
             return
 
         # Lookup command in global
         try:
             results = await api.API.get_global_application_command(interaction.data.id)
-            cls._log.info(f'API responded, attempt lookup inside global with [{results["name"]}].')
+            cls._log.debug(f'API responded, attempt lookup inside global with [{results["name"]}].')
             if results['name'] in cls.global_lookup:
                 cls.registered_commands[interaction.data.id] = cls.global_lookup[results['name']]
-                cls._log.info(cls.registered_commands[interaction.data.id])
-                cls._log.info(interaction.data.id)
                 try:
                     await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], interaction, raw_data, client)
                 except Exception as e:
@@ -145,7 +143,7 @@ class CommandHandler:
             results = await api.API.get_guild_application_command(interaction.guild_id, interaction.data.id)
 
             key = (results['name'], interaction.guild_id)
-            cls._log.info('Attempt lookup inside guild.')
+            cls._log.debug('Attempt lookup inside guild.')
             if (key in cls.guild_lookup):
                 cls.registered_commands[interaction.data.id] = cls.guild_lookup[key]
                 try:
@@ -155,7 +153,7 @@ class CommandHandler:
                 return
 
             key = (results['name'], None)
-            cls._log.info('Attempt lookup inside ALL guilds.')
+            cls._log.debug('Attempt lookup inside ALL guilds.')
             if (key in cls.guild_lookup):
                 cls.registered_commands[interaction.data.id] = cls.guild_lookup[key]
                 try:
@@ -172,7 +170,7 @@ class CommandHandler:
     async def handle_message_component(cls, interaction: 'interactions.Interaction', raw_data: dict, client: 'discord_client.DiscordClient') -> None:
         '''Handle slash-commands.'''
         assert interaction.data is not None
-        cls._log.info(f'Saw id [{interaction.id}] with custom id [{interaction.data.custom_id}].')
+        cls._log.debug(f'Saw id [{interaction.id}] with custom id [{interaction.data.custom_id}].')
         assert interaction.data is not None
         if interaction.data.custom_id not in cls.registered_custom_ids:
             raise RuntimeError('Got unexpected interaction.')
