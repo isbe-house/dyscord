@@ -2,6 +2,19 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.6.0] 2021-11-06
+## Added
+- Support for resuming, `RESUMED` event, and `on_resume` callbacks.
+- Requirement for the `logging_levels` lib.
+
+### Changed
+- All command helper registrations now take callbacks with 0-3 arguments. They must be in (interaction, dict, client) order.
+- Huge reduction in log chatter, most logs moved to `debug` level.
+- Several `critical` level logs moved to `warning` as we can recover from them.
+
+### Fixed
+- Detect zombie connections and attempt resume.
+
 ## [v0.5.3] 2021-11-05
 ### Changed
 - Made connections a bit more stable, added some nice debug.
