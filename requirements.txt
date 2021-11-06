@@ -7,6 +7,7 @@ orjson==3.6.4
 nest-asyncio==1.5.1
 cachetools==4.2.4
 validators==0.18.2
+logging_levels==0.3.0
 
 # For local dev needs. We cen remove this later.
 pymongo==3.12.1

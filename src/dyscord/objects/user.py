@@ -131,21 +131,6 @@ class Member(User):
     pending: bool = None  # type: ignore
     permissions: str = None  # type: ignore
 
-    def __str__(self):
-        '''Return string representation.'''
-        fields = []
-
-        if self.id is not None:
-            fields.append(f'id={self.id}')
-
-        if (self.username is not None) and (self.discriminator is not None):
-            fields.append(f'username=\'{self.username}#{self.discriminator}\'')
-
-        if self.nick is not None:
-            fields.append(f'nick=\'{self.nick}\'')
-
-        return f'Member({", ".join(fields)})'
-
     def from_dict(self, data: dict) -> 'Member':
         '''Parse a Member from an API compliant dict.'''
         if 'nick' in data:

@@ -48,5 +48,6 @@ setuptools.setup(
         'requests>=2.26.0',
         'websockets>=10.0',
         'validators>=0.18.2',
+        'logging_levels>=0.3.0'
     ],
 )

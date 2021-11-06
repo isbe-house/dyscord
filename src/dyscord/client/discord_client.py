@@ -189,6 +189,7 @@ class DiscordClient:
             if self._listener_task is not None:
 
                 if self._listener_task.done():
+                    self._log.warning('_listener_task is done, handle it.')
 
                     exception = self._listener_task.exception()
                     if exception:
@@ -251,7 +252,12 @@ class DiscordClient:
 
             while True:
 
-                data = await websocket.recv()
+                try:
+                    data = await asyncio.wait_for(websocket.recv(), 60)
+                except asyncio.TimeoutError:
+                    self._log.debug('Websocket timeout occurred, looping.')
+                    continue
+
                 data = json.loads(data)
 
                 for callback in self._raw_callbacks:
@@ -259,7 +265,7 @@ class DiscordClient:
 
                 if 's' in data and data['s'] is not None:
                     self._sequence_number = data['s']
-                    self._log.debug('Updated seq count to [{self._sequence_number}].')
+                    self._log.debug(f'Updated seq count to [{self._sequence_number}].')
 
                 opcode = data['op']
 
@@ -296,9 +302,12 @@ class DiscordClient:
     async def _heartbeat(self, interval):
 
         self._log.info('New heartbeat task started. Send new heartbeat NOW.')
+        self._log.debug('New heartbeat task started. Send new heartbeat NOW.')
 
         data = {'op': 1, 'd': self._sequence_number}
         await self._gateway_ws.send(json.dumps(data))
+
+        self._log.info('Heartbeat sent, loop time.')
 
         while True:
 
@@ -375,6 +384,7 @@ class DiscordClient:
         }
         self._log.info('Sending reconnect.')
         await self._gateway_ws.send(json.dumps(data))
+        self._log.info('Reconnect complete.')
 
     async def _identify(self):
         data = {
