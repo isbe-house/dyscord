@@ -646,10 +646,8 @@ class DiscordClient:
             arg_len = len(inspect.signature(user_function).parameters)
             assert arg_len >= 0 and arg_len <= 3
             if asyncio.iscoroutinefunction(user_function):
-                self._log.critical('Found function!')
                 await user_function(*arguments[:arg_len])
             else:
-                self._log.critical('Found function!')
                 user_function(*arguments[:arg_len])
 
         for user_class in self.__class__._wrapper_class_registrations:
@@ -660,10 +658,8 @@ class DiscordClient:
                 if list(inspect.signature(user_function).parameters.items())[0][0] != 'cls':
                     warnings.warn('Wrapped class does not appear to be using class methods, unexpected behavior may result!', UserWarning)
                 if asyncio.iscoroutinefunction(user_function):
-                    self._log.critical('Found function!')
                     await user_function(user_class, *arguments[:arg_len])
                 else:
-                    self._log.critical('Found function!')
                     user_function(user_class, *arguments[:arg_len])
 
         # Handle the special case of the ANY event.
