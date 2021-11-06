@@ -12,10 +12,6 @@ def test_member_merge():
     member.update_from_user(author)
     print(member)
 
-    member.nick = 'FOO'
-
-    assert 'FOO' in member.__str__()
-
     data = samples.self_and_role_mention['member']
 
     demo_user = User()

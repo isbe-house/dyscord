@@ -38,7 +38,7 @@ class BaseDiscordObject(ABC):
             raise NotImplementedError(f'_auto_map not defined for {self.__class__}.')
 
         for attribute_key, value in data.items():
-            self._log.debug(attribute_key)
+            self._log.trace(attribute_key)
             if attribute_key not in self._auto_map:
                 warnings.warn(RuntimeWarning(f'Saw unexpected attribute key [{attribute_key}] in [{self.__class__}].'))
                 setattr(self, attribute_key, value)
