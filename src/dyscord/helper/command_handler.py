@@ -9,7 +9,7 @@ from typing import Callable, Dict, Optional, Union, Any, Tuple
 
 from ..objects import interactions, snowflake, guild as ext_guild
 from ..utilities import Log
-from ..client import api
+from ..client import api, discord_client
 
 
 @dataclass
@@ -98,39 +98,37 @@ class CommandHandler:
             raise KeyError(f'[{custom_id}] not in registered IDs!')
 
     @classmethod
-    async def command_handler(cls, client, interaction: 'interactions.Interaction') -> None:  # noqa: C901
+    async def command_handler(cls, interaction: 'interactions.Interaction', raw_data: dict, client: 'discord_client.DiscordClient') -> None:  # noqa: C901
         '''Handle incoming commands and dispatch them to the correct type handler.'''
         if interaction.data is None:
             return
 
         if interaction.type == interactions.enumerations.INTERACTION_TYPES.MESSAGE_COMPONENT:
-            await cls.handle_message_component(client, interaction)
+            await cls.handle_message_component(interaction, raw_data, client)
         elif interaction.type in [interactions.enumerations.INTERACTION_TYPES.APPLICATION_COMMAND, interactions.enumerations.INTERACTION_TYPES.APPLICATION_COMMAND_AUTOCOMPLETE]:
-            await cls.handle_application_command(client, interaction)
+            await cls.handle_application_command(interaction, raw_data, client)
 
     @classmethod
-    async def handle_application_command(cls, client, interaction: 'interactions.Interaction') -> None:  # noqa: C901
+    async def handle_application_command(cls, interaction: 'interactions.Interaction', raw_data: dict, client: 'discord_client.DiscordClient') -> None:  # noqa: C901
         '''Handle interactions against Messages and Users.'''
         assert interaction.data is not None
         key: Tuple[Any, Optional['snowflake.Snowflake']]
 
-        cls._log.info(f'Attempt lookup of [{interaction.data.name}] with id [{interaction.data.id}].')
+        cls._log.debug(f'Attempt lookup of [{interaction.data.name}] with id [{interaction.data.id}].')
 
         if interaction.data.id in cls.registered_commands:
-            cls._log.info(f'Found [{interaction.data.id}] in registered commands.')
-            await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+            cls._log.debug(f'Found [{interaction.data.id}] in registered commands.')
+            await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], interaction, raw_data, client)
             return
 
         # Lookup command in global
         try:
             results = await api.API.get_global_application_command(interaction.data.id)
-            cls._log.info(f'API responded, attempt lookup inside global with [{results["name"]}].')
+            cls._log.debug(f'API responded, attempt lookup inside global with [{results["name"]}].')
             if results['name'] in cls.global_lookup:
                 cls.registered_commands[interaction.data.id] = cls.global_lookup[results['name']]
-                cls._log.info(cls.registered_commands[interaction.data.id])
-                cls._log.info(interaction.data.id)
                 try:
-                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], interaction, raw_data, client)
                 except Exception as e:
                     raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
@@ -145,21 +143,21 @@ class CommandHandler:
             results = await api.API.get_guild_application_command(interaction.guild_id, interaction.data.id)
 
             key = (results['name'], interaction.guild_id)
-            cls._log.info('Attempt lookup inside guild.')
+            cls._log.debug('Attempt lookup inside guild.')
             if (key in cls.guild_lookup):
                 cls.registered_commands[interaction.data.id] = cls.guild_lookup[key]
                 try:
-                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], interaction, raw_data, client)
                 except Exception as e:
                     raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
 
             key = (results['name'], None)
-            cls._log.info('Attempt lookup inside ALL guilds.')
+            cls._log.debug('Attempt lookup inside ALL guilds.')
             if (key in cls.guild_lookup):
                 cls.registered_commands[interaction.data.id] = cls.guild_lookup[key]
                 try:
-                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], client, interaction)
+                    await cls._determine_args_and_call(cls.registered_commands[interaction.data.id], interaction, raw_data, client)
                 except Exception as e:
                     raise RuntimeError(f'Callback function experienced an error {e}.')
                 return
@@ -169,38 +167,51 @@ class CommandHandler:
         raise LookupError(f'Unable to find interaction [{interaction.data.id}] in Global or Guild!')
 
     @classmethod
-    async def _determine_args_and_call(cls, callable, client, interaction: 'interactions.Interaction') -> None:
-        assert interaction.data is not None
-        arg_len = len(inspect.signature(callable).parameters)
-        if cls.__iscoroutinefunction_or_partial(callable):
-            if arg_len == 1:
-                await cls.registered_commands[interaction.data.id](interaction)
-            elif arg_len == 2:
-                await cls.registered_commands[interaction.data.id](interaction, client)
-        else:
-            if arg_len == 1:
-                cls.registered_commands[interaction.data.id](interaction)
-            elif arg_len == 2:
-                cls.registered_commands[interaction.data.id](interaction, client)
-            warnings.warn('While sync functions are supported as callbacks in CommandHandler, they are STRONGLY counter-recommended!', UserWarning)
-
-    @classmethod
-    async def handle_message_component(cls, client, interaction: 'interactions.Interaction') -> None:
+    async def handle_message_component(cls, interaction: 'interactions.Interaction', raw_data: dict, client: 'discord_client.DiscordClient') -> None:
         '''Handle slash-commands.'''
         assert interaction.data is not None
-        cls._log.info(f'Saw id [{interaction.id}] with custom id [{interaction.data.custom_id}].')
+        cls._log.debug(f'Saw id [{interaction.id}] with custom id [{interaction.data.custom_id}].')
         assert interaction.data is not None
         if interaction.data.custom_id not in cls.registered_custom_ids:
-            raise RuntimeError('Got unexpected interaction')
+            raise RuntimeError('Got unexpected interaction.')
 
         callback_data = cls.registered_custom_ids[interaction.data.custom_id]
         if callback_data.unlimited is False:
             del cls.registered_custom_ids[interaction.data.custom_id]
 
         if cls.__iscoroutinefunction_or_partial(callback_data.callback):
-            await callback_data.callback(client, interaction)
+            await cls._determine_args_and_call(callback_data.callback, interaction, raw_data, client)
         else:
-            callback_data.callback(client, interaction)
+            cls._determine_args_and_call(callback_data.callback, interaction, raw_data, client)
+            warnings.warn('While sync functions are supported as callbacks in CommandHandler, they are STRONGLY counter-recommended!', UserWarning)
+
+    @classmethod
+    async def _determine_args_and_call(cls, callable, interaction: 'interactions.Interaction', raw_data: dict, client: 'discord_client.DiscordClient') -> None:
+        assert interaction.data is not None
+        arg_len = len(inspect.signature(callable).parameters)
+        if cls.__iscoroutinefunction_or_partial(callable):
+            cls._log.critical('Found it')
+            if arg_len == 0:
+                await callable()
+            elif arg_len == 1:
+                await callable(interaction)
+            elif arg_len == 2:
+                await callable(interaction, raw_data)
+            elif arg_len == 3:
+                await callable(interaction, raw_data, client)
+            else:
+                raise RuntimeError(f'Callacks must take 0-3 arguments, not {arg_len}!')
+        else:
+            if arg_len == 0:
+                callable()
+            elif arg_len == 1:
+                callable(interaction)
+            elif arg_len == 2:
+                callable(interaction, raw_data)
+            elif arg_len == 3:
+                callable(interaction, raw_data, client)
+            else:
+                raise RuntimeError(f'Callacks must take 0-3 arguments, not {arg_len}!')
             warnings.warn('While sync functions are supported as callbacks in CommandHandler, they are STRONGLY counter-recommended!', UserWarning)
 
     @classmethod

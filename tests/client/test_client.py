@@ -118,6 +118,7 @@ async def test_every_event():
     await client.on_message_update(None, None)
     await client.on_presence_update(None, None)
     await client.on_ready(None, None)
+    await client.on_resumed(None, None)
     await client.on_stage_instance_create(None, None)
     await client.on_stage_instance_delete(None, None)
     await client.on_stage_instance_update(None, None)
