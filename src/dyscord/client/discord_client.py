@@ -321,13 +321,13 @@ class DiscordClient:
         while True:
             self._log.debug(f'Sleeping for {interval / 1000}s')
 
+            await asyncio.sleep(interval / 1000)
+
             if current_last_heartbeat and self._last_heartbeat_ack == current_last_heartbeat:
                 # ZOMBIE CONNECTION, AHHHHHHH!
                 # Shield this, as it is going to kill this task promptly.
                 asyncio.shield(self._reconnect())
                 return
-
-            await asyncio.sleep(interval / 1000)
 
             data = {'op': 1, 'd': self.__class__._sequence_number}
             self._log.debug(f'Sending heartbeat: {data}')

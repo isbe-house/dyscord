@@ -2,6 +2,11 @@
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep A Change Log](https://keepachangelog.com/en/1.0.0/).
 
+## [v0.6.1]
+### Fixed
+- Removed stray log message in the `command_handler`.
+- Corrected infinite reconnects introduced in `v0.6.0`.
+
 ## [v0.6.0] 2021-11-06
 ## Added
 - Support for resuming, `RESUMED` event, and `on_resume` callbacks.

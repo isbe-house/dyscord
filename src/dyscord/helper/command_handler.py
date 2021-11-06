@@ -190,7 +190,6 @@ class CommandHandler:
         assert interaction.data is not None
         arg_len = len(inspect.signature(callable).parameters)
         if cls.__iscoroutinefunction_or_partial(callable):
-            cls._log.critical('Found it')
             if arg_len == 0:
                 await callable()
             elif arg_len == 1:
